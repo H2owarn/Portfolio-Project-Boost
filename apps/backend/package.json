@@ -1,0 +1,12 @@
+{
+	"name": "backend",
+	"version": "0.0.0",
+	"scripts": {
+		"functions": "bunx supabase functions serve"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@types/deno": "^2.3.0",
+		"supabase": "^2.40.7"
+	}
+}

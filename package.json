@@ -1,0 +1,9 @@
+{
+  "name": "portfolio-project-boost",
+  "workspaces": [
+    "apps/*"
+  ],
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
