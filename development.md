@@ -17,21 +17,21 @@
     ```
     cd apps/backend
     ```
-3. Install the supabase local development by running:
-    ```
-    bunx supabase start
-    ```
-    - This will download/install & run the supabase local environment inside docker.
-4. Sign in to your supabase account by running:
+3. Sign in to your supabase account by running:
     ```
     bunx supabase login
     ```
     And follow the prompts.
-5. Link to the remote supabase project by running:
+4. Link to the remote supabase project by running:
     ```
     bunx supabase link
     ```
     And selecting the project.
+5. Install the supabase local development by running:
+    ```
+    bunx supabase start
+    ```
+    - This will download/install & run the supabase local environment inside docker.
 6. Run:
     ```
     bunx supabase db reset
