@@ -1,14 +1,12 @@
 import { Router } from '../_shared/router.ts';
 
 new Router()
-	.post('/login', async (req) => {
-		const body = (await req.json()) as Record<string, string>;
-
+	.get('/', ({ query }) => query)
+	.get('/redirect', ({ redirect }) => redirect('/auth'))
+	.post('/login', async ({ body }) => {
 		return body;
 	})
-	.post('/register', async (req) => {
-		const body = (await req.json()) as Record<string, string>;
-
+	.post('/register', async ({ body }) => {
 		return body;
 	})
 	.serve();
