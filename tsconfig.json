@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     // Environment setup & latest features
-    "lib": ["ESNext", "deno.ns"],
+    "lib": ["ESNext", "dom", "dom.iterable", "deno.ns"],
     "target": "es2022",
     "module": "ESNext",
     "moduleDetection": "force",

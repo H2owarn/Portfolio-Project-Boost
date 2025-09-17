@@ -1,9 +1,10 @@
 {
-  "name": "portfolio-project-boost",
-  "workspaces": [
-    "apps/*"
-  ],
-  "devDependencies": {
-    "@types/bun": "latest"
-  }
+	"name": "portfolio-project-boost",
+	"workspaces": [
+		"apps/*"
+	],
+	"devDependencies": {
+		"@trivago/prettier-plugin-sort-imports": "^5.2.2",
+		"@types/bun": "latest"
+	}
 }

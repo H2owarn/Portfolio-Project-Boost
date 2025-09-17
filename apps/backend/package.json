@@ -2,7 +2,9 @@
 	"name": "backend",
 	"version": "0.0.0",
 	"scripts": {
-		"functions": "bunx supabase functions serve"
+		"functions": "bunx supabase functions serve",
+		"start": "bunx supabase start",
+		"stop": "bunx supabase stop"
 	},
 	"dependencies": {},
 	"devDependencies": {

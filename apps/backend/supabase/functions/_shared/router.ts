@@ -1,6 +1,8 @@
-import { MethodError } from './errors.ts';
+import { createClient } from '@supabase/supabase-js';
+import { ENV } from './env.ts';
+import type { JSONValue, Method } from './types.ts';
 
-import type { JSONValue, Method } from './types';
+type ErrorHandler = (message?: string) => Response;
 
 interface MethodObj<T extends object | undefined> {
 	body: T extends { body: infer B } ? B : Record<string, any>;
@@ -8,8 +10,16 @@ interface MethodObj<T extends object | undefined> {
 	params: T extends { params: infer P } ? P : Record<string, any>;
 	headers: Headers;
 	request: Request;
+	supabase: ReturnType<typeof createClient>;
 	redirect: (location: string, code?: 301 | 302 | 303 | 307 | 308) => Response;
 	status: (code: number) => void;
+	error: {
+		BadRequest: ErrorHandler;
+		Unauthorized: ErrorHandler;
+		NotFound: ErrorHandler;
+		Forbidden: ErrorHandler;
+		custom: (status: number, message: string) => Response;
+	};
 }
 
 type MethodHandler<T extends object | undefined> = (
@@ -27,6 +37,12 @@ interface Route {
 export class Router {
 	#routes: Route[] = [];
 	#methods: Method[] = [];
+
+	#supabase: ReturnType<typeof createClient>;
+
+	constructor() {
+		this.#supabase = createClient(ENV.SUPABASE_URL, ENV.SUPABASE_ANON_KEY);
+	}
 
 	#addRoute(method: Method, path: string, handler: MethodHandler<any>) {
 		const fullPath = path.startsWith('/') ? path : '/' + path;
@@ -47,6 +63,12 @@ export class Router {
 	#getQuery(req: Request) {
 		const url = new URLSearchParams(req.url.split('?')[1]);
 		return Object.fromEntries(url);
+	}
+	#constructError(status: number, message: string) {
+		return new Response(JSON.stringify({ status, message }), {
+			headers: { 'Content-Type': 'application/json' },
+			status
+		});
 	}
 
 	get<T extends object | undefined = undefined>(path: string, handler: MethodHandler<T>) {
@@ -121,6 +143,7 @@ export class Router {
 				body,
 				params: selectedRoute.params,
 				request: req,
+				supabase: this.#supabase,
 				status: (code: number) => (status = code),
 				redirect: (location: string, code?: number) => {
 					if (location.startsWith('/')) {
@@ -129,19 +152,20 @@ export class Router {
 					}
 
 					return Response.redirect(location, code);
+				},
+				error: {
+					BadRequest: (message) => this.#constructError(400, message ?? 'Bad Request'),
+					Unauthorized: (message) => this.#constructError(401, message ?? 'Unautorized'),
+					Forbidden: (message) => this.#constructError(400, message ?? 'Forbidden'),
+					NotFound: (message) => this.#constructError(400, message ?? 'Not Found'),
+					custom: (status, message) => this.#constructError(status, message)
 				}
 			};
 
 			try {
 				selectedReturn = await selectedRoute.handler(res);
-			} catch (error) {
-				console.log(error);
-				let body: MethodError | null = null;
-				if (error instanceof MethodError) body = error;
-				return new Response(JSON.stringify({ message: body?.message, status: body?.statusCode }), {
-					status: body?.statusCode || 500,
-					headers: { 'Content-Type': 'application/json' }
-				});
+			} catch (err) {
+				return new Response('Internal Server Error', { status: 500 });
 			}
 
 			if (selectedReturn instanceof Response) return selectedReturn;
