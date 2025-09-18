@@ -1,8 +1,9 @@
+import { z, ZodAny } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 import { ENV } from './env.ts';
 import type { JSONValue, Method } from './types.ts';
 
-type ErrorHandler = (message?: string) => Response;
+type ErrorHandler = (message?: string, additions?: Record<string, any>) => Response;
 
 interface MethodObj<T extends object | undefined> {
 	body: T extends { body: infer B } ? B : Record<string, any>;
@@ -18,7 +19,7 @@ interface MethodObj<T extends object | undefined> {
 		Unauthorized: ErrorHandler;
 		NotFound: ErrorHandler;
 		Forbidden: ErrorHandler;
-		custom: (status: number, message: string) => Response;
+		custom: (status: number, message: string, additions?: Record<string, any>) => Response;
 	};
 }
 
@@ -37,6 +38,7 @@ interface Route {
 export class Router {
 	#routes: Route[] = [];
 	#methods: Method[] = [];
+	#schemas: { path: string; method: Method; schema: z.ZodObject }[] = [];
 
 	#supabase: ReturnType<typeof createClient>;
 
@@ -44,7 +46,10 @@ export class Router {
 		this.#supabase = createClient(ENV.SUPABASE_URL, ENV.SUPABASE_ANON_KEY);
 	}
 
-	#addRoute(method: Method, path: string, handler: MethodHandler<any>) {
+	#addRoute(method: Method, path: string, handler: MethodHandler<any>, schema?: z.ZodObject) {
+		if (schema && !this.#schemas.find((el) => el.path === path && el.method === method)) {
+			this.#schemas.push({ path, method, schema });
+		}
 		const fullPath = path.startsWith('/') ? path : '/' + path;
 
 		this.#routes.push({ method, path: fullPath, handler, pattern: new URLPattern({ pathname: fullPath }), params: {} });
@@ -64,27 +69,27 @@ export class Router {
 		const url = new URLSearchParams(req.url.split('?')[1]);
 		return Object.fromEntries(url);
 	}
-	#constructError(status: number, message: string) {
-		return new Response(JSON.stringify({ status, message }), {
+	#constructError(status: number, message: string, additions?: Record<string, any>) {
+		return new Response(JSON.stringify({ status, message, ...additions }), {
 			headers: { 'Content-Type': 'application/json' },
 			status
 		});
 	}
 
-	get<T extends object | undefined = undefined>(path: string, handler: MethodHandler<T>) {
-		return this.#addRoute('GET', path, handler);
+	get<T extends object | undefined = undefined>(path: string, handler: MethodHandler<T>, schema?: z.ZodObject) {
+		return this.#addRoute('GET', path, handler, schema);
 	}
-	post<T extends object | undefined = undefined>(path: string, handler: MethodHandler<T>) {
-		return this.#addRoute('POST', path, handler);
+	post<T extends object | undefined = undefined>(path: string, handler: MethodHandler<T>, schema?: z.ZodObject) {
+		return this.#addRoute('POST', path, handler, schema);
 	}
-	put<T extends object | undefined = undefined>(path: string, handler: MethodHandler<T>) {
-		return this.#addRoute('PUT', path, handler);
+	put<T extends object | undefined = undefined>(path: string, handler: MethodHandler<T>, schema?: z.ZodObject) {
+		return this.#addRoute('PUT', path, handler, schema);
 	}
-	patch<T extends object | undefined = undefined>(path: string, handler: MethodHandler<T>) {
-		return this.#addRoute('PATCH', path, handler);
+	patch<T extends object | undefined = undefined>(path: string, handler: MethodHandler<T>, schema?: z.ZodObject) {
+		return this.#addRoute('PATCH', path, handler, schema);
 	}
-	delete<T extends object | undefined = undefined>(path: string, handler: MethodHandler<T>) {
-		return this.#addRoute('DELETE', path, handler);
+	delete<T extends object | undefined = undefined>(path: string, handler: MethodHandler<T>, schema?: z.ZodObject) {
+		return this.#addRoute('DELETE', path, handler, schema);
 	}
 
 	serve() {
@@ -103,7 +108,6 @@ export class Router {
 				DELETE: 204,
 				PATCH: 200
 			}[method];
-			let body: Record<string, any> = {};
 
 			if (!this.#methods.includes(method)) {
 				return new Response(`Method ${method} not allowed`, {
@@ -133,14 +137,10 @@ export class Router {
 				return new Response('Not Found', { status: 404 });
 			}
 
-			if (method !== 'GET' && req.headers.get('Content-Type') === 'application/json') {
-				body = (await req.json()) as Record<string, any>;
-			}
-
 			const res: MethodObj<any> = {
 				headers: new Headers(),
 				query: this.#getQuery(req),
-				body,
+				body: {},
 				params: selectedRoute.params,
 				request: req,
 				supabase: this.#supabase,
@@ -154,13 +154,27 @@ export class Router {
 					return Response.redirect(location, code);
 				},
 				error: {
-					BadRequest: (message) => this.#constructError(400, message ?? 'Bad Request'),
-					Unauthorized: (message) => this.#constructError(401, message ?? 'Unautorized'),
-					Forbidden: (message) => this.#constructError(400, message ?? 'Forbidden'),
-					NotFound: (message) => this.#constructError(400, message ?? 'Not Found'),
-					custom: (status, message) => this.#constructError(status, message)
+					BadRequest: (message, additions) => this.#constructError(400, message ?? 'Bad Request', additions),
+					Unauthorized: (message, additions) => this.#constructError(401, message ?? 'Unautorized', additions),
+					Forbidden: (message, additions) => this.#constructError(400, message ?? 'Forbidden', additions),
+					NotFound: (message, additions) => this.#constructError(400, message ?? 'Not Found', additions),
+					custom: (status, message, additions) => this.#constructError(status, message, additions)
 				}
 			};
+
+			if (method !== 'GET' && req.headers.get('Content-Type') === 'application/json') {
+				const jsonBody = (await req.json()) as Record<string, any>;
+				const hasSchema = this.#schemas.find((el) => el.path === pathname && el.method === method);
+				if (!hasSchema) res.body = jsonBody;
+				else {
+					const parsed = hasSchema.schema.safeParse(jsonBody);
+					if (parsed.error) {
+						return res.error.BadRequest('Validation error', { error: z.treeifyError(parsed.error) });
+					}
+
+					res.body = parsed.data;
+				}
+			}
 
 			try {
 				selectedReturn = await selectedRoute.handler(res);
