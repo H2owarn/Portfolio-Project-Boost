@@ -1,41 +1,44 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const primary = '#7DF843';
+const secondary = '#1F2937';
+const backgroundDark = '#000000';
+const backgroundLight = '#FFFFFF';
+const textDark = '#F9FAFB';
+const textLight = '#111827';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    text: textLight,
+    mutedText: '#6B7280',
+    background: backgroundLight,
+    surface: '#F3F4F6',
+    primary,
+    secondary,
+    tint: primary,
+    icon: '#4B5563',
+    tabIconDefault: '#9CA3AF',
+    tabIconSelected: primary,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    text: textDark,
+    mutedText: '#9CA3AF',
+    background: backgroundDark,
+    surface: '#111827',
+    primary,
+    secondary,
+    tint: primary,
+    icon: '#9CA3AF',
+    tabIconDefault: '#4B5563',
+    tabIconSelected: primary,
   },
 };
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
@@ -51,3 +54,18 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
+
+export const Spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+};
+
+export const Radii = {
+  sm: 8,
+  md: 16,
+  lg: 24,
+  pill: 999,
+};

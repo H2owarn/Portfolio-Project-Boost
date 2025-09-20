@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#7DF843",
+            "background-light": "#FFFFFF",
+            "background-dark": "#000000",
+            "card-dark": "#1A1A1A",
+            "trophy-gold": "#FFD700",
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          borderRadius: {
+            'xl': '1rem',
+            '2xl': '1.5rem',
+          },
+        },
+      },
+    };
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-white font-sans">
+<div class="container mx-auto px-4 py-8">
+<div class="flex items-center mb-8">
+<button class="p-2 rounded-full bg-gray-800">
+<span class="material-icons text-white">arrow_back_ios_new</span>
+</button>
+</div>
+<div class="flex flex-col items-center">
+<div class="relative mb-4">
+<div class="w-32 h-32 rounded-full border-4 border-primary p-1">
+<img alt="User profile picture" class="rounded-full w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_gAgVttyZd6A3fC-8zEOOYYyrBg-k0eTRQ5a756-yHmoPRQFsDk1maQ5cQ1qwuUtUijm6l9E17pzVd-L5WojYiIwPcuNYGtxEuCBiiOajxCLQ64RHBKnRapFRppDVgFP55CW5E-6dpX_YWGxU5FqWK96s4rAgd8HuFcR8mLqa69qD90CWDzYEBq1PU-AQZLWnUIf0CH8OCd88xur90Pl3NSBmN96kamgmX503e_B7I1sIw8ZAETCwf_okjhVvKzfJpA5Zs2PfEEI"/>
+</div>
+<button class="absolute bottom-0 right-0 bg-primary p-2 rounded-full">
+<span class="material-icons text-background-dark text-lg">photo_camera</span>
+</button>
+</div>
+<h1 class="text-2xl font-bold mb-4">Mr. Chen</h1>
+<div class="flex justify-around w-full max-w-sm mb-6">
+<div class="text-center">
+<p class="text-gray-400 text-sm">Followers</p>
+<p class="text-2xl font-bold text-primary">2.7K</p>
+</div>
+<div class="text-center">
+<p class="text-gray-400 text-sm">Activity</p>
+<p class="text-2xl font-bold text-primary">45 <span class="text-base font-normal">KM</span></p>
+</div>
+</div>
+<button class="bg-primary text-background-dark font-semibold py-3 px-8 rounded-full mb-8 w-full max-w-xs">Edit Profile</button>
+<div class="grid grid-cols-2 gap-4 w-full max-w-sm">
+<div class="bg-card-dark p-4 rounded-2xl flex flex-col items-center justify-center aspect-square">
+<div class="relative w-32 h-32">
+<svg class="w-full h-full" viewBox="0 0 100 100">
+<circle cx="50" cy="50" fill="none" r="45" stroke="#3730A3" stroke-dasharray="282.74" stroke-dashoffset="80" stroke-width="8"></circle>
+<circle cx="50" cy="50" fill="none" r="35" stroke="#FBBF24" stroke-dasharray="219.91" stroke-dashoffset="100" stroke-width="8"></circle>
+<circle cx="50" cy="50" fill="none" r="25" stroke="#7DF843" stroke-dasharray="157.08" stroke-dashoffset="50" stroke-width="8"></circle>
+</svg>
+</div>
+</div>
+<div class="bg-card-dark p-4 rounded-2xl flex flex-col items-center justify-center aspect-square">
+<p class="text-gray-400 text-sm">Running</p>
+<p class="text-4xl font-bold text-primary">17<span class="text-lg font-normal">KM</span></p>
+</div>
+<div class="bg-card-dark p-4 rounded-2xl flex flex-col items-center justify-center aspect-square">
+<div class="relative text-trophy-gold">
+<span class="material-icons text-7xl">emoji_events</span>
+</div>
+<p class="text-xl font-bold text-trophy-gold">×3</p>
+</div>
+<div class="bg-card-dark p-4 rounded-2xl flex flex-col items-center justify-center aspect-square">
+<div class="relative text-primary">
+<span class="material-icons text-7xl">military_tech</span>
+</div>
+<p class="text-xl font-bold text-primary">×3</p>
+<p class="text-gray-400 text-sm">Achievements</p>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>
