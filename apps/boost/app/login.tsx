@@ -14,12 +14,13 @@ export default function LoginScreen() {
 
   return (
     <Screen scrollable contentStyle={styles.container}>
-      <View style={[styles.card, { backgroundColor: palette.surface }]}>
-        <View style={styles.avatarWrapper}>
-          <View style={[styles.avatar, { backgroundColor: '#111827' }]}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <View style={[styles.icon, { backgroundColor: '#111827' }]}>
             <MaterialIcons name="fitness-center" size={36} color={palette.primary} />
           </View>
           <Text style={[styles.title, { color: palette.text }]}>Log in</Text>
+          <Text style={[styles.subtitle, { color: palette.mutedText }]}>Welcome back to Boost</Text>
         </View>
         <View style={styles.form}>
           <BoostInput
@@ -50,6 +51,8 @@ export default function LoginScreen() {
             <MaterialIcons name="photo-camera" size={24} color={palette.primary} />
           </View>
         </View>
+      </View>
+      <View style={styles.footer}>
         <Text style={[styles.footerText, { color: palette.mutedText }]}>
           Don’t have an account?{' '}
           <Link href="/signup" style={[styles.link, { color: palette.primary }]}>Sign up</Link>
@@ -62,22 +65,19 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    minHeight: '100%',
+    paddingHorizontal: 24,
     paddingVertical: 48,
+    gap: 32,
   },
-  card: {
-    width: '100%',
-    maxWidth: 360,
-    borderRadius: Radii.lg,
-    padding: 24,
+  content: {
     gap: 24,
   },
-  avatarWrapper: {
+  header: {
     alignItems: 'center',
     gap: 12,
   },
-  avatar: {
+  icon: {
     width: 64,
     height: 64,
     borderRadius: Radii.md,
@@ -87,6 +87,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
+  },
+  subtitle: {
+    fontSize: 15,
   },
   form: {
     gap: 16,
@@ -124,5 +127,9 @@ const styles = StyleSheet.create({
   },
   link: {
     fontWeight: '600',
+  },
+  footer: {
+    alignItems: 'center',
+    marginTop: 'auto',
   },
 });

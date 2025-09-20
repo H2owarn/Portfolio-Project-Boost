@@ -14,7 +14,7 @@ export default function SignUpAccountScreen() {
 
   return (
     <Screen scrollable contentStyle={styles.container}>
-      <View style={[styles.card, { backgroundColor: palette.surface }]}>
+      <View style={styles.content}>
         <View style={styles.header}>
           <View style={[styles.icon, { backgroundColor: '#1F2937' }]}>
             <MaterialIcons name="fitness-center" size={32} color={palette.primary} />
@@ -48,6 +48,8 @@ export default function SignUpAccountScreen() {
             <MaterialIcons name="grain" size={22} color={palette.primary} />
           </View>
         </View>
+      </View>
+      <View style={styles.footer}>
         <Text style={[styles.footerText, { color: palette.mutedText }]}>
           Already have an account?{' '}
           <Link href="/login" style={[styles.link, { color: palette.primary }]}>Sign in</Link>
@@ -60,14 +62,12 @@ export default function SignUpAccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    alignItems: 'center',
+    paddingHorizontal: 24,
+    minHeight: '100%',
     paddingVertical: 48,
+    gap: 32,
   },
-  card: {
-    width: '100%',
-    maxWidth: 360,
-    borderRadius: Radii.lg,
-    padding: 24,
+  content: {
     gap: 24,
   },
   header: {
@@ -123,5 +123,9 @@ const styles = StyleSheet.create({
   },
   link: {
     fontWeight: '600',
+  },
+  footer: {
+    alignItems: 'center',
+    marginTop: 'auto',
   },
 });
