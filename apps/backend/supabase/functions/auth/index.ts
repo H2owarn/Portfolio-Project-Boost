@@ -35,10 +35,12 @@ new Router()
 
 			return register;
 		},
-		z.object({
-			email: z.email(),
-			password: z.string().min(8)
-		})
+		{
+			body: z.object({
+				email: z.email(),
+				password: z.string().min(8)
+			})
+		}
 	)
 	.post('/login', async ({ body, supabase, error }) => {
 		const login = await supabase.auth.signInWithPassword({
