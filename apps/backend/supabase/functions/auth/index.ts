@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { ENV } from '../_shared/env.ts';
 import { Router } from '../_shared/router.ts';
 
@@ -24,21 +25,30 @@ new Router()
 		// 	refresh_token: data.refresh_token
 		// };
 	})
-	.post('/register', async ({ body, supabase }) => {
-		const register = await supabase.auth.signUp({
-			email: body.email,
-			password: body.password
-		});
+	.post(
+		'/register',
+		async ({ body, supabase }) => {
+			const register = await supabase.auth.signUp({
+				email: body.email,
+				password: body.password
+			});
 
-		return register;
-	})
+			return register;
+		},
+		{
+			body: z.object({
+				email: z.email(),
+				password: z.string().min(8)
+			})
+		}
+	)
 	.post('/login', async ({ body, supabase, error }) => {
 		const login = await supabase.auth.signInWithPassword({
 			email: body.email,
 			password: body.password
 		});
 
-		if (login.error) return error.NotFound();
+		if (login.error) return login.error;
 
 		return {
 			access_token: login.data.session.access_token,
