@@ -5,20 +5,20 @@ import { Screen } from '@/components/layout/screen';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-export default function ProfileScreen() {
+export default function ExploreScreen() {
   const palette = Colors[useColorScheme() ?? 'dark'];
 
   return (
     <Screen scrollable={false} contentStyle={styles.container}>
       <View style={styles.content}>
         <View style={[styles.iconContainer, { backgroundColor: palette.primary + '20' }]}>
-          <MaterialIcons name="person" size={64} color={palette.primary} />
+          <MaterialIcons name="explore" size={64} color={palette.primary} />
         </View>
         <Text style={[styles.title, { color: palette.text }]}>
-          Your Profile
+          Explore Workouts
         </Text>
         <Text style={[styles.subtitle, { color: palette.mutedText }]}>
-          Manage your fitness profile and settings
+          Discover new exercises and workout routines
         </Text>
       </View>
     </Screen>

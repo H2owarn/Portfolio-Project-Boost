@@ -20,24 +20,24 @@ export default function TabLayout() {
         },
       }}>
       <Tabs.Screen
+        name="home"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => <MaterialIcons name="home" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="index"
         options={{
-          title: 'Challenge',
-          tabBarIcon: ({ color, size }) => <MaterialIcons name="rocket-launch" color={color} size={size} />,
+          title: 'Exercises',
+          tabBarIcon: ({ color, size }) => <MaterialIcons name="fitness-center" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
-        name="daily"
+        name="explore"
         options={{
-          title: 'Daily',
-          tabBarIcon: ({ color, size }) => <MaterialIcons name="event-note" color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="activity"
-        options={{
-          title: 'Activity',
-          tabBarIcon: ({ color, size }) => <MaterialIcons name="insights" color={color} size={size} />,
+          title: 'Explore',
+          tabBarIcon: ({ color, size }) => <MaterialIcons name="explore" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
@@ -45,6 +45,12 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, size }) => <MaterialIcons name="person" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="exercises/[muscle]"
+        options={{
+          href: null, // Hide from tab bar
         }}
       />
     </Tabs>
