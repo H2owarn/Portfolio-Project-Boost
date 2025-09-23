@@ -1,12 +1,16 @@
 {
-	"name": "backend",
-	"version": "0.0.0",
-	"scripts": {
-		"functions": "bunx supabase functions serve"
-	},
-	"dependencies": {},
-	"devDependencies": {
-		"@types/deno": "^2.3.0",
-		"supabase": "^2.40.7"
-	}
+  "name": "backend",
+  "version": "0.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "functions": "bunx supabase functions serve"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
+    "axios": "^1.12.2",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "supabase": "^2.40.7"
+  }
 }

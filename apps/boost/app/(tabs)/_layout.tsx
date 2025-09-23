@@ -9,6 +9,13 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
+  const tabs = [
+    { name: "index", title: "Home", icon: "house.fill"},
+    { name: "main", title: "Main", icon: "star.fill"},
+    { name: "main2", title: "Main2", icon: "list.bullet"},
+    { name: "explore", title: "Explore", icon: "paperplane.fill"},
+  ];
+
   return (
     <Tabs
       screenOptions={{
@@ -16,20 +23,18 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
       }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
+      {tabs.map(({ name, title, icon}) => (
+        <Tabs.Screen
+          key={name}
+          name={name}
+          options={{
+            title,
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name={icon} color={color} />
+            ),
+          }}
+          />
+      ))}
     </Tabs>
   );
 }
