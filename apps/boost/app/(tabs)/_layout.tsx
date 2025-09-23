@@ -11,7 +11,7 @@ export default function TabLayout() {
 
   const tabs = [
     { name: "index", title: "Home", icon: "house.fill"},
-    { name: "main", title: "Main", icon: "star.fill"},
+    { name: "profile", title: "Profile", icon: "star.fill"},
     { name: "main2", title: "Main2", icon: "list.bullet"},
     { name: "explore", title: "Explore", icon: "paperplane.fill"},
   ];
