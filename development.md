@@ -3,48 +3,58 @@
 ### Prerequisites
 
 - [BunJS](https://bun.sh)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) 
-  - Windows users: Inside your Docker Desktop settings, enable: "Expose daemon on tcp http://localhost:2375 without TLS"
-    > If you do see this option, don't worry and skip this step.
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - A [Supabase](https://supabase.com) account & project.
 - Expo Go - [view their docs](https://docs.expo.dev/get-started/set-up-your-environment/)
-
+- [Deno VSCode](https://marketplace.visualstudio.com/items?itemName=denoland.vscode-deno) extension.
 
 ### Running
 
 1. Run `bun install` in the root of the repo to install dependencies.
 2. Move into the `backend` directory with:
-    ```
-    cd apps/backend
-    ```
+
+   ```
+   cd apps/backend
+   ```
+
 3. Sign in to your supabase account by running:
-    ```
-    bunx supabase login
-    ```
-    And follow the prompts.
+
+   ```
+   bunx supabase login
+   ```
+
+   And follow the prompts.
+
 4. Link to the remote supabase project by running:
-    ```
-    bunx supabase link
-    ```
-    And selecting the project.
+
+   ```
+   bunx supabase link
+   ```
+
+   And selecting the project.
+
 5. Install the supabase local development by running:
-    ```
-    bunx supabase start
-    ```
-    - This will download/install & run the supabase local environment inside docker.
+
+   ```
+   bunx supabase start
+   ```
+
+   - This will download/install & run the supabase local environment inside docker.
+
 6. Run:
-    ```
-    bunx supabase db reset
-    ```
-    To push the migrations to your local environment.
+
+   ```
+   bunx supabase db reset
+   ```
+
+   To push the migrations to your local environment.
 
 Now that the backend _should_ be setup, we're now able to run the Expo app.
 
 Simply run:
-```
-cd ../../
 
-cd apps/boost
+```
+cd ../../apps/boost
 
 bun start
 ```
