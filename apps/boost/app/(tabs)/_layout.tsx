@@ -1,8 +1,8 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-
+import { Tabs,} from 'expo-router';
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -30,6 +30,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account-box" size={24} color={color} />,
+        }}
+        />
     </Tabs>
   );
 }
