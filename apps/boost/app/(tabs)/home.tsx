@@ -5,17 +5,17 @@ import { Screen } from '@/components/layout/screen';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-export default function ExploreScreen() {
+export default function HomeScreen() {
 	const palette = Colors[useColorScheme() ?? 'dark'];
 
 	return (
 		<Screen scrollable={false} contentStyle={styles.container}>
 			<View style={styles.content}>
 				<View style={[styles.iconContainer, { backgroundColor: palette.primary + '20' }]}>
-					<MaterialIcons name="explore" size={64} color={palette.primary} />
+					<MaterialIcons name="home" size={64} color={palette.primary} />
 				</View>
-				<Text style={[styles.title, { color: palette.text }]}>Explore Workouts</Text>
-				<Text style={[styles.subtitle, { color: palette.mutedText }]}>Discover new exercises and workout routines</Text>
+				<Text style={[styles.title, { color: palette.text }]}>Welcome Home</Text>
+				<Text style={[styles.subtitle, { color: palette.mutedText }]}>Your fitness dashboard coming soon</Text>
 			</View>
 		</Screen>
 	);

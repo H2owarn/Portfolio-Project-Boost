@@ -1,40 +1,59 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import React from 'react';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+	const colorScheme = useColorScheme() ?? 'dark';
+	const palette = Colors[colorScheme];
 
-  const tabs = [
-    { name: "index", title: "Home", icon: "house.fill"},
-    { name: "main", title: "Main", icon: "star.fill"},
-    { name: "main2", title: "Main2", icon: "list.bullet"},
-    { name: "explore", title: "Explore", icon: "paperplane.fill"},
-  ];
-
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      {tabs.map(({ name, title, icon}) => (
-        <Tabs.Screen
-          key={name}
-          name={name}
-          options={{
-            title,
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name={icon} color={color} />
-            ),
-          }}
-          />
-      ))}
-    </Tabs>
-  );
+	return (
+		<Tabs
+			screenOptions={{
+				headerShown: false,
+				tabBarActiveTintColor: palette.primary,
+				tabBarInactiveTintColor: palette.mutedText,
+				tabBarStyle: {
+					backgroundColor: palette.background,
+					borderTopColor: 'rgba(255,255,255,0.05)'
+				}
+			}}
+		>
+			<Tabs.Screen
+				name="home"
+				options={{
+					title: 'Home',
+					tabBarIcon: ({ color, size }) => <MaterialIcons name="home" color={color} size={size} />
+				}}
+			/>
+			<Tabs.Screen
+				name="index"
+				options={{
+					title: 'Exercises',
+					tabBarIcon: ({ color, size }) => <MaterialIcons name="fitness-center" color={color} size={size} />
+				}}
+			/>
+			<Tabs.Screen
+				name="explore"
+				options={{
+					title: 'Explore',
+					tabBarIcon: ({ color, size }) => <MaterialIcons name="explore" color={color} size={size} />
+				}}
+			/>
+			<Tabs.Screen
+				name="profile"
+				options={{
+					title: 'Profile',
+					tabBarIcon: ({ color, size }) => <MaterialIcons name="person" color={color} size={size} />
+				}}
+			/>
+			<Tabs.Screen
+				name="exercises/[muscle]"
+				options={{
+					href: null // Hide from tab bar
+				}}
+			/>
+		</Tabs>
+	);
 }

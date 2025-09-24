@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Boost Fitness App</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+    }
+  </style>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#7DF843",
+            "background-light": "#FFFFFF",
+            "background-dark": "#000000",
+          },
+          fontFamily: {
+            display: ["Roboto", "sans-serif"],
+          },
+          borderRadius: {
+            'xl': '1rem',
+            '2xl': '1.5rem',
+          },
+        },
+      },
+    };
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-display">
+<div class="max-w-sm mx-auto bg-background-dark text-white p-4">
+<header class="flex justify-between items-center mb-6">
+<span class="material-symbols-outlined">menu</span>
+<h1 class="text-3xl font-bold text-[#7DF843]">Boost</h1>
+<span class="material-symbols-outlined">person</span>
+</header>
+<main>
+<h2 class="text-xl font-semibold mb-4">Recent Activity</h2>
+<div class="grid grid-cols-3 gap-3 mb-6">
+<div class="bg-gray-800 rounded-2xl p-4 flex flex-col items-center justify-center">
+<img alt="Person walking on a path" class="w-12 h-12 mb-2 object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAn7yyh3_XrXxDxvhY6q8V13GzBE1HwaEl_maHOEbolaSpx2y-vsOAcDdbmoHG4yC-c267kaJOuHW1Jhy5LwSMTZCufE4Kl-iE7juJSVYbf0z2QiGfwdujQ1EYA1DRWO6T7s5kFuMiFOcbeyRjmit-nc6HPZXzlqbPI7kqdyo15bQeSws-k1w-kzNrXu9vtBNFuOAMwrD6UxbGh0q2_HyIUvxFtKEc_4sYH3PatOLeJ0ykFG7RhRlAVg39ErEBMsAlIrbjySg_gzX_K"/>
+<p class="text-2xl font-bold">6000</p>
+<p class="text-sm text-gray-400">step</p>
+<button class="mt-2 bg-gray-700 text-white text-sm py-1 px-4 rounded-full">Walk</button>
+</div>
+<div class="bg-gray-800 rounded-2xl p-4 flex flex-col items-center justify-center">
+<img alt="Person running at night" class="w-12 h-12 mb-2 object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrshNTUlIJAEjQCUuxqscdbHAfWfWfE7nBNlBzp3rdYRfXkQC5gIR8VDnD7xYt1N-YQ1CGe8lVoD7VzsxFfHG8jl-a8lOrv9Ez5q5Zmz5cZ9afCQR-VYIZvkvpy9oke5GWN4M1vycERJ7TaOVVTk2iM8haNQGCJh2La1x2arRa6Z3Q5qyicFFjtIY6ek5q48QRH3UX4f5bmD6CUx4vCZhB__686-LRP1OYiJz9uTx6HxMf6dVhT2CpXPx1sSlwqfRJIHceG1GC6boQ"/>
+<p class="text-2xl font-bold">2.0 <span class="text-lg">km</span></p>
+<p class="text-sm text-gray-400"> </p>
+<button class="mt-2 bg-gray-700 text-white text-sm py-1 px-4 rounded-full">Run</button>
+</div>
+<div class="bg-gray-800 rounded-2xl p-4 flex flex-col items-center justify-center">
+<img alt="Person cycling on a road" class="w-12 h-12 mb-2 object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWPjizwixo0v8ZcAYwvG1NLZUI3T2hXEp-7MFiZn6ALjjRIW6JL9HbwyaOyays2xXHQWx-ihmXUVqjKl4KLf3D00hW4fGfDdrfmLLJAkY3jePcDRMm6O1nFK5cDVZCi6zU5ncQee2Ik1vEAx-tCpznlIpO5sgw9vP6U3TTVYpNyzi6iGaGd282xWu5P5N5kUPX7MVAdO4k9hpHf66RCPwgMhmStXVMjqGLmVI8lJ0oqxhU6hn7bkcyRN8DmQ87Ljk4VLJeULNxEbdc"/>
+<p class="text-2xl font-bold">0.0 <span class="text-lg">km</span></p>
+<p class="text-sm text-gray-400"> </p>
+<button class="mt-2 bg-gray-700 text-white text-sm py-1 px-4 rounded-full">Bike</button>
+</div>
+</div>
+<div class="flex justify-around mb-6 border-b-2 border-gray-800">
+<button class="text-primary border-b-2 border-primary pb-2 px-2">Strength</button>
+<button class="text-gray-400 pb-2 px-2">Cardio</button>
+<button class="text-gray-400 pb-2 px-2">Yoga</button>
+<button class="text-gray-400 pb-2 px-2">Meditation</button>
+</div>
+<div class="space-y-4">
+<div class="relative rounded-2xl overflow-hidden">
+<img alt="Man with well-defined back muscles" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHcpxmJ2qz4e5H0FLBaPEi-m1bsm1xSKnmGTwbedYrq88Cll-sHeHb4SqlSiisJy3cORYsThJwWF0nBAqVeFndK8YKfTE46RmsrrrVPVpvTg3mZeutPAyUXlycSEpll3x7PweMuQS9u3zAF_afdwV7AkAEeZCIKxb7ReFz4UNcq-Ak1DEGpb-tK9g3VP_MDBiS813YQCiCDLkurUKnyMGaYOpAr39BnBTjKMuNJlpvjSj5ygT-CsC5O3uxTEyCP9GwQ1yDWKNI1TsS"/>
+<div class="absolute inset-0 bg-black bg-opacity-40 flex items-end p-4">
+<p class="text-white text-lg font-semibold">Train with live-action images</p>
+</div>
+<div class="absolute top-2 right-2 w-4 h-4 bg-primary rounded-full"></div>
+<div class="absolute bottom-2 left-2 w-6 h-1 bg-primary rounded-full"></div>
+</div>
+<div class="relative rounded-2xl overflow-hidden">
+<img alt="Person stretching in a yoga pose" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPnc5fjI69W5nafZCvwpDXE-8homiSyGvhDx73BQKMOTjUgjte_t9xTbCZjrdBNrBPGcqIJGmSr1t9r__pfDyPSo8nq83jm5EoP-RnSy3fviw02KKsZeQ_oiZ2JVWR9VV78x6xms0wrpy97NATJOfv973U0tWo1zaIoKHcqde8UDyM86BbELCPy5WoQGhuHTOwiEU95FpnSu1-2ByzcspDX3jkSl9IFyZx07xZWlcr6pdbLQUakr-CncDC9j7mpPTvzxvjU5dMAyxj"/>
+<div class="absolute inset-0 bg-black bg-opacity-40 flex items-end p-4">
+<p class="text-white text-lg font-semibold">Stretch your back and hips</p>
+</div>
+<div class="absolute top-2 right-2 w-4 h-4 bg-primary rounded-full"></div>
+<div class="absolute bottom-2 left-2 w-6 h-1 bg-primary rounded-full"></div>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 right-0 max-w-sm mx-auto bg-gray-900 flex justify-around items-center p-2 border-t border-gray-700">
+<button class="text-primary">
+<span class="material-symbols-outlined text-3xl">directions_run</span>
+</button>
+<button class="text-gray-400">
+<span class="material-symbols-outlined text-3xl">share</span>
+</button>
+<button class="text-gray-400">
+<span class="material-symbols-outlined text-3xl">star</span>
+</button>
+<button class="text-gray-400">
+<span class="material-symbols-outlined text-3xl">calendar_today</span>
+</button>
+</footer>
+</div>
+
+</body></html>

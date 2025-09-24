@@ -1,98 +1,93 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { Screen } from '@/components/layout/screen';
+import { MUSCLES, type Muscle } from '@/constants/exercise-data';
+import { Colors, Font, Radii, Shadow, Spacing } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">So it here!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Time to login</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+export default function ExercisesScreen() {
+	const router = useRouter();
+	const palette = Colors[useColorScheme() ?? 'dark'];
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+	const handleMusclePress = (muscle: Muscle) => {
+		router.push(`/(tabs)/exercises/${muscle.id}` as const);
+	};
+
+	const renderMuscleCard = ({ item }: { item: Muscle }) => (
+		<Pressable
+			style={[styles.muscleCard, { backgroundColor: palette.surface }]}
+			onPress={() => handleMusclePress(item)}
+			android_ripple={{ color: palette.primary + '20' }}
+		>
+			<View style={[styles.cardIcon, { backgroundColor: palette.primary + '20' }]}>
+				<MaterialIcons name={item.icon as any} size={32} color={palette.primary} />
+			</View>
+			<Text style={[styles.cardTitle, { color: palette.text }]}>{item.name}</Text>
+		</Pressable>
+	);
+
+	return (
+		<Screen scrollable={false} contentStyle={styles.container}>
+			<View style={styles.header}>
+				<Text style={[styles.title, { color: palette.text }]}>Choose Muscle Group</Text>
+				<Text style={[styles.subtitle, { color: palette.mutedText }]}>Select a muscle group to see exercises</Text>
+			</View>
+
+			<FlatList
+				data={MUSCLES}
+				renderItem={renderMuscleCard}
+				keyExtractor={(item) => item.id}
+				numColumns={2}
+				columnWrapperStyle={styles.row}
+				contentContainerStyle={styles.grid}
+				showsVerticalScrollIndicator={false}
+			/>
+		</Screen>
+	);
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+	container: {
+		flex: 1,
+		paddingHorizontal: Spacing.lg,
+		paddingTop: Spacing.lg
+	},
+	header: {
+		alignItems: 'center',
+		marginBottom: Spacing.xl,
+		gap: Spacing.sm
+	},
+	title: Font.title,
+	subtitle: Font.subTitle,
+	grid: {
+		gap: Spacing.md
+	},
+	row: {
+		justifyContent: 'space-between'
+	},
+	muscleCard: {
+		flex: 1,
+		marginHorizontal: Spacing.sm,
+		padding: Spacing.lg,
+		borderRadius: Radii.md,
+		alignItems: 'center',
+		gap: Spacing.sm,
+		minHeight: 120,
+		justifyContent: 'center',
+		...Shadow.card
+	},
+	cardIcon: {
+		width: 56,
+		height: 56,
+		borderRadius: Radii.md,
+		justifyContent: 'center',
+		alignItems: 'center'
+	},
+	cardTitle: {
+		fontSize: 16,
+		fontWeight: '600',
+		textAlign: 'center'
+	}
 });
