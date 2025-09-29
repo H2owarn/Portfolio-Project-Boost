@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { Tabs } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors } from '@/constants/theme';
@@ -11,11 +11,13 @@ export default function TabLayout() {
 	const colorScheme = useColorScheme() ?? 'dark';
 	const palette = Colors[colorScheme];
 	const insets = useSafeAreaInsets();
-	const tabBarBottomPadding = Math.max(insets.bottom, 12);
+	// Ensure minimum padding for web platforms where safe area might be 0
+	const tabBarBottomPadding = Platform.OS === 'web' ? Math.max(insets.bottom, 20) : Math.max(insets.bottom, 12);
 	const baseTabBarHeight = 58;
 	const tabBarHeight = baseTabBarHeight + tabBarBottomPadding;
 	const questButtonSize = 72;
-	const questLift = Math.max((questButtonSize - baseTabBarHeight) / 2 - tabBarBottomPadding / 3, 0);
+	// Move the entire button up more to align text with other tabs
+	const questLift = Math.max((questButtonSize - baseTabBarHeight) / 2 + 8, 0);
 	const sideTabSpacing = 16;
 	const baseTabItemStyle = {
 		paddingTop: 6,
@@ -65,6 +67,7 @@ export default function TabLayout() {
 
 	return (
 		<Tabs
+			initialRouteName="home"
 			screenOptions={{
 				headerShown: false,
 				tabBarActiveTintColor: palette.primary,
@@ -149,7 +152,8 @@ const styles = StyleSheet.create({
 		borderRadius: 36,
 		alignItems: 'center',
 		justifyContent: 'center',
-		boxShadow: ['0px 14px 28px rgba(125, 248, 67, 0.3)'],
+		paddingTop: 8,
+		boxShadow: '0px 14px 28px rgba(125, 248, 67, 0.3)',
 		borderWidth: 2,
 		borderColor: 'transparent',
 	},
