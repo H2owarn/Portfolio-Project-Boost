@@ -7,13 +7,25 @@ import { Screen } from '@/components/layout/screen';
 import { Colors, Radii } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
+function hexToRgba(hex: string, alpha: number) {
+  const sanitized = hex.replace('#', '');
+  const normalized = sanitized.length === 3 ? sanitized.split('').map((char) => char + char).join('') : sanitized;
+  const int = parseInt(normalized, 16);
+  const r = (int >> 16) & 255;
+  const g = (int >> 8) & 255;
+  const b = int & 255;
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export default function WelcomeScreen() {
   const router = useRouter();
   const palette = Colors[useColorScheme() ?? 'dark'];
+  const glowShadow = `0px 12px 24px ${hexToRgba(palette.primary, 0.35)}`;
 
   return (
     <Screen scrollable={false} contentStyle={styles.content}>
-      <View style={[styles.heroIcon, { backgroundColor: palette.primary, shadowColor: palette.primary }]}>
+      <View style={[styles.heroIcon, { backgroundColor: palette.primary, boxShadow: [glowShadow] }]}>
         <MaterialIcons name="local-fire-department" size={64} color={palette.background} />
       </View>
       <View style={styles.copy}>
@@ -43,9 +55,6 @@ const styles = StyleSheet.create({
     borderRadius: Radii.pill,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowOpacity: 0.35,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 12 },
     elevation: 12,
   },
   copy: {
