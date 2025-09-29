@@ -37,6 +37,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account-box" size={24} color={color} />,
         }}
         />
+      <Tabs.Screen
+      name="go"
+      options={{
+        title: 'Lets Go!',
+        tabBarIcon: ({ color }) => <MaterialCommunityIcons name="plus" size={24} color={color} />,
+      }}
+      />
     </Tabs>
   );
 }
