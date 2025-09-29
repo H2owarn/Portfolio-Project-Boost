@@ -1,134 +1,186 @@
-import { View, Text, TextInput, StyleSheet, Image } from "react-native";
-import * as Progress from "react-native-progress";
-import { Link } from "expo-router";
+import { View, Text, StyleSheet, Image, Pressable, ScrollView } from "react-native";
 
-export default function HomeScreen() {
+export default function ProfilePage() {
   return (
-    <View style={styles.container}>
-      {/* Header: Avatar + Name + Stamina */}
-      <View style={styles.header}>
-        <Image
-          source={{ uri: "https://via.placeholder.com/50" }}
-          style={styles.avatar}
-        />
-        <View style={styles.userInfo}>
-          <Text style={styles.name}>Username</Text>
-          <Progress.Bar
-            progress={0.6} // TODO: replace with user stamina value
-            width={150}
-            color="#f59e0b"
-            unfilledColor="#eee"
-            borderWidth={1}
-            height={14}
-          />
-          <Text style={styles.staminaText}>stamina bar</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      {/* Profile Picture */}
+      <View style={styles.avatarWrapper}>
+        <View style={styles.avatarCircle}>
+          <Text style={{ fontSize: 32 }}>👤</Text>
         </View>
       </View>
 
-      {/* Search */}
-      <TextInput
-        style={styles.searchBox}
-        placeholder="find some thing..."
-      />
+      {/* Name + Info */}
+      <Text style={styles.name}>Ian Gibson</Text>
+      <Text style={styles.subtext}>Joined February 2022</Text>
+      <Text style={[styles.subtext, { color: "#007bff" }]}>0 Friends</Text>
 
-      {/* Summary */}
-      <View style={styles.summaryBox}>
-        <Text>Summary</Text>
+      {/* Buttons */}
+      <View style={styles.buttonRow}>
+        <Pressable style={styles.addButton}>
+          <Text style={styles.addButtonText}>+ Add Friends</Text>
+        </Pressable>
+        <Pressable style={styles.shareButton}>
+          <Text style={{ fontSize: 18 }}>🔗</Text>
+        </Pressable>
       </View>
 
-      {/* Three Stats */}
-      <View style={styles.statsRow}>
-        <View style={styles.statBox}></View>
-        <View style={styles.statBox}></View>
-        <View style={styles.statBox}></View>
-      </View>
-
-      {/* Quest Section */}
-      <Link href="/quests" asChild>
-        <View style={styles.questBox}>
-          <Text>Quest</Text>
+      {/* Overview */}
+      <Text style={styles.sectionTitle}>Overview</Text>
+      <View style={styles.statsGrid}>
+        <View style={styles.statCard}>
+          <Text style={styles.statIcon}>🔥</Text>
+          <Text style={styles.statValue}>112</Text>
+          <Text style={styles.statLabel}>Day streak</Text>
         </View>
-      </Link>
+        <View style={styles.statCard}>
+          <Text style={styles.statIcon}>⚡</Text>
+          <Text style={styles.statValue}>12716</Text>
+          <Text style={styles.statLabel}>Total XP</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statIcon}>💎</Text>
+          <Text style={styles.statValue}>Emerald</Text>
+          <Text style={styles.statLabel}>Current league</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statIcon}>⭐</Text>
+          <Text style={styles.statValue}>4</Text>
+          <Text style={styles.statLabel}>Badges</Text>
+        </View>
+      </View>
 
-    </View>
+      {/* Rivals */}
+      <Text style={styles.sectionTitle}>Rivals</Text>
+      <View style={styles.rivalsRow}>
+        <View style={styles.rival}>
+          <View style={styles.rivalCircle}>
+            <Text>👤</Text>
+          </View>
+          <Text style={styles.rivalName}>Kaj Kennedy</Text>
+        </View>
+        <View style={styles.rival}>
+          <View style={styles.rivalCircle}>
+            <Text>👤</Text>
+          </View>
+          <Text style={styles.rivalName}>WaWa</Text>
+        </View>
+        <View style={styles.rival}>
+          <View style={styles.rivalCircle}>
+            <Text>👤</Text>
+          </View>
+          <Text style={styles.rivalName}>Jin Lieu</Text>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#eee",
-    padding: 16,
-  },
-  header: {
-    flexDirection: "row",
+    width: "100%",
     alignItems: "center",
-    marginBottom: 16,
+    justifyContent: "center",
+    padding: 20,
+    backgroundColor: "#f2f2f2",
   },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12,
-    backgroundColor: "#ccc",
+  avatarWrapper: {
+    marginBottom: 10,
   },
-  userInfo: {
-    flex: 1,
+  avatarCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderColor: "#999",
+    alignItems: "center",
+    justifyContent: "center",
   },
   name: {
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+  subtext: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 4,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    marginVertical: 10,
+  },
+  addButton: {
+    backgroundColor: "#007bff",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  addButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  shareButton: {
+    backgroundColor: "#ddd",
+    padding: 10,
+    borderRadius: 8,
+  },
+  sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
+    marginVertical: 12,
   },
-  staminaText: {
-    fontSize: 10,
-    color: "#555",
-    marginTop: 2,
-  },
-  searchBox: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 20,
-    padding: 10,
-    marginVertical: 10,
-    backgroundColor: "#fff",
-  },
-  summaryBox: {
-    borderWidth: 1,
-    borderColor: "#aaa",
-    borderRadius: 8,
-    padding: 20,
-    marginVertical: 10,
-    backgroundColor: "#fff",
-  },
-  statsRow: {
+  statsGrid: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 10,
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 12,
   },
-  statBox: {
-    flex: 1,
-    height: 80,
-    marginHorizontal: 5,
-    borderWidth: 1,
-    borderColor: "#aaa",
-    borderRadius: 8,
+  statCard: {
     backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    width: 140,
+    alignItems: "center",
+    margin: 6,
+    elevation: 2,
   },
-  questBox: {
-    borderWidth: 1,
-    borderColor: "#aaa",
-    borderRadius: 8,
-    padding: 15,
-    marginVertical: 10,
-    backgroundColor: "#fff",
+  statIcon: {
+    fontSize: 20,
+    marginBottom: 6,
   },
-  questDetailBox: {
-    borderWidth: 1,
-    borderColor: "#aaa",
-    borderRadius: 8,
-    padding: 20,
-    marginBottom: 20,
-    backgroundColor: "#fff",
+  statValue: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
-
+  statLabel: {
+    fontSize: 12,
+    color: "#666",
+  },
+  rivalsRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  rival: {
+    alignItems: "center",
+    marginHorizontal: 10,
+  },
+  rivalCircle: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderColor: "#999",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  rivalName: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
 });

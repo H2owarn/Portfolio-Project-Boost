@@ -43,6 +43,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3f81fabc-3a52-49cd-af95-6e21c04c5e24"
+      }
+    },
+    "owner": "h2owarn"
   }
 }

@@ -1,112 +1,292 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+} from "react-native";
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+export default function QuestSelection() {
+  // Dummy quests for testing
+  const quests = [
+    {
+      id: "1",
+      title: "Strength Challenge 1",
+      description: "Progressive strength workout designed to push your limits",
+      type: "main",
+      difficulty: 1,
+      xpReward: 30,
+      staminaCost: 25,
+      duration: "15 min",
+      exercises: ["Push-ups", "Squats"],
+    },
+    {
+      id: "2",
+      title: "Strength Challenge 2",
+      description: "Progressive strength workout designed to push your limits",
+      type: "main",
+      difficulty: 2,
+      xpReward: 40,
+      staminaCost: 30,
+      duration: "20 min",
+      exercises: ["Push-ups", "Squats", "Plank"],
+    },
+    {
+      id: "3",
+      title: "Quick Boost",
+      description: "Quick and easy workout for motivation boost",
+      type: "side",
+      difficulty: 1,
+      xpReward: 10,
+      staminaCost: 10,
+      duration: "5 min",
+      exercises: ["Jumping Jacks"],
+    },
+  ];
 
-export default function TabTwoScreen() {
+  const userLevel = 1;
+  const userStamina = 40;
+
+  const mainQuests = quests.filter((q) => q.type === "main");
+  const sideQuests = quests.filter((q) => q.type === "side");
+
+  const canStartQuest = (quest: any) =>
+    userStamina >= quest.staminaCost && userLevel >= quest.difficulty;
+
+  const getDifficultyColor = (difficulty: number) => {
+    if (difficulty <= 2) return "#4CAF50"; // green
+    if (difficulty <= 4) return "#FFC107"; // yellow
+    return "#F44336"; // red
+  };
+
+  const getDifficultyLabel = (difficulty: number) => {
+    if (difficulty <= 2) return "Easy";
+    if (difficulty <= 4) return "Medium";
+    return "Hard";
+  };
+
+  const QuestCard = ({ quest }: { quest: any }) => {
+    const canStart = canStartQuest(quest);
+    const isLocked = userLevel < quest.difficulty;
+
+    return (
+      <View style={[styles.card, !canStart && { opacity: 0.6 }]}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.icon}>
+            {quest.type === "main" ? "⚔️" : "⭐"}
+          </Text>
+          <Text style={styles.cardTitle}>{quest.title}</Text>
+          {isLocked && (
+            <View style={styles.lockedTag}>
+              <Text style={styles.lockedText}>Locked</Text>
+            </View>
+          )}
+        </View>
+
+        <Text style={styles.description}>{quest.description}</Text>
+
+        <View style={styles.tagsRow}>
+          <View
+            style={[
+              styles.difficultyTag,
+              { backgroundColor: getDifficultyColor(quest.difficulty) },
+            ]}
+          >
+            <Text style={styles.tagText}>
+              {getDifficultyLabel(quest.difficulty)}
+            </Text>
+          </View>
+          <Text style={styles.tag}>⚡ {quest.xpReward} XP</Text>
+          <Text style={styles.tag}>🕐 {quest.duration}</Text>
+        </View>
+
+        <View style={styles.exercisesBox}>
+          <Text style={styles.exercisesTitle}>Exercises:</Text>
+          <View style={styles.exercisesRow}>
+            {quest.exercises.map((ex: string, i: number) => (
+              <Text key={i} style={styles.exercise}>
+                {ex}
+              </Text>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.cardFooter}>
+          <Text style={styles.stamina}>Stamina Cost: {quest.staminaCost}</Text>
+          <Pressable
+            style={[
+              styles.startButton,
+              { backgroundColor: canStart ? "#007bff" : "#ccc" },
+            ]}
+            disabled={!canStart}
+            onPress={() => console.log("Quest Selected:", quest.title)}
+          >
+            <Text style={styles.startButtonText}>
+              {isLocked
+                ? `Level ${quest.difficulty} Required`
+                : userStamina < quest.staminaCost
+                ? "Not Enough Stamina"
+                : "Start Quest"}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <ScrollView contentInset={{ top: 45 }} style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Pressable style={styles.backButton} onPress={() => console.log("Back pressed")}>
+          <Text style={styles.backText}>← Back</Text>
+        </Pressable>
+        <Text style={styles.headerTitle}>Choose Your Quest</Text>
+      </View>
+
+      {/* Main Quests */}
+      <Text style={styles.sectionTitle}>⚔️ Main Quests</Text>
+      {mainQuests.map((quest) => (
+        <QuestCard key={quest.id} quest={quest} />
+      ))}
+
+      {/* Side Quests */}
+      <Text style={styles.sectionTitle}>⭐ Side Quests</Text>
+      {sideQuests.map((quest) => (
+        <QuestCard key={quest.id} quest={quest} />
+      ))}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: "#0d1b2a",
+    padding: 16,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16
+  },
+  backButton: {
+    backgroundColor: "#ffffff33",
+    padding: 8,
+    borderRadius: 8
+  },
+  backText: {
+    color: "#fff",
+    fontWeight: "600"
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center"
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+    marginVertical: 10 },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8 },
+  icon: {
+    fontSize: 20,
+    marginRight: 8 },
+  cardTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "600" },
+  lockedTag: {
+    backgroundColor: "#f8d7da",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6 },
+  lockedText: {
+    color: "#721c24",
+    fontSize: 12,
+    fontWeight: "600"
+  },
+  description: {
+    fontSize: 14,
+    color: "#555",
+    marginBottom: 8
+  },
+  tagsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 8
+  },
+  difficultyTag: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6
+  },
+  tagText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600"
+  },
+  tag: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    fontSize: 12,
+    marginRight: 6
+  },
+  exercisesBox: {
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 8
+  },
+  exercisesTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 4
+  },
+  exercisesRow: {
+    flexDirection: "row",
+    flexWrap: "wrap" },
+  exercise: {
+    backgroundColor: "#eee",
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    borderRadius: 6,
+    fontSize: 12,
+    marginRight: 6,
+    marginBottom: 4
+  },
+  cardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  stamina: {
+    fontSize: 13,
+    color: "#666"
+  },
+  startButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8
+  },
+  startButtonText: {
+    color: "#fff",
+    fontWeight: "600"
   },
 });
