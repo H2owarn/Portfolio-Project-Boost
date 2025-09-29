@@ -78,17 +78,15 @@ export const Radii = {
 
 export const Shadow = {
 	card: {
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 8,
+		boxShadow: [
+			'0px 4px 12px rgba(15, 23, 42, 0.15)',
+		],
 		elevation: 4
 	},
 	overlay: {
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.25,
-		shadowRadius: 12,
+		boxShadow: [
+			'0px 10px 24px rgba(15, 23, 42, 0.28)',
+		],
 		elevation: 8
 	}
 } as const;

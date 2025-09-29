@@ -4,7 +4,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '@/components/layout/screen';
 import { type Exercise, getExercisesForMuscle, getMuscleById } from '@/constants/exercise-data';
-import { Colors, Font, Radii, Spacing } from '@/constants/theme';
+import { Colors, Font, Radii, Shadow, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function MuscleExercisesScreen() {
@@ -105,11 +105,7 @@ const styles = StyleSheet.create({
 	exerciseCard: {
 		padding: 16,
 		borderRadius: Radii.lg,
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 8,
-		elevation: 4
+		...Shadow.card
 	},
 	cardContent: {
 		gap: 12

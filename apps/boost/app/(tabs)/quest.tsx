@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from "react-native";
 
-export default function QuestSelection() {
+export default function QuestScreen() {
   // Dummy quests for testing
   const quests = [
     {
