@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import AvatarBody from '../../components/avatar_parts/AvatarBody';
 import { musclesFront } from "../../components/avatar_parts/musclesFront";
 import { musclesBack } from "../../components/avatar_parts/musclesBack";
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width: screenWidth } = Dimensions.get('window');
 const musclesPages = [musclesFront, musclesBack];
@@ -36,7 +37,7 @@ export default function AvatarScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.avatarWrapper}>
-        <AvatarBody width={500} height={500} style={{ marginTop: 20 }} />
+        <AvatarBody fill= '#161515af' width={500} height={500} style={{ marginTop: 20 }} />
 {/* Muscle swap view*/}
         <ScrollView
           horizontal
@@ -60,7 +61,7 @@ export default function AvatarScreen() {
                     <Component
                       width={width}
                       height={height}
-                      fill={isSelected ? "#37d137" : "#12586B"}
+                      fill={isSelected ? "#37d137" : "#fcfcfc91"}
                     />
                   </TouchableOpacity>
                 );
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#2c2935ff',
   },
   avatarWrapper: {
     position: 'relative',

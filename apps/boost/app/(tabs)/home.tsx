@@ -10,7 +10,7 @@ const USER = {
   xp: 40,
   xpRequired: 100,
   avatar: 'https://via.placeholder.com/80',
-  quests: ['👑', '🦴', '💎', '🌚', '⭐'],
+  quests: ['👑', '🦴', '💎',],
   friends: [
     { id: '1', name: 'Bailey Dupont', level: 99, avatar: 'https://via.placeholder.com/60' },
     { id: '2', name: 'Pedro Fernandes', level: 50, avatar: 'https://via.placeholder.com/60' },
@@ -77,7 +77,7 @@ export default function HomeScreen() {
 
       <View style={[styles.section, { backgroundColor: palette.surface }]}>
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: palette.text }]}>Recommended Allies</Text>
+          <Text style={[styles.sectionTitle, { color: palette.text }]}>Recommended Rivals</Text>
           <Pressable
             onPress={() => console.log('See all friends')}
             android_ripple={{ color: palette.primary + '20' }}

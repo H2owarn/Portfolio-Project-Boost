@@ -31,7 +31,7 @@ export default function ExercisesScreen() {
 	return (
 		<Screen scrollable={false} contentStyle={styles.container}>
 			<View style={styles.header}>
-				<Text style={[styles.title, { color: palette.text }]}>Choose Muscle Group</Text>
+				<Text style={[styles.title, { color: palette.text }]}>Change this to leaderboard/Rivals</Text>
 				<Text style={[styles.subtitle, { color: palette.mutedText }]}>Select a muscle group to see exercises</Text>
 			</View>
 

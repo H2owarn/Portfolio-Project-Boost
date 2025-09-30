@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 export default function ProfileScreen() {
   return (
@@ -29,10 +29,10 @@ export default function ProfileScreen() {
         {/* Statistics */}
         <Text style={styles.sectionTitle}>Overview</Text>
         <View style={styles.statsGrid}>
-          <StatCard icon="flame" value="112" label="Day streak" />
-          <StatCard icon="flash" value="12716" label="Total XP" />
-          <StatCard icon="medal" value="Emerald" label="Current league" />
-          <StatCard icon="star" value="4" label="Badges" />
+          <StatCard icon="local-fire-department" value="112" label="Day streak" />
+          <StatCard icon="star" value="12716" label="Total XP" />
+          <StatCard icon="shield" value="Emerald" label="Current league" />
+          <StatCard icon="workspace-premium" value="4" label="Badges" />
         </View>
 
         {/* Rival Section */}
@@ -73,7 +73,7 @@ function StatCard({ icon, value, label }: { icon: string; value: string | number
   return (
     <View style={{ marginBottom: 16, width: "48%" }}>
       <View style={[styles.statCard, { height: 65, width: 170 }]}>
-        <Ionicons name={icon as any} size={28} color="gold" />
+        <MaterialIcons name={icon as any} size={28} color="#2ec91aff" />
         <Text style={styles.statValue}>{value}</Text>
       </View>
       <Text style={[styles.statLabel, { marginTop: 4, textAlign: "center" }]}>{label}</Text>

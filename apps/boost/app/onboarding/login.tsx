@@ -15,7 +15,7 @@ async function submit(email: string, password: string) {
 	// const req = await api('POST', '/auth/login', { email, password });
 	// console.log('API REQUEST RESULT', req);
 
-	router.replace('/(tabs)');
+	router.replace('/(tabs)/home');
 }
 
 export default function LoginScreen() {

@@ -34,7 +34,7 @@ export default function WelcomeScreen() {
       </View>
       <BoostButton
         label="Get Started"
-        onPress={() => router.push('/login')}
+        onPress={() => router.push('/onboarding/login')}
         icon={<MaterialIcons name="arrow-forward" size={20} color="#000000" />}
       />
     </Screen>

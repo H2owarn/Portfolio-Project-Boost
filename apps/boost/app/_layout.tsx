@@ -25,9 +25,9 @@ export default function RootLayout() {
 					contentStyle: { backgroundColor: palette.background }
 				}}
 			>
-				<Stack.Screen name="welcome" options={{ headerShown: false }} />
-				<Stack.Screen name="login" options={{ headerShown: false, presentation: 'card' }} />
 				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+				<Stack.Screen name="onboarding/welcome" options={{ headerShown: false }} />
+				<Stack.Screen name="onboarding/login" options={{ headerShown: false, presentation: 'card' }} />
 			</Stack>
 		</ThemeProvider>
 	);
