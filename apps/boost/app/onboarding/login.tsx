@@ -8,12 +8,25 @@ import { BoostInput } from '@/components/boost-input';
 import { Screen } from '@/components/layout/screen';
 import { Colors, Font, Radii, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { supabase } from '@/lib/supabase';
+
 
 // import { api } from '@/utils/api';
 
 async function submit(email: string, password: string) {
 	// const req = await api('POST', '/auth/login', { email, password });
 	// console.log('API REQUEST RESULT', req);
+
+	const {data, error } = await supabase.auth.signInWithPassword({
+		email,
+		password,
+	});
+
+	if (error) {
+		console.error("Login error:", error.message);
+		alert(error.message);
+		return;
+	}
 
 	router.replace('/(tabs)/home');
 }
@@ -69,7 +82,7 @@ export default function LoginScreen() {
 			<View style={styles.footer}>
 				<Text style={[styles.footerText, { color: palette.mutedText }]}>
 					New here?{' '}
-					<Link href="/signup" style={[styles.link, { color: palette.primary }]}>
+					<Link href="/onboarding/signup" style={[styles.link, { color: palette.primary }]}>
 						Sign up
 					</Link>
 				</Text>

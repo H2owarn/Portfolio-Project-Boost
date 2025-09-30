@@ -1,8 +1,91 @@
-import React from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { supabase } from "@/lib/supabase";
+
+type Profile = {
+  id: string;
+  name: string;
+  level: number;
+  streak: number;
+  stamina: number;
+  exp: number;
+  rank_division: string;
+  created_at: string;
+};
 
 export default function ProfileScreen() {
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      // get the signed-in user
+      const { data: {user}, error:userErr } = await supabase.auth.getUser();
+      if (userErr) console.error(userErr);
+      if(!user) {
+        setLoading(false);
+        return;    // not logged in
+      }
+
+      // fetch profile
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (mounted) {
+        if(error) console.error(error);
+        setProfile(data as Profile);
+        setLoading(false);
+      }
+
+      // live update profile
+      const channel = supabase
+        .channel(`profile:${user.id}`)
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}`},
+          (payload) => setProfile(payload.new as Profile)
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+
+      };
+
+      load();
+      return () => { mounted = false; };
+    }, []);
+
+    const joined = useMemo(() => {
+    if (!profile?.created_at) return "";
+    const d = new Date(profile.created_at);
+    return d.toLocaleString(undefined, { month: "long", year: "numeric" });
+    }, [profile?.created_at]);
+
+    if (loading) {
+      return (
+        <View style={[styles.container, { justifyContent: "center" }]}>
+          <Text>Loading profile…</Text>
+        </View>
+      );
+    }
+
+    if (!profile) {
+      return (
+        <View style={[styles.container, { justifyContent: "center" }]}>
+          <Text>No profile. Please sign in.</Text>
+        </View>
+      );
+    }
+
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -11,8 +94,8 @@ export default function ProfileScreen() {
           <View style={styles.avatar}>
             <Ionicons name="person" size={48} color="gray" />
           </View>
-          <Text style={styles.username}>Ian Gibson</Text>
-          <Text style={styles.joinedText}>Joined February 2022</Text>
+          <Text style={styles.username}>{profile.name}</Text>
+          <Text style={styles.joinedText}>Joined {joined}</Text>
           <View style={styles.followRow}>
             <Text style={styles.linkText}>0 Friends</Text>
           </View>
@@ -30,16 +113,16 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Overview</Text>
         <View style={styles.statsGrid}>
           <StatCard icon="local-fire-department" value="112" label="Day streak" />
-          <StatCard icon="star" value="12716" label="Total XP" />
-          <StatCard icon="shield" value="Emerald" label="Current league" />
+          <StatCard icon="star" value={profile.exp} label="Total XP" />
+          <StatCard icon="shield" value={profile.rank_division} label="Current league" />
           <StatCard icon="workspace-premium" value="4" label="Badges" />
         </View>
 
         {/* Rival Section */}
         <Text style={styles.sectionTitle}>Rivals</Text>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.rivalsRow}
         >
         {/* Repeat for each rival */}
@@ -88,8 +171,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#e8eaecff"
   },
-  scrollContent: { 
-    padding: 16 
+  scrollContent: {
+    padding: 16
   },
   profileSection: {
     alignItems: "center",
@@ -139,7 +222,7 @@ const styles = StyleSheet.create({
     marginRight: 8
   },
   addButtonText: {
-    color: "white", 
+    color: "white",
     fontWeight: "bold"
   },
   shareButton: {
@@ -159,7 +242,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-between",
   },
-  statCard: { 
+  statCard: {
     backgroundColor: "#ffffff9d",
     borderRadius: 16, padding: 16,
     width: "48%", marginBottom: 1,

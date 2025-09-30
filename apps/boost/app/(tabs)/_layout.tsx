@@ -79,7 +79,7 @@ export default function TabLayout() {
 				borderTopColor: 'rgba(255,255,255,0.05)',
 				height: tabBarHeight,
 				paddingBottom: tabBarBottomPadding,
-				paddingTop: 12, 
+				paddingTop: 12,
 				marginBottom: 8,
 			},
 			tabBarItemStyle: baseTabItemStyle,
@@ -96,7 +96,7 @@ export default function TabLayout() {
 				}}
 			/>
 			<Tabs.Screen
-				name="muscles"
+				name="leaderboard"
 				options={{
 					title: 'Rivals',
 					tabBarIcon: ({ color, size }) => <MaterialIcons name="fitness-center" color={color} size={size} />,
