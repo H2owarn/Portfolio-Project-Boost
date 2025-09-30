@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Activity Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#7DF843",
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#000000",
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        .chart-line {
+            stroke: #7DF843;
+            stroke-width: 2;
+            fill: none;
+        }
+        .chart-bar {
+            fill: #7DF843;
+        }
+        .grid-line {
+            stroke: #4A4A4A;
+            stroke-width: 1;
+            stroke-dasharray: 2,2;
+        }
+        .axis-text {
+            fill: #FFFFFF;
+            font-size: 12px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-white font-sans">
+<div class="min-h-screen flex flex-col">
+<header class="p-4">
+<h1 class="text-2xl font-bold">Daily</h1>
+</header>
+<main class="flex-grow p-4 space-y-6">
+<div class="bg-gray-800 rounded-2xl p-4">
+<div class="flex justify-between items-start mb-4">
+<h2 class="text-lg font-semibold">Weekly Activity</h2>
+<div class="text-right">
+<span class="text-3xl font-bold text-primary">45</span>
+<span class="text-sm">min</span>
+</div>
+</div>
+<div class="relative h-40">
+<svg class="w-full h-full" viewBox="0 0 300 100">
+<line class="grid-line" x1="0" x2="300" y1="25" y2="25"></line>
+<line class="grid-line" x1="0" x2="300" y1="50" y2="50"></line>
+<line class="grid-line" x1="0" x2="300" y1="75" y2="75"></line>
+<path class="chart-line" d="M 15,80 C 40,30 60,30 85,50 S 110,90 135,70 S 160,30 185,50 S 210,90 235,40 S 260,60 285,80"></path>
+</svg>
+<div class="absolute bottom-0 w-full flex justify-between px-2">
+<span class="text-sm">S</span>
+<span class="text-sm">M</span>
+<span class="text-sm">T</span>
+<span class="text-sm">W</span>
+<span class="text-sm">T</span>
+<span class="text-sm">F</span>
+<span class="text-sm">S</span>
+</div>
+<span class="absolute top-1/2 left-2 transform -translate-y-1/2 text-xs text-gray-400">Avg.</span>
+</div>
+</div>
+<div class="bg-gray-800 rounded-2xl p-4">
+<div class="flex justify-between items-start mb-4">
+<h2 class="text-lg font-semibold">Weekly Energy</h2>
+<div class="text-right">
+<span class="text-3xl font-bold text-primary">5</span>
+</div>
+</div>
+<div class="relative h-40">
+<svg class="w-full h-full" viewBox="0 0 300 100">
+<line class="grid-line" x1="0" x2="300" y1="50" y2="50"></line>
+<rect class="chart-bar" height="40" rx="7.5" width="15" x="25" y="60"></rect>
+<rect class="chart-bar" height="80" rx="7.5" width="15" x="65" y="20"></rect>
+<rect class="chart-bar" height="30" rx="7.5" width="15" x="105" y="70"></rect>
+<rect class="chart-bar" height="90" rx="7.5" width="15" x="145" y="10"></rect>
+<rect class="chart-bar" height="50" rx="7.5" width="15" x="185" y="50"></rect>
+<rect class="chart-bar" height="70" rx="7.5" width="15" x="225" y="30"></rect>
+<rect class="chart-bar" height="95" rx="7.5" width="15" x="265" y="5"></rect>
+</svg>
+<div class="absolute bottom-0 w-full flex justify-between px-2">
+<span class="text-sm">S</span>
+<span class="text-sm">M</span>
+<span class="text-sm">T</span>
+<span class="text-sm">W</span>
+<span class="text-sm">T</span>
+<span class="text-sm">F</span>
+<span class="text-sm">S</span>
+</div>
+<span class="absolute top-1/2 left-2 transform -translate-y-1/2 text-xs text-gray-400">Avg.</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-gray-800 rounded-2xl p-4 flex flex-col items-center justify-between">
+<div class="w-full flex justify-between items-start">
+<h3 class="text-lg font-semibold">Water</h3>
+<p class="text-lg"><span class="text-primary">3</span>/8</p>
+</div>
+<div class="w-20 h-20 rounded-full bg-blue-900/50 flex items-center justify-center my-4">
+<div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center overflow-hidden">
+<div class="w-full h-1/2 bg-blue-400 self-end"></div>
+</div>
+</div>
+<button class="w-full bg-blue-600 text-white py-2 rounded-lg">Drink</button>
+</div>
+<div class="bg-gray-800 rounded-2xl p-4 flex flex-col items-center justify-between">
+<div class="w-full flex justify-between items-start">
+<h3 class="text-lg font-semibold">Weight</h3>
+<p class="text-lg"><span class="text-primary">87.6</span> kg</p>
+</div>
+<div class="w-24 h-24 rounded-full border-4 border-primary border-t-transparent rotate-45 flex items-center justify-center my-4" style="border-color: #7DF843 #7DF843 #7DF843 #2D3748;">
+<div class="w-16 h-16 bg-blue-900/50 rounded-full flex items-center justify-center transform -rotate-45">
+<span class="material-icons text-3xl text-blue-400">monitor_weight</span>
+</div>
+</div>
+<button class="w-full bg-blue-600 text-white py-2 rounded-lg">Change</button>
+</div>
+</div>
+</main>
+<footer class="sticky bottom-0 bg-gray-900 p-2 mt-auto">
+<nav class="flex justify-around">
+<a class="flex flex-col items-center text-primary" href="#">
+<span class="material-icons">rocket_launch</span>
+</a>
+<a class="flex flex-col items-center text-gray-400" href="#">
+<span class="material-icons">share</span>
+</a>
+<a class="flex flex-col items-center text-gray-400" href="#">
+<span class="material-icons">person</span>
+</a>
+<a class="flex flex-col items-center text-gray-400" href="#">
+<span class="material-icons">article</span>
+</a>
+</nav>
+</footer>
+</div>
+
+</body></html>

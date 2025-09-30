@@ -1,186 +1,185 @@
-import { View, Text, StyleSheet, Image, Pressable, ScrollView } from "react-native";
+import React from "react";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
-export default function ProfilePage() {
+export default function ProfileScreen() {
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Profile Picture */}
-      <View style={styles.avatarWrapper}>
-        <View style={styles.avatarCircle}>
-          <Text style={{ fontSize: 32 }}>👤</Text>
-        </View>
-      </View>
-
-      {/* Name + Info */}
-      <Text style={styles.name}>Ian Gibson</Text>
-      <Text style={styles.subtext}>Joined February 2022</Text>
-      <Text style={[styles.subtext, { color: "#007bff" }]}>0 Friends</Text>
-
-      {/* Buttons */}
-      <View style={styles.buttonRow}>
-        <Pressable style={styles.addButton}>
-          <Text style={styles.addButtonText}>+ Add Friends</Text>
-        </Pressable>
-        <Pressable style={styles.shareButton}>
-          <Text style={{ fontSize: 18 }}>🔗</Text>
-        </Pressable>
-      </View>
-
-      {/* Overview */}
-      <Text style={styles.sectionTitle}>Overview</Text>
-      <View style={styles.statsGrid}>
-        <View style={styles.statCard}>
-          <Text style={styles.statIcon}>🔥</Text>
-          <Text style={styles.statValue}>112</Text>
-          <Text style={styles.statLabel}>Day streak</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statIcon}>⚡</Text>
-          <Text style={styles.statValue}>12716</Text>
-          <Text style={styles.statLabel}>Total XP</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statIcon}>💎</Text>
-          <Text style={styles.statValue}>Emerald</Text>
-          <Text style={styles.statLabel}>Current league</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statIcon}>⭐</Text>
-          <Text style={styles.statValue}>4</Text>
-          <Text style={styles.statLabel}>Badges</Text>
-        </View>
-      </View>
-
-      {/* Rivals */}
-      <Text style={styles.sectionTitle}>Rivals</Text>
-      <View style={styles.rivalsRow}>
-        <View style={styles.rival}>
-          <View style={styles.rivalCircle}>
-            <Text>👤</Text>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Profile Section */}
+        <View style={styles.profileSection}>
+          <View style={styles.avatar}>
+            <Ionicons name="person" size={48} color="gray" />
           </View>
-          <Text style={styles.rivalName}>Kaj Kennedy</Text>
-        </View>
-        <View style={styles.rival}>
-          <View style={styles.rivalCircle}>
-            <Text>👤</Text>
+          <Text style={styles.username}>Ian Gibson</Text>
+          <Text style={styles.joinedText}>Joined February 2022</Text>
+          <View style={styles.followRow}>
+            <Text style={styles.linkText}>0 Friends</Text>
           </View>
-          <Text style={styles.rivalName}>WaWa</Text>
-        </View>
-        <View style={styles.rival}>
-          <View style={styles.rivalCircle}>
-            <Text>👤</Text>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.addButton}>
+              <Text style={styles.addButtonText}>+ Add Friends</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.shareButton}>
+              <Ionicons name="share-outline" size={20} color="white" />
+            </TouchableOpacity>
           </View>
-          <Text style={styles.rivalName}>Jin Lieu</Text>
         </View>
-      </View>
-    </ScrollView>
+
+        {/* Statistics */}
+        <Text style={styles.sectionTitle}>Overview</Text>
+        <View style={styles.statsGrid}>
+          <StatCard icon="local-fire-department" value="112" label="Day streak" />
+          <StatCard icon="star" value="12716" label="Total XP" />
+          <StatCard icon="shield" value="Emerald" label="Current league" />
+          <StatCard icon="workspace-premium" value="4" label="Badges" />
+        </View>
+
+        {/* Rival Section */}
+        <Text style={styles.sectionTitle}>Rivals</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.rivalsRow}
+        >
+        {/* Repeat for each rival */}
+          <View style={styles.rivalAvatarContainer}>
+            <View style={styles.avatar}>
+              <Ionicons name="person" size={48} color="gray" />
+            </View>
+            <Text style={styles.username}>Kaj Kennedy</Text>
+          </View>
+
+          <View style={styles.rivalAvatarContainer}>
+            <View style={styles.avatar}>
+              <Ionicons name="person" size={48} color="gray" />
+            </View>
+            <Text style={styles.username}>WaWa</Text>
+          </View>
+
+          <View style={styles.rivalAvatarContainer}>
+            <View style={styles.avatar}>
+              <Ionicons name="person" size={48} color="gray" />
+            </View>
+            <Text style={styles.username}>Jin Lieu</Text>
+          </View>
+        </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
+
+function StatCard({ icon, value, label }: { icon: string; value: string | number; label: string }) {
+  return (
+    <View style={{ marginBottom: 16, width: "48%" }}>
+      <View style={[styles.statCard, { height: 65, width: 170 }]}>
+        <MaterialIcons name={icon as any} size={28} color="#2ec91aff" />
+        <Text style={styles.statValue}>{value}</Text>
+      </View>
+      <Text style={[styles.statLabel, { marginTop: 4, textAlign: "center" }]}>{label}</Text>
+    </View>
+  );
+}
+
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: "100%",
+    backgroundColor: "#e8eaecff"
+  },
+  scrollContent: {
+    padding: 16
+  },
+  profileSection: {
     alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-    backgroundColor: "#f2f2f2",
+    marginBottom: 24
   },
-  avatarWrapper: {
-    marginBottom: 10,
-  },
-  avatarCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  avatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
     borderWidth: 2,
     borderStyle: "dashed",
-    borderColor: "#999",
+    borderColor: "gray",
     alignItems: "center",
     justifyContent: "center",
   },
-  name: {
-    fontSize: 22,
-    fontWeight: "bold",
+  rivalAvatarContainer: {
+    alignItems: 'center',
+    marginRight: 12,
   },
-  subtext: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 4,
+  username: {
+    color: "black",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 8
+  },
+  joinedText: {
+    color: "#9ca3af",
+    marginTop: 4
+  },
+  followRow: {
+    flexDirection: "row",
+    marginTop: 8
+  },
+  linkText: {
+    color: "#3b82f6",
+    marginHorizontal: 8
   },
   buttonRow: {
     flexDirection: "row",
-    marginVertical: 10,
+    marginTop: 12
   },
   addButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#2563eb",
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    marginRight: 8,
+    paddingVertical: 8,
+    borderRadius: 12,
+    marginRight: 8
   },
   addButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    color: "white",
+    fontWeight: "bold"
   },
   shareButton: {
-    backgroundColor: "#ddd",
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: "#374151ff",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginVertical: 12,
+    color: "Black",
+    fontSize: 18, fontWeight: "bold",
+    marginBottom: 12,
+    textAlign: "center"
   },
   statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "center",
-    gap: 12,
+    justifyContent: "space-between",
   },
   statCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    width: 140,
+    backgroundColor: "#ffffff9d",
+    borderRadius: 16, padding: 16,
+    width: "48%", marginBottom: 1,
+    borderWidth: 2, flexDirection: "row",
     alignItems: "center",
-    margin: 6,
-    elevation: 2,
-  },
-  statIcon: {
-    fontSize: 20,
-    marginBottom: 6,
+    gap: 20
   },
   statValue: {
-    fontSize: 16,
+    color: "black",
+    fontSize: 18,
     fontWeight: "bold",
+    marginTop: 4
   },
   statLabel: {
-    fontSize: 12,
-    color: "#666",
+    color: "#000000ff"
   },
   rivalsRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    gap: 12,
   },
-  rival: {
-    alignItems: "center",
-    marginHorizontal: 10,
-  },
-  rivalCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    borderWidth: 2,
-    borderStyle: "dashed",
-    borderColor: "#999",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4,
-  },
-  rivalName: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
+
 });

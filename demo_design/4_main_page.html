@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fitness Challenge</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#7DF843",
+            "background-light": "#FFFFFF",
+            "background-dark": "#000000",
+            "card-light": "#F3F4F6",
+            "card-dark": "#1F2937",
+            "text-light": "#111827",
+            "text-dark": "#FFFFFF",
+            "subtext-light": "#6B7280",
+            "subtext-dark": "#9CA3AF"
+          },
+          fontFamily: {
+            sans: ['Roboto', 'sans-serif'],
+          },
+          borderRadius: {
+            'xl': '1rem',
+          },
+        },
+      },
+    };
+  </script>
+<style>
+    .material-icons {
+      font-size: 24px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-text-dark font-sans">
+<div class="container mx-auto px-4 py-8 max-w-sm">
+<header class="mb-8">
+<h1 class="text-2xl font-bold">Challenge</h1>
+</header>
+<section class="mb-8">
+<div class="flex items-center space-x-4 overflow-x-auto pb-2">
+<button class="flex-shrink-0 w-16 h-16 bg-card-dark rounded-full flex items-center justify-center border-2 border-dashed border-gray-600">
+<span class="material-icons text-gray-400">add</span>
+</button>
+<div class="relative flex-shrink-0">
+<img alt="User avatar with pink hair" class="w-16 h-16 rounded-full border-2 border-red-500 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAh3q22kaWutr_sayY-Y3qyLx7IiqcRWD8ZaMt3lfcA7V5AbJWU9VnQ2nfL1tz9WUXGx_OGSci-841O9yQyZA3SrJ46Zj9eu0bECp-8xvjs6RnzdP0GmYu6RVoNhEhE8UOz2Yhk2D-kquA32rdiXJ6hJSuGOwLPn0SAaIoZaMniHKP4GV9rkZq3XqASlzq8EZmfzoA44B4AsGoAsfkYnP3YHfhQ_3NJdLi1PkpDpU0GehVvjlBliBBaTjzHWnKfLyZcimIV-UMy9s8"/>
+<span class="absolute bottom-0 right-0 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">Live</span>
+</div>
+<div class="relative flex-shrink-0">
+<img alt="User avatar with sunglasses" class="w-16 h-16 rounded-full border-2 border-primary object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnj_ulgqKsVnL9VvJBJdEUSJG8O_wqgnA4pE0S5fPAga0lJ4zvDtQavTxVnumoocLYVJmqAX3vJNRuhve6YNjC4aKHz6UGIUZNa9TQWQpsjfpa7Sb44FVel-g-k5Asn7xMSWrpyO2UtbTuw9jr1N85l1XZR-qpUGWbcWz93zWBbdw6ddBjnOqCxDrdZ9e2uwViRvVXNNMONckXl-5agNc_5A6ZRdxb4Z7JBZ1rahWp5OJYMK9LLPZdFfgWWr_EmcK-RvX7Zl2arb4"/>
+</div>
+<img alt="User avatar in black and white" class="w-16 h-16 rounded-full border-2 border-transparent object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7P3pFKfh8zFh86QfuV_i5sA123dmyd7zlLVUhki55DeRV7rfWjsnI0C2Qz9HWL5f0vi1Pls4YMNV5nXn3cVsZIMJiqcqA-NrvrPEA5cH2edxK2RZOz6QWpBgnLk1nN1jO58D1FskNRKrGQ2LdtUuyG2sjzz4RJTNmjRFafbBSHiZmap5RW5Nykai7ot4QpD2-pisElP7qudqQGU93Ur0yUG4KwFCHq4HDcTeePgGwfRQLzTXkG57YmNsJYkzgZ1dpdt2TXP7L81A"/>
+<img alt="User avatar smiling" class="w-16 h-16 rounded-full border-2 border-transparent object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByzBmXgkx84zUdoatmhpQn6MRqnXPAOpOsdwsm8BCtYtxN5Te5GtcAezMNXF3anktjUU4nUhV4jDX0xF1kVfdr6IEl-TmS_zUipgmPE9Y7b6BwOcliNeXsUT7MDX7V27wH9uvzCiaqD3qOK0uva3kPtBGAQEOgK-R359etgaAWW0nUpOccbTdt7xCSl4zKj42bMUqcMxv4rJZkolZBCS-jbNfmNChKj7WcpEeaS1Rz6xXviXtXJqYrYFvDBXX-xAcNo466Ax0NnVg"/>
+<img alt="User avatar with green background" class="w-16 h-16 rounded-full border-2 border-transparent object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl3sUne3M3cB8SQJYidRM4QR2FRNPfbtPhA_PKDIbjeEWuoevUvXtmo9Zpoobwjcp-xiB1c220zkLvUHDli_WRRRbjtVVMpxL4No5ZDB5tICyc4AlAj5WiXWnfT4inj7YWBHVjRxjaE6raEFHK3K0O6zsg71Y7V37Ri0PwRIS1rw4xQC_mYRiebf7y2atZLz6rtF_smLUIEm2Atsi0RU7YdD0fry6fq9xzLw1GcFDtZ1xQ5SHpe3vb0B7usYEzQPbYuGUtUMgkT1Q"/>
+</div>
+</section>
+<section class="mb-8">
+<h2 class="text-xl font-semibold mb-4">Daily Tasks</h2>
+<div class="flex space-x-4">
+<div class="relative w-1/2 bg-cover bg-center rounded-xl p-4 flex flex-col justify-end h-48" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBUI_GRocDW4znZUZuVmMrUpMoxSdqEDIQSkunlkJqNu3MLPcFNC2BUBR913StwKfeEE7gy4Kx-WRYUFv5-0Kfbyib8jVVgbA-bkYry6TeKNkYJ_hJ7CjhAOD0YjXxHL3l3rVk-cU7QDjzwv6ZiNoonpBr9ecKIOo5em6m_sdt160C0GmcLqNhOkdIcNhh0wOXZzopMQy98hEyTs7AnoyKirCvFK1c1mFQTWjZvWHb4HeooqT1uw0Qqxg6FV_gpQF6t1kZO9RCu49c');">
+<div class="absolute inset-0 bg-black bg-opacity-40 rounded-xl"></div>
+<div class="relative z-10">
+<h3 class="text-lg font-bold">10 Sets</h3>
+<p class="text-sm">Build ABS</p>
+</div>
+<div class="absolute bottom-4 right-4 w-10 h-10">
+<svg class="w-full h-full" viewBox="0 0 36 36">
+<path class="text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke-dasharray="75, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+</div>
+</div>
+<div class="relative w-1/2 bg-cover bg-center rounded-xl p-4 flex flex-col justify-end h-48" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBUI_GRocDW4znZUZuVmMrUpMoxSdqEDIQSkunlkJqNu3MLPcFNC2BUBR913StwKfeEE7gy4Kx-WRYUFv5-0Kfbyib8jVVgbA-bkYry6TeKNkYJ_hJ7CjhAOD0YjXxHL3l3rVk-cU7QDjzwv6ZiNoonpBr9ecKIOo5em6m_sdt160C0GmcLqNhOkdIcNhh0wOXZzopMQy98hEyTs7AnoyKirCvFK1c1mFQTWjZvWHb4HeooqT1uw0Qqxg6FV_gpQF6t1kZO9RCu49c');">
+<div class="absolute inset-0 bg-black bg-opacity-40 rounded-xl"></div>
+<div class="relative z-10">
+<h3 class="text-lg font-bold">30 mins</h3>
+<p class="text-sm">Fat Burn</p>
+</div>
+<div class="absolute bottom-4 right-4 w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+<span class="material-icons text-black">expand_more</span>
+</div>
+</div>
+</div>
+</section>
+<section>
+<h2 class="text-xl font-semibold mb-4">More Challenges</h2>
+<div class="relative">
+<div class="absolute left-3 top-0 bottom-0 w-px bg-gray-700"></div>
+<div class="space-y-4">
+<div class="flex items-center ml-10 p-4 bg-card-dark rounded-xl">
+<div class="absolute left-0 w-6 h-6 rounded-full bg-card-dark border-2 border-gray-700 flex items-center justify-center">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+</div>
+<span class="material-icons mr-4 text-primary">fitness_center</span>
+<span class="flex-grow">Battle Rope</span>
+<span class="material-icons text-sm mr-1 text-subtext-dark">schedule</span>
+<span class="text-sm text-subtext-dark">5 mins</span>
+</div>
+<div class="flex items-center ml-10 p-4 bg-card-dark rounded-xl">
+<div class="absolute left-0 w-6 h-6 rounded-full bg-card-dark border-2 border-gray-700 flex items-center justify-center">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+</div>
+<span class="material-icons mr-4 text-primary">workspaces</span>
+<span class="flex-grow">Yoga</span>
+<span class="material-icons text-sm mr-1 text-subtext-dark">schedule</span>
+<span class="text-sm text-subtext-dark">10 mins</span>
+</div>
+<div class="flex items-center ml-10 p-4 bg-card-dark rounded-xl">
+<div class="absolute left-0 w-6 h-6 rounded-full bg-card-dark border-2 border-gray-700 flex items-center justify-center">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+</div>
+<span class="material-icons mr-4 text-primary">directions_bike</span>
+<span class="flex-grow">Cycling</span>
+<span class="material-icons text-sm mr-1 text-subtext-dark">schedule</span>
+<span class="text-sm text-subtext-dark">30 mins</span>
+</div>
+<div class="flex items-center ml-10 p-4 bg-card-dark rounded-xl">
+<div class="absolute left-0 w-6 h-6 rounded-full bg-card-dark border-2 border-gray-700 flex items-center justify-center">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+</div>
+<span class="material-icons mr-4 text-primary">self_improvement</span>
+<span class="flex-grow">Meditation</span>
+<span class="material-icons text-sm mr-1 text-subtext-dark">schedule</span>
+<span class="text-sm text-subtext-dark">15 mins</span>
+</div>
+</div>
+</div>
+</section>
+<footer class="fixed bottom-0 left-0 right-0 bg-background-dark border-t border-gray-800 max-w-sm mx-auto">
+<div class="flex justify-around items-center h-16">
+<button class="p-2 text-primary">
+<span class="material-icons">rocket_launch</span>
+</button>
+<button class="p-2 text-gray-500">
+<span class="material-icons">share</span>
+</button>
+<button class="p-2 text-gray-500">
+<span class="material-icons">bookmark_border</span>
+</button>
+<button class="p-2 text-gray-500">
+<span class="material-icons">event_note</span>
+</button>
+</div>
+</footer>
+</div>
+
+</body></html>

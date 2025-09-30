@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Congratulations</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<style type="text/tailwindcss">
+    :root {
+      --primary: #7DF843;
+      --background-dark: #000000;
+    }
+    body {
+      min-height: max(884px, 100dvh);
+      background-color: var(--background-dark);
+      font-family: 'Roboto', sans-serif;
+    }
+    .trophy-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .trophy-glow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(125, 248, 67, 0.3) 0%, rgba(125, 248, 67, 0) 70%);
+      border-radius: 50%;
+    }
+    .petal {
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 150% 0 150% 0;
+        opacity: 0.8;
+        animation: fall 10s linear infinite;
+    }
+    @keyframes fall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+        }
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-white">
+<div class="relative min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
+<div class="petal" style="width: 20px; height: 30px; left: 10%; top: -30px; animation-duration: 8s; animation-delay: 0s; transform: rotate(10deg);"></div>
+<div class="petal" style="width: 15px; height: 25px; left: 25%; top: -30px; animation-duration: 12s; animation-delay: 2s; transform: rotate(-20deg); background-color: rgba(125, 248, 67, 0.7);"></div>
+<div class="petal" style="width: 25px; height: 35px; left: 40%; top: -30px; animation-duration: 7s; animation-delay: 1s; transform: rotate(30deg);"></div>
+<div class="petal" style="width: 18px; height: 28px; left: 60%; top: -30px; animation-duration: 15s; animation-delay: 4s; transform: rotate(-15deg);"></div>
+<div class="petal" style="width: 22px; height: 32px; left: 80%; top: -30px; animation-duration: 9s; animation-delay: 3s; transform: rotate(25deg); background-color: rgba(125, 248, 67, 0.8);"></div>
+<div class="petal" style="width: 17px; height: 27px; left: 90%; top: -30px; animation-duration: 11s; animation-delay: 5s; transform: rotate(-5deg);"></div>
+<div class="petal" style="width: 20px; height: 30px; left: 5%; top: -30px; animation-duration: 13s; animation-delay: 6s; transform: rotate(15deg); background-color: rgba(125, 248, 67, 0.6);"></div>
+<div class="petal" style="width: 20px; height: 30px; left: 70%; top: -30px; animation-duration: 8s; animation-delay: 7s; transform: rotate(-25deg);"></div>
+<header class="absolute top-0 right-0 p-4 z-10">
+<div class="flex items-center space-x-1">
+<span class="material-icons text-xs">signal_cellular_alt</span>
+<span class="material-icons text-xs">wifi</span>
+<span class="material-icons text-xs rotate-90">battery_full</span>
+</div>
+</header>
+<main class="flex-1 flex flex-col items-center justify-center text-center z-10">
+<div class="trophy-container mb-8">
+<div class="trophy-glow"></div>
+<span class="material-icons text-[120px]" style="color: var(--primary); text-shadow: 0 0 20px var(--primary);">emoji_events</span>
+</div>
+<h1 class="text-3xl font-bold mb-2">Ms. Chen</h1>
+<p class="text-2xl">Congratulations</p>
+</main>
+<footer class="w-full px-8 pb-8 z-10">
+<button class="w-full bg-[var(--primary)] text-black font-bold py-4 rounded-full mb-4 text-lg">
+      Show Results
+    </button>
+<a class="text-white text-center block" href="#">
+      Return to Home
+    </a>
+</footer>
+</div>
+
+</body></html>

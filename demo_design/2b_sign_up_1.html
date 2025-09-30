@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Boost Mobile App - Sign Up</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#7DF843",
+            "background-light": "#18181B",
+            "background-dark": "#18181B",
+          },
+          fontFamily: {
+            display: ["Poppins", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1.5rem",
+          },
+        },
+      },
+    };
+  </script>
+<style>
+    .material-icons {
+      font-family: 'Material Icons';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+<style>
+    body {
+      min-height: 100dvh;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-black font-display flex items-center justify-center min-h-screen p-4">
+<div class="bg-background-light dark:bg-background-dark rounded-3xl shadow-lg p-8 w-full max-w-sm flex flex-col h-[812px]">
+<div class="flex flex-col items-center mb-8">
+<div class="w-16 h-16 bg-zinc-800 rounded-lg flex items-center justify-center mb-4">
+<span class="material-icons text-primary" style="font-size: 36px;">fitness_center</span>
+</div>
+<h2 class="text-3xl font-bold text-white">Sign up</h2>
+</div>
+<form class="space-y-4">
+<div class="relative">
+<span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">person_outline</span>
+<input class="w-full bg-zinc-800 text-white border-zinc-700 rounded-xl py-3 pl-12 focus:ring-primary focus:border-primary" placeholder="User Name" type="text"/>
+</div>
+<div class="relative">
+<span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">phone_outline</span>
+<input class="w-full bg-zinc-800 text-white border-zinc-700 rounded-xl py-3 pl-12 focus:ring-primary focus:border-primary" placeholder="Phone number" type="tel"/>
+</div>
+<div class="relative">
+<span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">email_outline</span>
+<input class="w-full bg-zinc-800 text-white border-zinc-700 rounded-xl py-3 pl-12 focus:ring-primary focus:border-primary" placeholder="Email" type="email"/>
+</div>
+<div class="relative">
+<span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">lock_outline</span>
+<input class="w-full bg-zinc-800 text-white border-zinc-700 rounded-xl py-3 pl-12 pr-12 focus:ring-primary focus:border-primary" placeholder="Password" type="password"/>
+<span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400">visibility_off</span>
+</div>
+<button class="w-full bg-primary text-black font-semibold py-4 rounded-xl flex items-center justify-center mt-6">
+        Get Started
+        <span class="material-icons ml-2">arrow_forward</span>
+</button>
+</form>
+<div class="flex items-center my-6">
+<div class="flex-grow border-t border-zinc-700"></div>
+<span class="mx-4 text-zinc-400 text-sm">or</span>
+<div class="flex-grow border-t border-zinc-700"></div>
+</div>
+<div class="flex justify-center space-x-4">
+<button class="w-12 h-12 border border-zinc-700 rounded-lg flex items-center justify-center">
+<div class="w-7 h-7 rounded-lg border-2 border-primary relative flex items-center justify-center">
+<div class="w-4 h-4 rounded-full border-2 border-primary"></div>
+<div class="w-1 h-1 bg-primary rounded-full absolute top-1 right-1"></div>
+</div>
+</button>
+</div>
+<p class="text-center text-zinc-400 mt-auto">
+      Already have an account? <a class="font-semibold text-primary" href="#">Sign in</a>
+</p>
+</div>
+
+</body></html>

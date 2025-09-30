@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style type="text/tailwindcss">
+    :root {
+      --primary-green: #7DF843;
+      --background-dark: #000000;
+      --card-dark: #1A1A1A;
+      --text-light: #F9FAFB;
+      --text-dark: #9CA3AF;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--background-dark);
+      color: var(--text-light);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+    .text-glow {
+        text-shadow: 0 0 8px var(--primary-green);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased">
+<div class="min-h-screen bg-background-dark p-4 flex flex-col">
+<header class="flex justify-between items-center mb-6">
+<button class="p-2">
+<span class="material-icons">arrow_back_ios_new</span>
+</button>
+<button class="p-2">
+<span class="material-icons">more_horiz</span>
+</button>
+</header>
+<main class="flex-grow flex flex-col">
+<div class="flex flex-col items-center text-center">
+<div class="relative w-32 h-32 mb-4">
+<img alt="User profile picture" class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7NzJt1-NmMyLbDh-J5dC0H2qhHzs5F8phMnyTcvzNtaBsw-BMt9XRxN-t7xe0Ke8puCO7SKLe0mmg4aPbAzgUkLvMvPCjGnzoNI39R2FhksyAe2mfpTUs2HPYBPXR4coiBMfQIcBzAD-HbFYf-F5fceq0UuY0AiX4lV3vVzMoYbAXNTfsNZbdF_QRMYGaZoQF_94ya-_06Qd0N5x1sKnGgsh9vpcp0khXEsiBkNs5EhORoiVnRNlTNGGtp3d7gWLQs3ICIvzbx-Q"/>
+<div class="absolute inset-0 rounded-full border-2 border-[var(--primary-green)]"></div>
+</div>
+<h1 class="text-3xl font-bold">Ms. Lin</h1>
+<p class="text-text-dark">@ms.lin_official</p>
+<p class="mt-4 max-w-sm mx-auto text-sm text-gray-400">Fitness enthusiast &amp; content creator. Sharing my journey to a healthier lifestyle. Let's get moving together! 🚀</p>
+<div class="flex justify-center gap-4 my-6">
+<button class="bg-[var(--primary-green)] text-black font-bold py-3 px-10 rounded-full">Follow</button>
+<button class="bg-[var(--card-dark)] text-white font-semibold py-3 px-10 rounded-full">Message</button>
+</div>
+</div>
+<div class="bg-[var(--card-dark)] w-full rounded-3xl p-5 flex justify-around mb-6">
+<div>
+<p class="text-2xl font-bold">2.7K</p>
+<p class="text-text-dark text-sm">Followers</p>
+</div>
+<div>
+<p class="text-2xl font-bold">1.2K</p>
+<p class="text-text-dark text-sm">Following</p>
+</div>
+<div>
+<p class="text-2xl font-bold">24</p>
+<p class="text-text-dark text-sm">Posts</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="relative col-span-1 aspect-square rounded-2xl overflow-hidden">
+<img alt="Fitness photo 1" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMh0vOT_pC7qsI2OpdrsbplnkW492zJINDOAkP3zr9Y6Is6ndVPZD4FulVG0IliJXu1WrmGQB6DqgKT05ImhLC35iSsT5w2lkunIYap1ev-Ew0ombbNegIhUDWcaTcNSYTu1JqB6oi7XbbtcBRuz8fNGNoZFSPxLwEKVrep9jUUKa9HV4ooxv3ZMujMRVGQKpmykZ21f1G5KbehhwtoePFai9-D1epRzzNkgqW2ku_l2kLPiZghEw_fJLYb7PP-3RdO0_f-0xtFr8"/>
+<div class="absolute inset-0 bg-black/30"></div>
+</div>
+<div class="relative col-span-1 aspect-square rounded-2xl overflow-hidden">
+<img alt="Fitness photo 2" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCF_Kt3_vvJ1NuqPywGa9h6CN1t7336NNnSko1U6DVudw2_H_Qsx90gzmavyapunFEF8r2-D9hijSMkMtA8J1WiFNcwfldBLmf0fWBarMaZQFD6-oJl3jDScuyOUtN7UcnKIPoQYicEJHQE9QUbxLUxDiv2wCf3utukx8PkeqASWJKCzyqQdH6svU9IUnkGW6f8-zesYQc_YsDWG1ueoqH3HOBRtDQSID6-PWqot8yTSsX_AL4oka8m-zdr1qzlSj5gXJgdFxxRjSU"/>
+<div class="absolute inset-0 bg-black/30"></div>
+</div>
+</div>
+<div class="bg-[var(--card-dark)] w-full rounded-3xl p-5 flex items-center justify-between">
+<div>
+<p class="text-lg font-semibold">Race Champion</p>
+<p class="text-text-dark text-sm">Top 1% in the last marathon</p>
+<a class="text-[var(--primary-green)] font-semibold text-sm mt-2 inline-block" href="#">View results</a>
+</div>
+<span class="material-icons text-6xl text-[var(--primary-green)] text-glow">emoji_events</span>
+</div>
+</main>
+</div>
+
+</body></html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Welcome</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#7DF843",
+              "background-light": "#FFFFFF",
+              "background-dark": "#000000",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "1rem",
+            },
+          },
+        },
+      };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-white">
+<div class="flex flex-col h-screen p-8">
+<header class="flex justify-between items-center">
+</header>
+<main class="flex flex-col flex-grow justify-center space-y-12">
+<h1 class="text-4xl font-bold text-center text-white">Welcome</h1>
+<div class="space-y-4">
+<p class="text-lg text-white">Thank you for choosing us...</p>
+<p class="text-lg text-white">Let us get you started in <span class="text-primary">Boost!</span></p>
+</div>
+<div class="space-y-2">
+<label class="text-white" for="name">How should we call you?</label>
+<input class="w-full bg-gray-800 border-gray-700 text-white rounded-lg p-4 focus:ring-primary focus:border-primary placeholder-gray-500" id="name" placeholder="How should we call you?" type="text"/>
+</div>
+</main>
+<footer class="space-y-4">
+<button class="w-full bg-primary text-black font-bold py-4 rounded-full hover:bg-opacity-90 transition-colors">Next</button>
+<button class="w-full text-white font-medium py-2">Skip</button>
+</footer>
+</div>
+
+</body></html>

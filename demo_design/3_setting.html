@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#7DF843",
+            "background-light": "#FFFFFF",
+            "background-dark": "#000000",
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+<style>
+    .material-icons {
+      font-family: 'Material Icons';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      display: inline-block;
+      line-height: 1;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      -moz-osx-font-smoothing: grayscale;
+      font-feature-settings: 'liga';
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-sans">
+<div class="h-screen flex flex-col items-center pt-16 px-6">
+<div class="relative mb-6">
+<div class="w-28 h-28 rounded-full bg-black border-4 border-[#7DF843]"></div>
+</div>
+<h1 class="text-2xl font-semibold text-white mb-12">Thomas</h1>
+<div class="w-full max-w-sm space-y-6">
+<a class="flex items-center text-gray-300 hover:text-primary transition-colors" href="#">
+<span class="material-icons mr-4 text-primary">person_outline</span>
+<span class="text-lg">My Profile</span>
+</a>
+<a class="flex items-center text-gray-300 hover:text-primary transition-colors" href="#">
+<span class="material-icons mr-4 text-primary">favorite_border</span>
+<span class="text-lg">My Favorites</span>
+</a>
+<a class="flex items-center text-gray-300 hover:text-primary transition-colors" href="#">
+<span class="material-icons mr-4 text-primary">tune</span>
+<span class="text-lg">General Settings</span>
+</a>
+<div class="border-t border-gray-700 my-6"></div>
+</div>
+</div>
+</body></html>
