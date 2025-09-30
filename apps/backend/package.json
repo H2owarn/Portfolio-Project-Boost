@@ -6,7 +6,9 @@
 		"start": "bunx supabase start",
 		"stop": "bunx supabase stop"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"@supabase/supabase-js": "^2.57.4"
+	},
 	"devDependencies": {
 		"@types/deno": "^2.3.0",
 		"supabase": "^2.40.7"

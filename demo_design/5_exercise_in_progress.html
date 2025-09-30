@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workout App</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#7DF843",
+            "background-light": "#FFFFFF",
+            "background-dark": "#000000",
+          },
+          fontFamily: {
+            display: ["Roboto", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+          },
+        },
+      },
+    };
+  </script>
+<style>
+    .progress-ring__circle {
+      transition: stroke-dashoffset 0.35s;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-white font-display">
+<div class="relative min-h-screen">
+<div class="p-4 flex justify-between items-center">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 dark:bg-gray-700">
+<span class="material-icons text-white">arrow_back_ios_new</span>
+</button>
+<div class="flex items-center space-x-2 bg-gray-800 dark:bg-gray-700 px-3 py-1 rounded-full">
+<span class="material-icons text-primary">timer</span>
+<span class="text-white">01:30</span>
+</div>
+</div>
+<div class="px-4 mt-4">
+<div class="relative">
+<img alt="Man doing sit-ups" class="rounded-lg w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmixIwLOb3PHBna_tCMIKPma0dEgGube5ZWcAewPdkjzW-9dTKEtwOYm9kWiYhONkHQxM8wIt1ItjMxEqfnNTD-72YTDeDHFX26z796FiFIc6Yf35ram7XvYdFkrfOhr7LQlVizIq3od30e8WnQvAyOlgKKVCiclPJ3Ht9LdLrwPxobLJPRhcFN0hUelZbpsw0j-Qx1K35b1V83aJxcwkpzNJUM4ndaFQKwsZObbcMcWr1ZIwkWV1-YGu-kD6-4OhZD8S815rXwKJL"/>
+</div>
+</div>
+<div class="text-center mt-6">
+<h1 class="text-2xl font-bold">Crunches</h1>
+</div>
+<div class="relative flex justify-center items-center mt-8">
+<svg class="w-64 h-64" viewBox="0 0 120 120">
+<circle class="text-gray-700" cx="60" cy="60" fill="transparent" r="52" stroke="currentColor" stroke-width="8"></circle>
+<circle class="progress-ring__circle text-primary" cx="60" cy="60" fill="transparent" r="52" stroke="currentColor" stroke-dasharray="326.72" stroke-dashoffset="81.68" stroke-width="8"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-5xl font-bold">32X</span>
+</div>
+<div class="absolute bottom-[-1rem]">
+<button class="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-lg">
+<span class="material-icons text-black text-4xl">play_arrow</span>
+</button>
+</div>
+</div>
+<div class="absolute bottom-0 left-0 right-0 p-4">
+<div class="bg-gray-800 dark:bg-gray-900 rounded-lg p-3 flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<img alt="Woman doing side plank" class="w-12 h-12 rounded-md object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAL6HGu_YhQBD2JLzOleyE5ujJKYQ5DqxhfQPR0H3660uOPGaRLTFBG8SAgwZ96W2ipYZiUzN1ZbbCJrmpXbL0nRI9oHyT0rTXp9aAaXFaNo18MtaQIOHCDulGc2ZCbIe4z6F_dNE3O5HouDpwz9xGRaRHSWzzXOldF9goLvjmRUD2QTHHCgAt8HrNqVr7yuIP2OyPtsY9kwRV7iqbxB1ZoE2MwIZoQf0HrivZfxkUoJNJ_Whf2QnVGYccoVKvNECVWMC4y6VB6qh9J"/>
+<div>
+<p class="text-sm text-gray-400 dark:text-gray-300">Next Step:</p>
+<p class="font-semibold text-white">Side Plank</p>
+</div>
+</div>
+<span class="material-icons text-gray-400 dark:text-gray-300">chevron_right</span>
+</div>
+</div>
+</div>
+
+</body></html>

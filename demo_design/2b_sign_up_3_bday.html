@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Birthday Input</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#7DF843",
+            "background-light": "#FFFFFF",
+            "background-dark": "#000000",
+            "text-light": "#000000",
+            "text-dark": "#FFFFFF",
+            "input-border-light": "#E5E7EB",
+            "input-border-dark": "#4B5563",
+            "input-bg-light": "#F9FAFB",
+            "input-bg-dark": "#1F2937",
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "0.5rem",
+          },
+        },
+      },
+    };
+  </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-text-dark">
+<div class="flex flex-col h-screen p-6 justify-center">
+<div class="flex-grow flex flex-col justify-center">
+<h1 class="text-3xl font-bold text-center mb-6 text-white dark:text-white">Your Birthday</h1>
+<p class="text-lg mb-8 text-white dark:text-white text-center">When is your birthday?</p>
+<div class="grid grid-cols-3 gap-4">
+<div class="relative">
+<label class="absolute -top-2 left-2 inline-block bg-background-dark px-1 text-xs font-medium text-gray-400" for="year">Year</label>
+<input class="block w-full rounded-md border-0 py-3 text-white dark:text-white bg-transparent shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 text-center" id="year" name="year" type="text" value="1995"/>
+</div>
+<div class="relative">
+<label class="absolute -top-2 left-2 inline-block bg-background-dark px-1 text-xs font-medium text-gray-400" for="month">Month</label>
+<input class="block w-full rounded-md border-0 py-3 text-white dark:text-white bg-transparent shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 text-center" id="month" name="month" placeholder="Month" type="text"/>
+</div>
+<div class="relative">
+<label class="absolute -top-2 left-2 inline-block bg-background-dark px-1 text-xs font-medium text-gray-400" for="day">Day</label>
+<input class="block w-full rounded-md border-0 py-3 text-white dark:text-white bg-transparent shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 text-center" id="day" name="day" placeholder="Day" type="text"/>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<button class="w-full bg-primary text-black font-semibold py-3 rounded-lg">Next</button>
+<button class="w-full text-gray-400 font-semibold py-3 rounded-lg">Skip</button>
+</div>
+</div>
+
+</body></html>
+
