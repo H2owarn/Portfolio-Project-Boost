@@ -3,9 +3,9 @@ import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { Tabs } from 'expo-router';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import AppHeader from '@/components/layout/appheader';
 
 export default function TabLayout() {
 	const colorScheme = useColorScheme() ?? 'dark';
@@ -13,14 +13,14 @@ export default function TabLayout() {
 	const insets = useSafeAreaInsets();
 	// Ensure minimum padding for web platforms where safe area might be 0
 	const tabBarBottomPadding = Platform.OS === 'web' ? Math.max(insets.bottom, 20) : Math.max(insets.bottom, 12);
-	const baseTabBarHeight = 58;
+	const baseTabBarHeight = 45;
 	const tabBarHeight = baseTabBarHeight + tabBarBottomPadding;
 	const questButtonSize = 72;
 	// Move the entire button up more to align text with other tabs
 	const questLift = Math.max((questButtonSize - baseTabBarHeight) / 2 + 8, 0);
 	const sideTabSpacing = 16;
 	const baseTabItemStyle = {
-		paddingTop: 6,
+		paddingTop: 1,
 	};
 
 	function QuestTabButton({ accessibilityState, onLongPress, onPress }: BottomTabBarButtonProps) {
@@ -46,8 +46,8 @@ export default function TabLayout() {
 					]}
 				>
 					<MaterialIcons
-						name="auto-awesome"
-						size={32}
+						name="local-fire-department"
+						size={40}
 						color={palette.secondary}
 						style={styles.questIcon}
 					/>
@@ -58,7 +58,7 @@ export default function TabLayout() {
 							isSelected && styles.questLabelActive,
 						]}
 					>
-						Quest
+						Go!
 					</Text>
 				</View>
 			</Pressable>
@@ -66,6 +66,8 @@ export default function TabLayout() {
 	}
 
 	return (
+		<View style={{ flex: 1}}>
+			<AppHeader />
 		<Tabs
 			initialRouteName="home"
 			screenOptions={{
@@ -78,7 +80,7 @@ export default function TabLayout() {
 				height: tabBarHeight,
 				paddingBottom: tabBarBottomPadding,
 				paddingTop: 12, 
-				marginBottom: 8, 
+				marginBottom: 8,
 			},
 			tabBarItemStyle: baseTabItemStyle,
 			tabBarLabelStyle: {
@@ -94,9 +96,9 @@ export default function TabLayout() {
 				}}
 			/>
 			<Tabs.Screen
-				name="index"
+				name="muscles"
 				options={{
-					title: 'Exercises',
+					title: 'Rivals',
 					tabBarIcon: ({ color, size }) => <MaterialIcons name="fitness-center" color={color} size={size} />,
 					tabBarItemStyle: {
 						...baseTabItemStyle,
@@ -105,19 +107,19 @@ export default function TabLayout() {
 				}}
 			/>
 			<Tabs.Screen
-				name="quest"
+				name="go"
 				options={{
-					title: 'Quest',
+					title: 'Go',
 					tabBarLabel: '',
 					tabBarButton: (props) => <QuestTabButton {...props} />,
 					tabBarIcon: () => null,
 				}}
 			/>
 			<Tabs.Screen
-				name="explore"
+				name="quest"
 				options={{
-					title: 'Explore',
-					tabBarIcon: ({ color, size }) => <MaterialIcons name="explore" color={color} size={size} />,
+					title: 'Quests',
+					tabBarIcon: ({ color, size }) => <MaterialIcons name="auto-awesome" color={color} size={size} />,
 					tabBarItemStyle: {
 						...baseTabItemStyle,
 						marginLeft: sideTabSpacing,
@@ -138,6 +140,7 @@ export default function TabLayout() {
 				}}
 			/>
 		</Tabs>
+	</View>
 	);
 }
 
