@@ -6,77 +6,138 @@ import {
   Pressable,
   ScrollView,
 } from "react-native";
+import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
+
 
 export default function QuestScreen() {
-  // Dummy quests for testing
-  const quests = [
-    {
-      id: "1",
-      title: "Strength Challenge 1",
-      description: "Progressive strength workout designed to push your limits",
-      type: "main",
-      difficulty: 1,
-      xpReward: 30,
-      staminaCost: 25,
-      duration: "15 min",
-      exercises: ["Push-ups", "Squats"],
-    },
-    {
-      id: "2",
-      title: "Strength Challenge 2",
-      description: "Progressive strength workout designed to push your limits",
-      type: "main",
-      difficulty: 2,
-      xpReward: 40,
-      staminaCost: 30,
-      duration: "20 min",
-      exercises: ["Push-ups", "Squats", "Plank"],
-    },
-    {
-      id: "3",
-      title: "Quick Boost",
-      description: "Quick and easy workout for motivation boost",
-      type: "side",
-      difficulty: 1,
-      xpReward: 10,
-      staminaCost: 10,
-      duration: "5 min",
-      exercises: ["Jumping Jacks"],
-    },
-  ];
 
-  const userLevel = 1;
+  const [quests, setQuests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+
+
+useEffect(() => {
+  const loadProfile = async () => {
+    // Get logged-in user
+    const { data: { user }, error: userErr } = await supabase.auth.getUser();
+
+
+    if (userErr) {
+      console.error("User error:", userErr);
+      return;
+    }
+    if (!user) {
+      console.warn("No logged in user");
+      return;
+    }
+
+    // Fetch profile by user.id
+    const { data: profileData, error: profileErr } = await supabase
+
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (profileErr) {
+      console.error("Profile fetch error:", profileErr);
+      return;
+    }
+
+    setProfile(profileData);
+  };
+
+  loadProfile();
+}, []);
+
+
+useEffect(() => {
+  if (!profile) return; // wait until profile is loaded
+
+  const loadQuests = async () => {
+  // fetch quest
+  const { data: questRows, error } = await supabase
+    .from("quests")
+    .select("*")
+    .lte("min_level", profile.level)
+    .gte("max_level", profile.level);
+
+  if (error) {
+    console.error("Quest fetch error:", error);
+    setLoading(false);
+    return;
+  }
+
+  // fetch exercises by ids
+  const allExerciseIds = questRows.flatMap((q) => q.exercise_ids || []);
+  const { data: exerciseRows, error: exErr } = await supabase
+    .from("exercises")
+    .select("id, name")
+    .in("id", allExerciseIds);
+
+
+  // map exercise ids to names
+  const exerciseMap = new Map(exerciseRows?.map((ex) => [ex.id, ex.name]));
+
+  const questsWithExercises = questRows.map((q) => ({
+    ...q,
+    exercises: (q.exercise_ids || []).map((id: number) => exerciseMap.get(id) || `Exercise ${id}`),
+  }));
+
+  // random pick
+  const mains = questsWithExercises.filter((q) => q.quest_type === "main");
+  const sides = questsWithExercises.filter((q) => q.quest_type === "side");
+  const pickRandom = (arr: any[], n: number) =>
+    arr.sort(() => 0.5 - Math.random()).slice(0, n);
+
+  setQuests([...pickRandom(mains, 3), ...pickRandom(sides, 2)]);
+  setLoading(false);
+};
+
+  loadQuests();
+}, [profile]);
+
+  if (loading) {
+    return <Text style={{ color: "#fff" }}>Loading quests…</Text>;
+    }
+
+  const userLevel = profile?.level ?? 1;
   const userStamina = 40;
 
-  const mainQuests = quests.filter((q) => q.type === "main");
-  const sideQuests = quests.filter((q) => q.type === "side");
+  const mainQuests = quests.filter((q) => q.quest_type === "main");
+  const sideQuests = quests.filter((q) => q.quest_type === "side");
 
   const canStartQuest = (quest: any) =>
-    userStamina >= quest.staminaCost && userLevel >= quest.difficulty;
+    userStamina >= (quest.stamina_cost ?? 0)  &&
+    userLevel >= (quest.min_level ?? 0) &&
+    (quest.max_level == null || userLevel <= quest.max_level);
 
-  const getDifficultyColor = (difficulty: number) => {
-    if (difficulty <= 2) return "#4CAF50"; // green
-    if (difficulty <= 4) return "#FFC107"; // yellow
-    return "#F44336"; // red
-  };
+  // const getDifficultyColor = (difficulty: number) => {
+  //   if (difficulty <= 2) return "#4CAF50"; // green
+  //   if (difficulty <= 4) return "#FFC107"; // yellow
+  //   return "#F44336"; // red
+  // };
 
-  const getDifficultyLabel = (difficulty: number) => {
-    if (difficulty <= 2) return "Easy";
-    if (difficulty <= 4) return "Medium";
-    return "Hard";
-  };
+  // const getDifficultyLabel = (difficulty: number) => {
+  //   if (difficulty <= 2) return "Easy";
+  //   if (difficulty <= 4) return "Medium";
+  //   return "Hard";
+  // };
 
   const QuestCard = ({ quest }: { quest: any }) => {
     const canStart = canStartQuest(quest);
-    const isLocked = userLevel < quest.difficulty;
+    const isLocked = userLevel < (quest.min_level ?? 0);
+    const exerciseNames: string[] = Array.isArray(quest.exercises) ? quest.exercises : [];
+
 
     return (
       <View style={[styles.card, !canStart && { opacity: 0.6 }]}>
         <View style={styles.cardHeader}>
           <Text style={styles.icon}>
-            {quest.type === "main" ? "⚔️" : "⭐"}
+            {quest.quest_type === "main" ? "⚔️" : "⭐"}
           </Text>
-          <Text style={styles.cardTitle}>{quest.title}</Text>
+          <Text style={styles.cardTitle}>{quest.name}</Text>
           {isLocked && (
             <View style={styles.lockedTag}>
               <Text style={styles.lockedText}>Locked</Text>
@@ -84,48 +145,41 @@ export default function QuestScreen() {
           )}
         </View>
 
-        <Text style={styles.description}>{quest.description}</Text>
+        {!!quest.description && <Text style={styles.description}>{quest.description}</Text>}
 
         <View style={styles.tagsRow}>
-          <View
-            style={[
-              styles.difficultyTag,
-              { backgroundColor: getDifficultyColor(quest.difficulty) },
-            ]}
-          >
-            <Text style={styles.tagText}>
-              {getDifficultyLabel(quest.difficulty)}
-            </Text>
-          </View>
-          <Text style={styles.tag}>⚡ {quest.xpReward} XP</Text>
-          <Text style={styles.tag}>🕐 {quest.duration}</Text>
+          <Text style={styles.tag}>⚡ {quest.xp_reward ?? 0} XP</Text>
         </View>
 
         <View style={styles.exercisesBox}>
           <Text style={styles.exercisesTitle}>Exercises:</Text>
           <View style={styles.exercisesRow}>
-            {quest.exercises.map((ex: string, i: number) => (
-              <Text key={i} style={styles.exercise}>
-                {ex}
-              </Text>
-            ))}
+            {exerciseNames.length > 0 ? (
+              exerciseNames.map((ex, i) => (
+                <Text
+                key={`${quest.id}-ex-${i}`}
+                style={styles.exercise}>{ex}</Text>
+              ))
+            ) : (
+              <Text style={styles.exercise}>—</Text>
+            )}
           </View>
         </View>
 
         <View style={styles.cardFooter}>
-          <Text style={styles.stamina}>Stamina Cost: {quest.staminaCost}</Text>
+          <Text style={styles.stamina}>Stamina Cost: {quest.stamina_cost ?? 0}</Text>
           <Pressable
             style={[
               styles.startButton,
               { backgroundColor: canStart ? "#007bff" : "#ccc" },
             ]}
             disabled={!canStart}
-            onPress={() => console.log("Quest Selected:", quest.title)}
+            onPress={() => console.log("Quest Selected:", quest.name)}
           >
             <Text style={styles.startButtonText}>
               {isLocked
-                ? `Level ${quest.difficulty} Required`
-                : userStamina < quest.staminaCost
+                ? `Level ${quest.min_level ?? 0} Required`
+                : userStamina < quest.stamina_cost
                 ? "Not Enough Stamina"
                 : "Start Quest"}
             </Text>
@@ -139,9 +193,9 @@ export default function QuestScreen() {
     <ScrollView contentInset={{ top: 45 }} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={() => console.log("Back pressed")}>
+        {/* <Pressable style={styles.backButton} onPress={() => console.log("Back pressed")}>
           <Text style={styles.backText}>← Back</Text>
-        </Pressable>
+        </Pressable> */}
         <Text style={styles.headerTitle}>Choose Your Quest</Text>
       </View>
 
