@@ -65,9 +65,7 @@ export default function LoginScreen() {
 						autoCapitalize="none"
 						onChangeText={(value) => setEmail(value)}
 						value={email}
-						containerStyle={{
-							opacity: submitted ? 0.5 : undefined
-						}}
+						containerStyle={submitted && { opacity: 0.6, pointerEvents: 'none' }}
 					/>
 					<BoostInput
 						placeholder="Password"
@@ -77,9 +75,7 @@ export default function LoginScreen() {
 						autoCapitalize="none"
 						onChangeText={(value) => setPassword(value)}
 						value={password}
-						containerStyle={{
-							opacity: submitted ? 0.5 : undefined
-						}}
+						containerStyle={submitted && { opacity: 0.6, pointerEvents: 'none' }}
 					/>
 				</View>
 				<BoostButton
