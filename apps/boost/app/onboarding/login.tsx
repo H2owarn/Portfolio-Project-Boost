@@ -6,36 +6,42 @@ import { StyleSheet, Text, View } from 'react-native';
 import { BoostButton } from '@/components/boost-button';
 import { BoostInput } from '@/components/boost-input';
 import { Screen } from '@/components/layout/screen';
+import { ThemedText } from '@/components/themed-text';
+import { Alert } from '@/components/ui/alert';
 import { Colors, Font, Radii, Spacing } from '@/constants/theme';
+import { useAuth } from '@/hooks/use-auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { supabase } from '@/lib/supabase';
-
-
-// import { api } from '@/utils/api';
-
-async function submit(email: string, password: string) {
-	// const req = await api('POST', '/auth/login', { email, password });
-	// console.log('API REQUEST RESULT', req);
-
-	const {data, error } = await supabase.auth.signInWithPassword({
-		email,
-		password,
-	});
-
-	if (error) {
-		console.error("Login error:", error.message);
-		alert(error.message);
-		return;
-	}
-
-	router.replace('/(tabs)/home');
-}
 
 export default function LoginScreen() {
 	const palette = Colors[useColorScheme() ?? 'dark'];
+	const { login } = useAuth();
+	const [errors, setErrors] = useState<Record<string, any> | null>(null);
+	const [submitted, setSubmitted] = useState(false);
 
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
+	const submit = async (email: string, password: string) => {
+		// Prevent from sending multiple requests.
+		if (submitted) return;
+
+		setSubmitted(true);
+		const { type, data } = await login({ email, password });
+		setSubmitted(false);
+
+		if (type === 'error') {
+			console.error(data);
+			return;
+		}
+
+		if (type === 'validation') {
+			console.log(data);
+			if (data) setErrors(data);
+			return;
+		}
+
+		router.replace('/(tabs)/home');
+	};
+
+	const [email, setEmail] = useState('a@gibbu.dev');
+	const [password, setPassword] = useState('testing123');
 
 	return (
 		<Screen scrollable contentStyle={styles.container}>
@@ -44,27 +50,37 @@ export default function LoginScreen() {
 					<View style={[styles.icon, { backgroundColor: palette.surfaceElevated }]}>
 						<MaterialIcons name="fitness-center" size={36} color={palette.primary} />
 					</View>
-					<Text style={[styles.title, { color: palette.text }]}>Log in</Text>
+					<Text style={[styles.title, { color: palette.text }]}>Login</Text>
 					<Text style={[styles.subtitle, { color: palette.mutedText }]}>Welcome back to Boost</Text>
 				</View>
 				<View style={styles.form}>
+					{errors?.code === 'email_not_confirmed' && (
+						<Alert type="error" message="You must confirm your email before logging in." />
+					)}
+					{errors?.code === 'invalid_credentials' && <Alert type="error" message="Email or password are incorrect." />}
 					<BoostInput
 						placeholder="Email"
 						keyboardType="email-address"
 						leadingIcon={{ name: 'alternate-email' }}
 						autoCapitalize="none"
 						onChangeText={(value) => setEmail(value)}
+						value={email}
+						containerStyle={submitted && { opacity: 0.6, pointerEvents: 'none' }}
 					/>
 					<BoostInput
 						placeholder="Password"
 						leadingIcon={{ name: 'lock-outline' }}
 						trailingIcon={{ name: 'visibility-off' }}
 						secureTextEntry
+						autoCapitalize="none"
 						onChangeText={(value) => setPassword(value)}
+						value={password}
+						containerStyle={submitted && { opacity: 0.6, pointerEvents: 'none' }}
 					/>
 				</View>
 				<BoostButton
 					label="Login"
+					submitted={submitted}
 					onPress={() => submit(email, password)}
 					trailingIcon={<MaterialIcons name="arrow-forward" color="#000000" size={20} />}
 				/>
@@ -73,7 +89,7 @@ export default function LoginScreen() {
 					<Text style={[styles.dividerLabel, { color: palette.mutedText }]}>or</Text>
 					<View style={[styles.divider, { backgroundColor: palette.borderColorAlt }]} />
 				</View>
-				<View style={styles.socialRow}>
+				<View style={[styles.socialRow, submitted && { pointerEvents: 'none', opacity: 0.6 }]}>
 					<View style={[styles.socialButton, { backgroundColor: palette.surfaceElevated }]}>
 						<MaterialIcons name="photo-camera" size={24} color={palette.primary} />
 					</View>

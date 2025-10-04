@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 import { Colors, Radii, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -14,6 +14,7 @@ type BoostButtonProps = {
 	trailingIcon?: ReactNode;
 	fullWidth?: boolean;
 	disabled?: boolean;
+	submitted?: boolean;
 };
 
 export function BoostButton({
@@ -23,7 +24,8 @@ export function BoostButton({
 	icon,
 	trailingIcon,
 	fullWidth = true,
-	disabled = false
+	disabled = false,
+	submitted = false
 }: BoostButtonProps) {
 	const colorScheme = useColorScheme() ?? 'dark';
 	const palette = Colors[colorScheme];
@@ -34,12 +36,21 @@ export function BoostButton({
 		<Pressable
 			accessibilityRole="button"
 			onPress={disabled ? undefined : onPress}
-			style={({ pressed }) => [styles.button, pressed && !disabled && { opacity: 0.8 }]}
+			style={({ pressed }) => [styles.button, ((pressed && !disabled) || submitted) && { opacity: 0.6 }]}
 			disabled={disabled}
 		>
-			{icon ? <View style={styles.icon}>{icon}</View> : null}
+			{submitted && icon ? (
+				<ActivityIndicator color="black" size={20} />
+			) : icon ? (
+				<View style={styles.icon}>{icon}</View>
+			) : null}
 			<Text style={styles.label}>{label}</Text>
-			{trailingIcon ? <View style={styles.icon}>{trailingIcon}</View> : null}
+
+			{submitted && trailingIcon ? (
+				<ActivityIndicator color="black" size={20} />
+			) : trailingIcon ? (
+				<View style={styles.icon}>{trailingIcon}</View>
+			) : null}
 		</Pressable>
 	);
 }
