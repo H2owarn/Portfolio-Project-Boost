@@ -1,19 +1,21 @@
 // app/exercises/ExercisesScreen.tsx
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity,ActivityIndicator } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { supabase } from '@/lib/supabase';
+import { MUSCLE_GROUPS } from "@/utils/muscle-group";;
 
-// Sample exercises database
-const exercisesDB = [
-  { id: 1, name: "Crunches", muscles: ["Abs"] },
-  { id: 2, name: "Bench Press", muscles: ["Chest", "Shoulders"] },
-  { id: 3, name: "Pull Ups", muscles: ["Back", "Biceps"] },
-  { id: 4, name: "Squats", muscles: ["Legs"] },
-  { id: 5, name: "Shoulder Press", muscles: ["Shoulders"] },
-];
+type Exercise = {
+  id: number;
+  name: string;
+  primary_muscles: string[];
+}
+
 
 export default function ExercisesScreen() {
   const params = useLocalSearchParams();
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Parse selectedMuscles safely
   let selectedMuscles: { [page: number]: string[] } = {};
@@ -31,18 +33,49 @@ export default function ExercisesScreen() {
   // Flatten selections and extract muscle names (before the '-' in uniqueId)
   const selectedNames = Object.values(selectedMuscles)
     .flat()
-    .map((id: string) => id.split('-')[0]);
+    .map((id: string) => id.split('-')[0].toLowerCase());
 
-  // Filter exercises that target selected muscles
-  const recommendedExercises = exercisesDB.filter(exercise =>
-    exercise.muscles.some(muscle => selectedNames.includes(muscle))
-  );
+  // Expand selections: if it's a group key, expand, otherwise keep the muscle itself
+  const expandedMuscles = selectedNames.flatMap(name => {
+    if (MUSCLE_GROUPS[name]) {
+      return MUSCLE_GROUPS[name].map(m => m.toLowerCase());  // expand group → muscles
+    }
+    return [name]; // keep single muscle
+  });
 
-  const renderExercise = ({ item }: { item: typeof exercisesDB[0] }) => (
+  useEffect(() => {
+    const fetchExercises = async () => {
+      setLoading(true);
+
+      // Fetch exercises from Supabase
+      const { data, error } = await supabase
+        .from('exercises')
+        .select('id, name, primary_muscles, secondary_muscles');
+
+      if (error) {
+        console.error('Error fetching exercises:', error);
+        setExercises([]);
+        setLoading(false);
+        return;
+      }
+
+      // Filter by expanded group muscles
+      const filtered = data.filter((ex: Exercise) =>
+        ex.primary_muscles?.some(m => expandedMuscles.includes(m.toLowerCase()))
+      );
+
+      setExercises(filtered);
+      setLoading(false);
+    };
+
+    fetchExercises();
+  }, [params.selectedMuscles]);
+
+  const renderExercise = ({ item }: { item: Exercise }) => (
     <TouchableOpacity style={styles.card}>
       <Text style={styles.exerciseName}>{item.name}</Text>
       <Text style={styles.muscles}>
-        Targets: {item.muscles.join(', ')}
+        {item.primary_muscles}
       </Text>
     </TouchableOpacity>
   );
@@ -50,11 +83,13 @@ export default function ExercisesScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Recommended Exercises</Text>
-      {recommendedExercises.length === 0 ? (
+      {loading ? (
+        <ActivityIndicator size="large" color="#000" />
+      ) : exercises.length === 0 ? (
         <Text>No exercises found for the selected muscles.</Text>
       ) : (
         <FlatList
-          data={recommendedExercises}
+          data={exercises}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderExercise}
           contentContainerStyle={{ paddingBottom: 20 }}
