@@ -53,50 +53,87 @@ useEffect(() => {
 
 
 useEffect(() => {
-  if (!profile) return; // wait until profile is loaded
+  if (!profile) return;
 
   const loadQuests = async () => {
-  // fetch quest
-  const { data: questRows, error } = await supabase
-    .from("quests")
-    .select("*")
-    .lte("min_level", profile.level)
-    .gte("max_level", profile.level);
+    // 1. Check user active quests (assigned in last 3 days)
+    const { data: activeQuests, error: uqErr } = await supabase
+      .from("user_quests")
+      .select(`
+        quest_id,
+        quests(*)
+      `)
+      .eq("user_id", profile.id)
+      .eq("status", "active")
+      .gte("assigned_at", new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString());
 
-  if (error) {
-    console.error("Quest fetch error:", error);
+    if (uqErr) {
+      console.error("User quests fetch error:", uqErr);
+      return;
+    }
+
+    let questsList: any[] = [];
+
+    if (activeQuests.length > 0) {
+      // Already has quests, reuse them
+      questsList = activeQuests.map((uq) => uq.quests);
+    } else {
+      // 2. No active quests → pick new random ones
+      const { data: questRows, error } = await supabase
+        .from("quests")
+        .select("*")
+        .lte("min_level", profile.level)
+        .gte("max_level", profile.level);
+
+      if (error) {
+        console.error("Quest fetch error:", error);
+        return;
+      }
+
+      const mains = questRows.filter((q) => q.quest_type === "main");
+      const sides = questRows.filter((q) => q.quest_type === "side");
+      const pickRandom = (arr: any[], n: number) =>
+        arr.sort(() => 0.5 - Math.random()).slice(0, n);
+
+      questsList = [...pickRandom(mains, 3), ...pickRandom(sides, 2)];
+
+      // 3. Save them to user_quests
+      const insertPayload = questsList.map((q) => ({
+        user_id: profile.id,
+        quest_id: q.id,
+        status: "active",
+        assigned_at: new Date().toISOString(),
+      }));
+      await supabase.from("user_quests").insert(insertPayload);
+    }
+
+     // 3. Fetch exercises for all quests
+    const allExerciseIds = questsList.flatMap((q) => q.exercise_ids || []);
+    const { data: exerciseRows, error: exErr } = await supabase
+      .from("exercises")
+      .select("id, name")
+      .in("id", allExerciseIds);
+
+    if (exErr) {
+      console.error("Exercise fetch error:", exErr);
+    }
+
+    const exerciseMap = new Map(exerciseRows?.map((ex) => [ex.id, ex.name]));
+
+    const questsWithExercises = questsList.map((q) => ({
+      ...q,
+      exercises: (q.exercise_ids || []).map(
+        (id: number) => exerciseMap.get(id) || `Exercise ${id}`
+      ),
+    }));
+
+    setQuests(questsWithExercises);
     setLoading(false);
-    return;
-  }
-
-  // fetch exercises by ids
-  const allExerciseIds = questRows.flatMap((q) => q.exercise_ids || []);
-  const { data: exerciseRows, error: exErr } = await supabase
-    .from("exercises")
-    .select("id, name")
-    .in("id", allExerciseIds);
-
-
-  // map exercise ids to names
-  const exerciseMap = new Map(exerciseRows?.map((ex) => [ex.id, ex.name]));
-
-  const questsWithExercises = questRows.map((q) => ({
-    ...q,
-    exercises: (q.exercise_ids || []).map((id: number) => exerciseMap.get(id) || `Exercise ${id}`),
-  }));
-
-  // random pick
-  const mains = questsWithExercises.filter((q) => q.quest_type === "main");
-  const sides = questsWithExercises.filter((q) => q.quest_type === "side");
-  const pickRandom = (arr: any[], n: number) =>
-    arr.sort(() => 0.5 - Math.random()).slice(0, n);
-
-  setQuests([...pickRandom(mains, 3), ...pickRandom(sides, 2)]);
-  setLoading(false);
-};
+  };
 
   loadQuests();
 }, [profile]);
+
 
   if (loading) {
     return <Text style={{ color: "#fff" }}>Loading quests…</Text>;
