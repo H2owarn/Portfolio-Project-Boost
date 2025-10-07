@@ -17,6 +17,8 @@ type Exercise = {
   instructions?: string[];
   level?: string;
   category?: string;
+  xp_reward?: number;
+  stamina_cost?: number;
 }
 
 
@@ -26,7 +28,7 @@ export default function ExercisesScreen() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Filter states
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -66,7 +68,7 @@ export default function ExercisesScreen() {
       // Fetch exercises from Supabase
       const { data, error } = await supabase
         .from('exercises')
-        .select('id, name, primary_muscles, secondary_muscles, instructions, level, category');
+        .select('id, name, primary_muscles, secondary_muscles, instructions, level, category, xp_reward, stamina_cost');
 
       if (error) {
         console.error('Error fetching exercises:', error);
@@ -83,13 +85,13 @@ export default function ExercisesScreen() {
 
       setExercises(filtered);
       setFilteredExercises(filtered);
-      
+
       // Extract unique levels and categories for filters
       const levels = [...new Set(filtered.map(ex => ex.level).filter(Boolean))] as string[];
       const categories = [...new Set(filtered.map(ex => ex.category).filter(Boolean))] as string[];
       setAvailableLevels(levels);
       setAvailableCategories(categories);
-      
+
       setLoading(false);
     };
 
@@ -120,8 +122,8 @@ export default function ExercisesScreen() {
     <Pressable
       style={[
         styles.filterChip,
-        isSelected 
-          ? { backgroundColor: palette.primary } 
+        isSelected
+          ? { backgroundColor: palette.primary }
           : { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.borderColor }
       ]}
       onPress={onPress}
@@ -160,6 +162,18 @@ export default function ExercisesScreen() {
         </View>
 
         <View style={styles.exerciseSpecs}>
+          {item.xp_reward && (
+            <View style={[styles.specBadge, { backgroundColor: palette.primary + '10' }]}>
+              <MaterialIcons name="diamond" size={12} color={palette.primary} />
+              <Text style={[styles.specText, { color: palette.primary }]}>{item.xp_reward} XP</Text>
+            </View>
+          )}
+          {item.stamina_cost && (
+            <View style={[styles.specBadge, { backgroundColor: palette.primary + '10' }]}>
+              <MaterialIcons name="bolt" size={12} color={palette.primary} />
+              <Text style={[styles.specText, { color: palette.primary }]}>{item.stamina_cost} </Text>
+            </View>
+          )}
           {item.level && (
             <View style={[styles.specBadge, { backgroundColor: palette.primary + '10' }]}>
               <MaterialIcons name="signal-cellular-alt" size={12} color={palette.primary} />
@@ -186,13 +200,9 @@ export default function ExercisesScreen() {
     <>
       <Stack.Screen options={{ title: 'Back' }} />
       <Screen scrollable={false} contentStyle={styles.container}>
-        <View style={styles.header}>
+      <View style={styles.header}>
           <Text style={[styles.title, { color: palette.text }]}>Recommended Exercises</Text>
-        <Text style={[styles.subtitle, { color: palette.mutedText }]}>
-          {loading ? 'Loading...' : `${filteredExercises.length} of ${exercises.length} exercise${exercises.length !== 1 ? 's' : ''}`}
-        </Text>
       </View>
-
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={palette.primary} />
@@ -212,12 +222,12 @@ export default function ExercisesScreen() {
               {availableLevels.length > 0 && (
                 <View style={styles.filterGroup}>
                   <Text style={[styles.filterLabel, { color: palette.mutedText }]}>Level</Text>
-                  <ScrollView 
-                    horizontal 
+                  <ScrollView
+                    horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.filterChips}
                   >
-                    {availableLevels.map(level => 
+                    {availableLevels.map(level =>
                       renderFilterChip(
                         level,
                         selectedLevel === level,
@@ -231,12 +241,12 @@ export default function ExercisesScreen() {
               {availableCategories.length > 0 && (
                 <View style={styles.filterGroup}>
                   <Text style={[styles.filterLabel, { color: palette.mutedText }]}>Category</Text>
-                  <ScrollView 
-                    horizontal 
+                  <ScrollView
+                    horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.filterChips}
                   >
-                    {availableCategories.map(category => 
+                    {availableCategories.map(category =>
                       renderFilterChip(
                         category,
                         selectedCategory === category,
@@ -266,12 +276,11 @@ export default function ExercisesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Spacing.lg
   },
   header: {
     alignItems: 'center',
-    marginBottom: Spacing.xl,
-    gap: Spacing.sm
+    marginBottom: Spacing.md,
+    gap: Spacing.xs
   },
   title: Font.title,
   subtitle: Font.subTitle,
