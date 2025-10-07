@@ -45,19 +45,38 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 				}
 			};
 
-		const profile = await supabase.from('profiles').select('*').eq('id', login.data.user.id).single();
-		if (profile.error)
-			return {
-				type: 'error',
-				data: profile.error
-			};
+		const { data: profileData, error: profileErr } = await supabase
+			.from("profiles")
+			.select(`
+				id,
+				name,
+				exp,
+				level,
+				created_at,
+				streak,
+				stamina,
+				rank_division_id,
+				rank_divisions ( id, name )
+			`)
+			.eq("id", login.data.user.id)
+			.single();
+
+		if (profileErr) {
+		return { type: "error", data: profileErr };
+		}
+		// normalize here
+		const normalizedProfile = {
+			...profileData,
+			rank_divisions: Array.isArray(profileData.rank_divisions)
+			? profileData.rank_divisions[0] ?? null
+			: profileData.rank_divisions ?? null,
+		};
 
 		setAuthedUser(login.data.user);
-		setAuthedProfile(profile.data);
+		setAuthedProfile(normalizedProfile);
 
-		return {
-			type: 'success'
-		};
+		return { type: "success" };
+
 	};
 
 	// Create a user with their profile.
@@ -77,22 +96,56 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 	// Get the logged in user, else redirect to login page.
 	const getAuthedUser = async () => {
 		try {
-			const session = await supabase.auth.getSession();
+    const { data, error: sessionErr } = await supabase.auth.getSession();
 
-			if (session.error) {
-				console.error(session.error);
-				return;
+		if (sessionErr) {
+		console.error(sessionErr);
+		return;
+		}
+
+		const session = data.session;
+
+		if (!session?.user) return;
+
+			const { data: profileData, error: profileErr } = await supabase
+			.from("profiles")
+			.select(`
+				id,
+				name,
+				exp,
+				level,
+				created_at,
+				streak,
+				stamina,
+				rank_division_id,
+				rank_divisions ( id, name )
+			`)
+			.eq("id", session.user.id)
+			.single();
+
+
+			if (profileErr) {
+			console.error(profileErr);
+			return {
+				type: "error",
+				data: profileErr,
+			};
 			}
-			if (!session.data || !session.data.session) return;
 
-			const profile = await supabase.from('profiles').select('*').eq('id', session.data.session.user.id).single();
-			if (profile.error) {
-				console.error(profile.error);
-				return;
-			}
+			setAuthedProfile({
+			...profileData,
+			rank_divisions: Array.isArray(profileData.rank_divisions)
+				? profileData.rank_divisions[0] ?? null
+				: profileData.rank_divisions ?? null,
+			});
+			console.log("Normalized profile:", {
+			...profileData,
+			rank_divisions: Array.isArray(profileData.rank_divisions)
+				? profileData.rank_divisions[0] ?? null
+				: profileData.rank_divisions ?? null,
+			});
 
-			setAuthedProfile(profile.data);
-			setAuthedUser(session.data.session.user);
+			setAuthedUser(session.user);
 		} catch (err) {
 			// Handle error?
 		} finally {
@@ -102,7 +155,7 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 
 	useEffect(() => {
 		getAuthedUser();
-	}, [authChecked]);
+	}, []);
 
 	return (
 		<AuthedUserContext.Provider value={{ authedUser, authedProfile, authChecked, login, register, logout }}>

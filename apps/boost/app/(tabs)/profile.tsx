@@ -6,11 +6,17 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { useAuth } from '@/hooks/use-auth';
 
 export default function ProfileScreen() {
-	const { authedProfile: profile } = useAuth();
+	const { authedProfile: profile, authChecked } = useAuth();
 
-	if (!profile) return <Redirect href="/onboarding/login" />;
+	if (!authChecked) {
+		return <Text>Loading...</Text>;
+	}
 
-	const joined = useMemo(() => {
+  if (!profile) {
+		return <Redirect href="/onboarding/login" />;
+	}
+
+  const joined = useMemo(() => {
 		if (!profile?.created_at) return '';
 		const d = new Date(profile.created_at);
 		return d.toLocaleString(undefined, { month: 'long', year: 'numeric' });
@@ -44,7 +50,7 @@ export default function ProfileScreen() {
 				<View style={styles.statsGrid}>
 					<StatCard icon="local-fire-department" value="112" label="Day streak" />
 					<StatCard icon="star" value={profile.exp} label="Total XP" />
-					<StatCard icon="shield" value={profile.rank_division} label="Current league" />
+					<StatCard icon="shield" value={profile.rank_divisions?.name?? "?"} label="Current league" />
 					<StatCard icon="workspace-premium" value="4" label="Badges" />
 				</View>
 

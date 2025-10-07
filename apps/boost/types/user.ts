@@ -28,6 +28,11 @@ export interface Profile {
 	streak: number;
 	stamina: number;
 	exp: number;
-	rank_division: RankDivision;
 	name: string;
+	rank_division_id: number | null;
+	// relation
+	rank_divisions?: {
+		id: number;
+		name: RankDivision;
+	} | null;
 }

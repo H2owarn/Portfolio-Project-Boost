@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { supabase } from "@/lib/supabase";
 
 // 🎨 Custom Theme Colors
 const colors = {
@@ -11,33 +12,51 @@ const colors = {
   textLight: "#111827",
 };
 
-// Dummy leaderboard data
-const leaderboardData = [
-  { id: 1, name: "Number one", score: 25456 },
-  { id: 2, name: "Number two", score: 25456 },
-  { id: 3, name: "Number three", score: 25456 },
-  { id: 4, name: "Random name", score: 25456 },
-  { id: 5, name: "Random name", score: 25456 },
-  { id: 6, name: "Random name", score: 25456 },
-  { id: 7, name: "Random name", score: 25456 },
-];
-
 export default function LeaderboardPage() {
-  const top3 = leaderboardData.slice(0, 3);
-  const others = leaderboardData.slice(3);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadLeaderboard = async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, name, exp")
+        .order("exp", { ascending: false }); // ✅ highest exp first
+
+      if (error) {
+        console.error("Leaderboard fetch error:", error);
+        setLoading(false);
+        return;
+      }
+
+      setLeaderboard(data ?? []);
+      setLoading(false);
+    };
+
+    loadLeaderboard();
+  }, []);
+
+  if (loading) {
+    return <Text style={{ color: "#fff" }}>Loading leaderboard…</Text>;
+  }
+
+  const top3 = leaderboard.slice(0, 3);
+  const others = leaderboard.slice(3);
+
 
   return (
 	<ScrollView style={styles.container}>
 	  <Text style={styles.header}>Leaderboard</Text>
 
 	  {/* Top 3 podium */}
+	{top3.length === 3 && (
 	  <View style={styles.podiumRow}>
 		{/* 2nd place */}
 		<View style={[styles.podiumBox, { height: 110 }]}>
 		  <View style={styles.avatar} />
 		  <Text style={[styles.rankCircle, styles.rankCircle1]}>2</Text>
 		  <Text style={[styles.podiumName23, styles.podiumName]}>{top3[1].name}</Text>
-		  <Text style={styles.podiumScore}>{top3[1].score}</Text>
+		  <Text style={styles.podiumScore}>{top3[1].exp}</Text>
 		</View>
 
 		{/* 1st place */}
@@ -47,7 +66,7 @@ export default function LeaderboardPage() {
 		  </View>
 		  <Text style={styles.rankCircle}>1</Text>
 		  <Text style={[styles.podiumName1, styles.podiumName]}>{top3[0].name}</Text>
-		  <Text style={[styles.podiumScore, styles.podiumScore1]}>{top3[0].score}</Text>
+		  <Text style={[styles.podiumScore, styles.podiumScore1]}>{top3[0].exp}</Text>
 		</View>
 
 		{/* 3rd place */}
@@ -55,24 +74,24 @@ export default function LeaderboardPage() {
 		  <View style={styles.avatar} />
 		  <Text style={[styles.rankCircle, styles.rankCircle1]}>3</Text>
 		  <Text style={[styles.podiumName23, styles.podiumName]}>{top3[2].name}</Text>
-		  <Text style={styles.podiumScore}>{top3[2].score}</Text>
+		  <Text style={styles.podiumScore}>{top3[2].exp}</Text>
 		</View>
 	  </View>
+	)}
 
-	  {/* Other leaderboard entries */}
-	  {others.map((player) => (
-		<View key={player.id} style={styles.listItem}>
-		  <View style={styles.rowLeft}>
-			<View style={styles.smallAvatar} />
-			<Text style={styles.listName}>{player.name}</Text>
-		  </View>
-		  <Text style={styles.listScore}>{player.score}</Text>
-		</View>
-	  ))}
-	</ScrollView>
+	   {/* Other leaderboard entries */}
+      {others.map((player, i) => (
+        <View key={player.id} style={styles.listItem}>
+          <View style={styles.rowLeft}>
+            <View style={styles.smallAvatar} />
+            <Text style={styles.listName}>{player.name}</Text>
+          </View>
+          <Text style={styles.listScore}>{player.exp}</Text>
+        </View>
+      ))}
+    </ScrollView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
 	flex: 1,
