@@ -6,24 +6,19 @@ import { supabase } from "@/lib/supabase";
 import { Colors, Radii, Shadow } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
+
 type Profile = {
   id: string;
   name: string;
   level: number;
   exp: number;
-  avatar_url?: string | null;
 };
 
-type FriendRow = {
-  friend_id: string;
-  profile: {
-    id: string;
-    name: string;
-    level: number;
-    avatar_url?: string | null;
-  } | null;
+type LevelRow = {
+  level_number: number;
+  min_exp: number;
+  max_exp: number | null;
 };
-
 
 type UserQuestRow = {
   quest_id: number;
@@ -34,17 +29,17 @@ type UserQuestRow = {
   } | null;
 };
 
-
-const FALLBACK_AVATAR = "https://via.placeholder.com/80";
 const FALLBACK_FRIEND_AVATAR = "https://via.placeholder.com/60";
+
 
 export default function HomeScreen() {
   const palette = Colors[useColorScheme() ?? "dark"];
   const router = useRouter();
 
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [friends, setFriends] = useState<FriendRow[]>([]);
+  const [users, setUsers] = useState<Profile[]>([]);
   const [quests, setQuests] = useState<UserQuestRow[]>([]);
+  const [levelInfo, setLevelInfo] = useState<LevelRow | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,21 +63,30 @@ export default function HomeScreen() {
 
     if (profileErr) console.error("Profile fetch error:", profileErr);
 
-    // 3) Friends
-    const { data: friendsData, error: friendsErr } = await supabase
-      .from("friends")
-      .select(`
-        friend_id,
-        profiles!friends_friend_id_fkey ( id, name, level, avatar_url )
-      `)
-      .eq("user_id", user.id);
+    // 2.2) Level info (based on profile.level)
 
-    if (friendsErr) console.error("Friends fetch error:", friendsErr);
+    let fetchedLevelInfo: LevelRow | null = null;
 
-    const normalizedFriends = (friendsData ?? []).map((f: any) => ({
-      friend_id: f.friend_id,
-      profile: f.profiles?.[0] ?? null,
-    }));
+    if (profileData) {
+      const { data: levelData, error: levelErr } = await supabase
+        .from("levels")
+        .select("min_exp, max_exp")
+        .eq("level_number", profileData.level)
+        .maybeSingle<LevelRow>();
+
+      if (levelErr) console.error("Level fetch error:", levelErr);
+      fetchedLevelInfo = levelData ?? null;
+    }
+
+    // 3) Recommended rivals
+    const { data: usersData, error: usersErr } = await supabase
+      .from("profiles")
+      .select("id, name, level, exp")
+      .neq("id", user.id)
+      .order("level", { ascending: false })
+      .limit(2)
+
+    if (usersErr) console.error("Users fetch error:", usersErr);
 
     // 4) Active quests
     const { data: questsData, error: questsErr } = await supabase
@@ -98,27 +102,34 @@ export default function HomeScreen() {
 
     const normalizedQuests = (questsData ?? []).map((q: any) => ({
       quest_id: q.quest_id,
-      quest: q.quests?.[0] ?? null,
+      quest: q.quests?? null,
     }));
 
     // ✅ Set all state once
     if (mounted) {
-      setProfile((profileData ?? null) as Profile | null);
-      setFriends(normalizedFriends as FriendRow[]);
+      setProfile(profileData ?? null);
+      setLevelInfo(fetchedLevelInfo);
+      setUsers(usersData ?? []);
       setQuests(normalizedQuests as UserQuestRow[]);
       setLoading(false);
     }
   })();
+
 
   return () => {
     mounted = false;
   };
 }, []);
 
+ // ---- EXP calculation here ----
+  const currentExp = profile?.exp ?? 0;
+  const minExp = levelInfo?.min_exp ?? 0;
+  const maxExp = levelInfo?.max_exp ?? null;
+  const progress =
+    levelInfo && profile
+      ? (currentExp - minExp) / ((maxExp ?? currentExp) - minExp)
+      : 0;
 
-  function getXpRequired(level: number) {
-    return 100 + level * 20; // tweak as you like
-  }
 
   if (loading) {
     return (
@@ -137,7 +148,7 @@ export default function HomeScreen() {
       {/* Header / Profile */}
       <View style={[styles.header, { backgroundColor: palette.surface }]}>
         <Image
-          source={{ uri: profile?.avatar_url || FALLBACK_AVATAR }}
+          source={{ uri: FALLBACK_FRIEND_AVATAR  }}
           style={styles.avatar}
         />
         <View style={styles.headerCopy}>
@@ -147,7 +158,7 @@ export default function HomeScreen() {
           </Text>
 
           <Progress.Bar
-            progress={(profile?.exp ?? 0) / getXpRequired(profile?.level ?? 1)}
+            progress={progress}
             width={220}
             height={12}
             color={palette.primary}
@@ -156,9 +167,11 @@ export default function HomeScreen() {
             borderColor={palette.borderColor}
             style={styles.progressBar}
           />
+
           <Text style={[styles.xpText, { color: palette.mutedText }]}>
-            {profile?.exp ?? 0}/{getXpRequired(profile?.level ?? 1)} XP
+            {currentExp}/{maxExp ?? "∞"} XP
           </Text>
+
         </View>
       </View>
 
@@ -214,29 +227,35 @@ export default function HomeScreen() {
             onPress={() => console.log("See all friends")}
             android_ripple={{ color: palette.primary + "20" }}
           >
-            <Text style={[styles.seeAll, { color: palette.primary }]}>See All ▾</Text>
           </Pressable>
         </View>
 
-        {friends.map((f) => (
-          <View
-            key={f.friend_id}
-            style={[styles.recommendCard, { backgroundColor: palette.surfaceElevated }]}
-          >
-            <Image
-              source={{ uri: f.profile?.avatar_url || FALLBACK_FRIEND_AVATAR }}
-              style={styles.recommendAvatar}
-            />
-            <View style={styles.recommendInfo}>
-              <Text style={[styles.recommendName, { color: palette.text }]}>{f.profile?.name ?? "—"}</Text>
-              <Text style={[styles.recommendLevel, { color: palette.mutedText }]}>
-                Level {f.profile!.level}
-              </Text>
-            </View>
-            <Text style={[styles.arrow, { color: palette.primary }]}>➡️</Text>
+          <View style={styles.recommendContainer}>
+      {users.map((u) => (
+        <View
+          key={u.id}
+          style={[
+            styles.recommendCard,
+            { backgroundColor: palette.surfaceElevated ?? palette.surface },
+          ]}
+        >
+          <Image
+            source={{ uri: FALLBACK_FRIEND_AVATAR }}
+            style={styles.recommendAvatar}
+          />
+          <View style={styles.recommendInfo}>
+            <Text style={[styles.recommendName, { color: palette.text }]}>
+              {u.name ?? "—"}
+            </Text>
+            <Text style={[styles.recommendLevel, { color: palette.mutedText }]}>
+              Level {u.level}
+            </Text>
           </View>
-        ))}
-      </View>
+          <Text style={[styles.arrow, { color: palette.primary }]}>➡️</Text>
+        </View>
+      ))}
+    </View>
+    </View>
     </ScrollView>
   );
 }
@@ -322,8 +341,24 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     backgroundColor: "#111",
   },
-  recommendInfo: { flex: 1, gap: 4 },
-  recommendName: { fontSize: 16, fontWeight: "600" },
-  recommendLevel: { fontSize: 13 },
-  arrow: { fontSize: 18 },
+
+  recommendContainer: {
+  gap: 12,
+  marginTop: 8,
+  },
+
+  recommendInfo: {
+    flex: 1,
+    gap: 4
+  },
+  recommendName: {
+    fontSize: 16,
+    fontWeight: "600"
+  },
+  recommendLevel: {
+    fontSize: 13
+  },
+  arrow: {
+    fontSize: 18
+    },
 });
