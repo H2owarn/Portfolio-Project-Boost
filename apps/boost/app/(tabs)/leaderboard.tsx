@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { supabase } from "@/lib/supabase";
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
-// 🎨 Custom Theme Colors
-const colors = {
-  primary: "#7DF843",
-  secondary: "#1F2937",
-  backgroundDark: "#000000",
-  backgroundLight: "#FFFFFF",
-  textDark: "#F9FAFB",
-  textLight: "#111827",
-};
 
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const palette = Colors[useColorScheme() ?? 'dark'];
 
   useEffect(() => {
     const loadLeaderboard = async () => {
@@ -45,48 +39,54 @@ export default function LeaderboardPage() {
 
 
   return (
-	<ScrollView style={styles.container}>
-	  <Text style={styles.header}>Leaderboard</Text>
+	<ScrollView style={[styles.container, {backgroundColor: palette.background}]}>
+	  <Text style={[styles.header, { color: palette.primary }]}>Leaderboard</Text>
 
 	  {/* Top 3 podium */}
 	{top3.length === 3 && (
 	  <View style={styles.podiumRow}>
 		{/* 2nd place */}
-		<View style={[styles.podiumBox, { height: 110 }]}>
+		<View style={[styles.podiumWrapper, { height: 100 }]}>
+			<View style={[styles.badgeBottom, {borderTopColor: palette.secondary}]} />
+		<View style={[styles.badgeContent, {backgroundColor: palette.secondary}]}></View>
 		  <View style={styles.avatar} />
-		  <Text style={[styles.rankCircle, styles.rankCircle1]}>2</Text>
-		  <Text style={[styles.podiumName23, styles.podiumName]}>{top3[1].name}</Text>
-		  <Text style={styles.podiumScore}>{top3[1].exp}</Text>
+		  <Text style={[styles.rankCircle, styles.rankCircle1, {backgroundColor: palette.primary}]}>2</Text>
+		  <Text style={[styles.podiumName23, styles.podiumName, {color: palette.text}]}>{top3[1].name}</Text>
+		  <Text style={[styles.podiumScore, {color: palette.text}]}>{top3[1].exp}</Text>
 		</View>
 
 		{/* 1st place */}
-		<View style={[styles.podiumBox, { height: 120 }]}>
+		<View style={[styles.podiumWrapper, { height: 130 }]}>
+		  <View style={[styles.badgeBottom, {borderTopColor: palette.secondary}]} />
+		<View style={[styles.badgeContent, { bottom: -20 }, {backgroundColor: palette.secondary}]}></View>
 		  <View style={[styles.avatar, styles.avatar1]}>
 			<Text style={styles.crown}>👑</Text>
 		  </View>
-		  <Text style={styles.rankCircle}>1</Text>
-		  <Text style={[styles.podiumName1, styles.podiumName]}>{top3[0].name}</Text>
-		  <Text style={[styles.podiumScore, styles.podiumScore1]}>{top3[0].exp}</Text>
+		  <Text style={[styles.rankCircle, {backgroundColor: palette.primary}]}>1</Text>
+		  <Text style={[styles.podiumName1, styles.podiumName, {color: palette.text}]}>{top3[0].name}</Text>
+		  <Text style={[styles.podiumScore, styles.podiumScore1, {color: palette.text}]}>{top3[0].exp}</Text>
 		</View>
 
 		{/* 3rd place */}
-		<View style={[styles.podiumBox, { height: 110 }]}>
+		<View style={[styles.podiumWrapper, { height: 100 }]}>
+			<View style={[styles.badgeBottom, {borderTopColor: palette.secondary}]} />
+		<View style={[styles.badgeContent, {backgroundColor: palette.secondary}]}></View>
 		  <View style={styles.avatar} />
-		  <Text style={[styles.rankCircle, styles.rankCircle1]}>3</Text>
-		  <Text style={[styles.podiumName23, styles.podiumName]}>{top3[2].name}</Text>
-		  <Text style={styles.podiumScore}>{top3[2].exp}</Text>
+		  <Text style={[styles.rankCircle, styles.rankCircle1, {backgroundColor: palette.primary}]}>3</Text>
+		  <Text style={[styles.podiumName23, styles.podiumName, {color: palette.text}]}>{top3[2].name}</Text>
+		  <Text style={[styles.podiumScore, {color: palette.text}]}>{top3[2].exp}</Text>
 		</View>
 	  </View>
 	)}
 
 	   {/* Other leaderboard entries */}
       {others.map((player, i) => (
-        <View key={player.id} style={styles.listItem}>
+        <View key={player.id} style={[styles.listItem, {backgroundColor: palette.secondary}]}>
           <View style={styles.rowLeft}>
             <View style={styles.smallAvatar} />
-            <Text style={styles.listName}>{player.name}</Text>
+            <Text style={[styles.listName, {color: palette.text}]}>{player.name}</Text>
           </View>
-          <Text style={styles.listScore}>{player.exp}</Text>
+          <Text style={[styles.listScore, {color: palette.text}]}>{player.exp}</Text>
         </View>
       ))}
     </ScrollView>
@@ -95,7 +95,6 @@ export default function LeaderboardPage() {
 const styles = StyleSheet.create({
   container: {
 	flex: 1,
-	backgroundColor: colors.backgroundDark,
 	padding: 16,
   },
   header: {
@@ -103,34 +102,59 @@ const styles = StyleSheet.create({
 	fontWeight: "bold",
 	textAlign: "center",
 	marginBottom: 90,
-	color: colors.primary,
   },
   podiumRow: {
 	flexDirection: "row",
 	justifyContent: "center",
 	alignItems: "flex-end",
 	marginBottom: 30,
+	gap: 15,
   },
-  podiumBox: {
-	marginHorizontal: 6,
-	backgroundColor: colors.secondary,
-	borderRadius: 12,
-	alignItems: "center",
-	justifyContent: "flex-end",
-	padding: 8,
+
+  podiumWrapper: {
+    width: 100,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    position: 'relative',
   },
+
+  // The bottom triangle part
+  badgeBottom: {
+    position: 'absolute',
+    bottom: -20,
+    width: 0,
+    height: 0,
+    borderLeftWidth: 50,
+    borderRightWidth: 50,
+    borderTopWidth: 20,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+  },
+
+  // Content sits above the badge shape
+  badgeContent: {
+    position: 'absolute',
+    top: 0,
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: 8,
+  },
+
+
   avatar: {
 	width: 70,
 	height: 70,
 	borderRadius: 35,
-	backgroundColor: colors.textLight,
+	backgroundColor: "#111827",
 	marginBottom: 6,
 	alignItems: "center",
 	justifyContent: "center",
 	bottom: 25,
   },
   avatar1: {
-  bottom: 45,
+  bottom: 55,
   },
 
   crown: {
@@ -141,8 +165,7 @@ const styles = StyleSheet.create({
   rankCircle: {
 	position: "absolute",
 	bottom: 90,
-	backgroundColor: colors.primary,
-	color: colors.textLight,
+	color: "#111827",
 	fontSize: 14,
 	fontWeight: "bold",
 	borderRadius: 12,
@@ -155,7 +178,6 @@ const styles = StyleSheet.create({
   },
   podiumName: {
 	fontWeight: "600",
-	color: colors.textDark,
 	textAlign: "center",
   },
   podiumName1: {
@@ -165,7 +187,6 @@ const styles = StyleSheet.create({
 	top:-10,
   },
   podiumScore: {
-	color: colors.textDark,
 	fontSize: 13,
 	textAlign: "center",
   },
@@ -176,10 +197,10 @@ const styles = StyleSheet.create({
 	flexDirection: "row",
 	justifyContent: "space-between",
 	alignItems: "center",
-	backgroundColor: colors.secondary,
 	borderRadius: 12,
 	padding: 12,
 	marginBottom: 10,
+	top: 20,
   },
   rowLeft: {
 	flexDirection: "row",
@@ -189,17 +210,15 @@ const styles = StyleSheet.create({
 	width: 40,
 	height: 40,
 	borderRadius: 20,
-	backgroundColor: colors.textLight,
+	backgroundColor: "#111827",
 	marginRight: 10,
   },
   listName: {
 	fontSize: 16,
 	fontWeight: "500",
-	color: colors.textDark,
   },
   listScore: {
 	fontSize: 14,
 	fontWeight: "bold",
-	color: colors.textDark,
   },
 });
