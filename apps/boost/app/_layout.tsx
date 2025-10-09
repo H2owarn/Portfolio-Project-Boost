@@ -28,6 +28,7 @@ export default function RootLayout() {
 						contentStyle: { backgroundColor: palette.background }
 					}}
 				>
+					<Stack.Screen name="index" options={{ headerShown: false }} />
 					<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 					<Stack.Screen name="onboarding/welcome" options={{ headerShown: false }} />
 					<Stack.Screen name="onboarding/login" options={{ headerShown: false, presentation: 'card' }} />
