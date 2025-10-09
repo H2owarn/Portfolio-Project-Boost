@@ -2,17 +2,21 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Redirect } from 'expo-router';
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { useAuth } from '@/hooks/use-auth';
 
+
 export default function ProfileScreen() {
 	const { authedProfile: profile, authChecked } = useAuth();
+	const palette = Colors[useColorScheme() ?? 'dark'];
 
 	if (!authChecked) {
 		return <Text>Loading...</Text>;
 	}
 
-  if (!profile) {
+   if (!profile) {
 		return <Redirect href="/onboarding/login" />;
 	}
 
@@ -23,15 +27,15 @@ export default function ProfileScreen() {
 	}, [profile?.created_at]);
 
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, {backgroundColor: palette.background}]}>
 			<ScrollView contentContainerStyle={styles.scrollContent}>
 				{/* Profile Section */}
 				<View style={styles.profileSection}>
 					<View style={styles.avatar}>
-						<Ionicons name="person" size={48} color="gray" />
+						<Ionicons name="person" size={48} color="#7DF843" />
 					</View>
-					<Text style={styles.username}>{profile.name}</Text>
-					<Text style={styles.joinedText}>Joined {joined}</Text>
+					<Text style={[styles.username, {color: palette.text}]}>{profile.name}</Text>
+					<Text style={[styles.joinedText, { color: palette.mutedText}]}>Joined {joined}</Text>
 					<View style={styles.followRow}>
 						<Text style={styles.linkText}>0 Friends</Text>
 					</View>
@@ -46,37 +50,52 @@ export default function ProfileScreen() {
 				</View>
 
 				{/* Statistics */}
-				<Text style={styles.sectionTitle}>Overview</Text>
+				<Text style={[styles.sectionTitle, { color: palette.text }]}>Overview</Text>
 				<View style={styles.statsGrid}>
-					<StatCard icon="local-fire-department" value="112" label="Day streak" />
-					<StatCard icon="star" value={profile.exp} label="Total XP" />
-					<StatCard icon="shield" value={profile.rank_divisions?.name?? "?"} label="Current league" />
-					<StatCard icon="workspace-premium" value="4" label="Badges" />
+					<StatCard
+					icon="local-fire-department"
+					value="112"
+					label="Streak"
+					/>
+					<StatCard
+					icon="star"
+					value={profile.exp}
+					label="Total XP"
+					/>
+					<StatCard
+					icon="shield"
+					value={profile.rank_divisions?.name?? "?"} label="Current league"
+					/>
+					<StatCard
+					icon="workspace-premium"
+					value="4"
+					label="Badges"
+					/>
 				</View>
 
-				{/* Rival Section */}
-				<Text style={styles.sectionTitle}>Rivals</Text>
+				{/* Friends Section */}
+				<Text style={[styles.sectionTitle, {color: palette.text }]}>Friends</Text>
 				<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rivalsRow}>
 					{/* Repeat for each rival */}
 					<View style={styles.rivalAvatarContainer}>
 						<View style={styles.avatar}>
 							<Ionicons name="person" size={48} color="gray" />
 						</View>
-						<Text style={styles.username}>Kaj Kennedy</Text>
+						<Text style={[styles.username, { color: palette.text }]}>Kaj Kennedy</Text>
 					</View>
 
 					<View style={styles.rivalAvatarContainer}>
 						<View style={styles.avatar}>
 							<Ionicons name="person" size={48} color="gray" />
 						</View>
-						<Text style={styles.username}>WaWa</Text>
+						<Text style={[styles.username, { color: palette.text }]}>WaWa</Text>
 					</View>
 
 					<View style={styles.rivalAvatarContainer}>
 						<View style={styles.avatar}>
 							<Ionicons name="person" size={48} color="gray" />
 						</View>
-						<Text style={styles.username}>Jin Lieu</Text>
+						<Text style={[styles.username, { color: palette.text }]}>Jin Lieu</Text>
 					</View>
 				</ScrollView>
 			</ScrollView>
@@ -89,9 +108,9 @@ function StatCard({ icon, value, label }: { icon: string; value: string | number
 		<View style={{ marginBottom: 16, width: '48%' }}>
 			<View style={[styles.statCard, { height: 65, width: 170 }]}>
 				<MaterialIcons name={icon as any} size={28} color="#2ec91aff" />
-				<Text style={styles.statValue}>{value}</Text>
+				<Text style={[styles.statValue, { color: '#F9FAFB' }]}>{value}</Text>
 			</View>
-			<Text style={[styles.statLabel, { marginTop: 4, textAlign: 'center' }]}>{label}</Text>
+			<Text style={[styles.statLabel, { marginTop: 4, textAlign: 'center' }, {color: '#F9FAFB'}]}>{label}</Text>
 		</View>
 	);
 }
@@ -99,7 +118,6 @@ function StatCard({ icon, value, label }: { icon: string; value: string | number
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#e8eaecff'
 	},
 	scrollContent: {
 		padding: 16
@@ -123,13 +141,11 @@ const styles = StyleSheet.create({
 		marginRight: 12
 	},
 	username: {
-		color: 'black',
 		fontSize: 20,
 		fontWeight: 'bold',
 		marginTop: 8
 	},
 	joinedText: {
-		color: '#9ca3af',
 		marginTop: 4
 	},
 	followRow: {
@@ -162,7 +178,6 @@ const styles = StyleSheet.create({
 		borderRadius: 12
 	},
 	sectionTitle: {
-		color: 'Black',
 		fontSize: 18,
 		fontWeight: 'bold',
 		marginBottom: 12,
@@ -174,7 +189,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between'
 	},
 	statCard: {
-		backgroundColor: '#ffffff9d',
+		backgroundColor: '#1F2937',
 		borderRadius: 16,
 		padding: 16,
 		width: '48%',
