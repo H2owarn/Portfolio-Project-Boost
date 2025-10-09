@@ -141,7 +141,6 @@ export default function HomeScreen() {
 
   return (
     <ScrollView
-      contentInset={{ top: 45 }}
       style={{ backgroundColor: palette.background }}
       contentContainerStyle={styles.container}
     >
@@ -263,8 +262,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    paddingBottom: 40,
-    paddingHorizontal: 16,
+    padding: 16,
     gap: 16,
   },
   header: {
