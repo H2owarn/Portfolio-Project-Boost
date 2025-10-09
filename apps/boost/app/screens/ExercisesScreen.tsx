@@ -1,12 +1,12 @@
 // app/exercises/ExercisesScreen.tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, ScrollView } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { MUSCLE_GROUPS } from "@/utils/muscle-group";
 import { Screen } from '@/components/layout/screen';
-import { Colors, Font, Radii, Spacing } from '@/constants/theme';
+import { Colors, Radii, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 type Exercise = {
@@ -17,6 +17,7 @@ type Exercise = {
   instructions?: string[];
   level?: string;
   category?: string;
+  images?: string[];
   xp_reward?: number;
   stamina_cost?: number;
 }
@@ -68,7 +69,7 @@ export default function ExercisesScreen() {
       // Fetch exercises from Supabase
       const { data, error } = await supabase
         .from('exercises')
-        .select('id, name, primary_muscles, secondary_muscles, instructions, level, category, xp_reward, stamina_cost');
+        .select('id, name, primary_muscles, secondary_muscles, instructions, level, category, images, xp_reward, stamina_cost');
 
       if (error) {
         console.error('Error fetching exercises:', error);
@@ -144,8 +145,13 @@ export default function ExercisesScreen() {
       style={[styles.exerciseCard, { backgroundColor: palette.surface }]}
       android_ripple={{ color: palette.primary + '20' }}
       onPress={() => {
-        // Future: Navigate to exercise detail or start workout
-        console.log('Selected exercise:', item.name);
+        // Navigate to exercise in progress screen
+        router.push({
+          pathname: '/screens/ExerciseInProgressScreen' as any,
+          params: {
+            exercise: JSON.stringify(item)
+          }
+        });
       }}
     >
       <View style={styles.cardContent}>
@@ -198,11 +204,8 @@ export default function ExercisesScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Back' }} />
+      <Stack.Screen options={{ title: 'Recommended Exercises' }} />
       <Screen scrollable={false} contentStyle={styles.container}>
-      <View style={styles.header}>
-          <Text style={[styles.title, { color: palette.text }]}>Recommended Exercises</Text>
-      </View>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={palette.primary} />
@@ -227,13 +230,15 @@ export default function ExercisesScreen() {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.filterChips}
                   >
-                    {availableLevels.map(level =>
-                      renderFilterChip(
-                        level,
-                        selectedLevel === level,
-                        () => setSelectedLevel(selectedLevel === level ? null : level)
-                      )
-                    )}
+                    {availableLevels.map(level => (
+                      <View key={`level-${level}`}>
+                        {renderFilterChip(
+                          level,
+                          selectedLevel === level,
+                          () => setSelectedLevel(selectedLevel === level ? null : level)
+                        )}
+                      </View>
+                    ))}
                   </ScrollView>
                 </View>
               )}
@@ -246,13 +251,15 @@ export default function ExercisesScreen() {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.filterChips}
                   >
-                    {availableCategories.map(category =>
-                      renderFilterChip(
-                        category,
-                        selectedCategory === category,
-                        () => setSelectedCategory(selectedCategory === category ? null : category)
-                      )
-                    )}
+                    {availableCategories.map(category => (
+                      <View key={`category-${category}`}>
+                        {renderFilterChip(
+                          category,
+                          selectedCategory === category,
+                          () => setSelectedCategory(selectedCategory === category ? null : category)
+                        )}
+                      </View>
+                    ))}
                   </ScrollView>
                 </View>
               )}
@@ -277,13 +284,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-    gap: Spacing.xs
-  },
-  title: Font.title,
-  subtitle: Font.subTitle,
   list: {
     gap: Spacing.md,
     paddingHorizontal: Spacing.lg
@@ -343,6 +343,7 @@ const styles = StyleSheet.create({
   },
   filtersSection: {
     paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xs,
     paddingBottom: Spacing.md,
     gap: Spacing.md
   },

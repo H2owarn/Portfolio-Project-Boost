@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '@/components/layout/screen';
@@ -16,12 +16,15 @@ export default function MuscleExercisesScreen() {
 
 	if (!selectedMuscle) {
 		return (
-			<Screen scrollable={false} contentStyle={styles.container}>
-				<View style={styles.errorContainer}>
-					<MaterialIcons name="error-outline" size={48} color={palette.mutedText} />
-					<Text style={[styles.errorText, { color: palette.mutedText }]}>Muscle group not found</Text>
-				</View>
-			</Screen>
+			<>
+				<Stack.Screen options={{ title: 'Error', headerShown: true }} />
+				<Screen scrollable={false} contentStyle={styles.container}>
+					<View style={styles.errorContainer}>
+						<MaterialIcons name="error-outline" size={48} color={palette.mutedText} />
+						<Text style={[styles.errorText, { color: palette.mutedText }]}>Muscle group not found</Text>
+					</View>
+				</Screen>
+			</>
 		);
 	}
 
@@ -67,22 +70,30 @@ export default function MuscleExercisesScreen() {
 	);
 
 	return (
-		<Screen scrollable={false} contentStyle={styles.container}>
-			<View style={styles.header}>
-				<Text style={[styles.title, { color: palette.text }]}>{selectedMuscle.name} Exercises</Text>
-				<Text style={[styles.subtitle, { color: palette.mutedText }]}>
-					{exercises.length} exercise{exercises.length !== 1 ? 's' : ''} available
-				</Text>
-			</View>
-
-			<FlatList
-				data={exercises}
-				renderItem={renderExerciseCard}
-				keyExtractor={(item) => item.id}
-				contentContainerStyle={styles.list}
-				showsVerticalScrollIndicator={false}
+		<>
+			<Stack.Screen 
+				options={{ 
+					title: selectedMuscle.name,
+					headerShown: true
+				}} 
 			/>
-		</Screen>
+			<Screen scrollable={false} contentStyle={styles.container}>
+				<View style={styles.header}>
+					<Text style={[styles.title, { color: palette.text }]}>{selectedMuscle.name} Exercises</Text>
+					<Text style={[styles.subtitle, { color: palette.mutedText }]}>
+						{exercises.length} exercise{exercises.length !== 1 ? 's' : ''} available
+					</Text>
+				</View>
+
+				<FlatList
+					data={exercises}
+					renderItem={renderExerciseCard}
+					keyExtractor={(item) => item.id}
+					contentContainerStyle={styles.list}
+					showsVerticalScrollIndicator={false}
+				/>
+			</Screen>
+		</>
 	);
 }
 
