@@ -1,6 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { forwardRef, useState } from 'react';
-import { StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
 
 import { Colors, Radii, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -14,8 +14,8 @@ type BoostInputProps = TextInputProps & {
 	hint?: string;
 	leadingIcon?: IconProps;
 	trailingIcon?: IconProps;
-	containerStyle?: ViewStyle;
-	inputRowStyle?: ViewStyle;
+	containerStyle?: StyleProp<ViewStyle>;
+	inputRowStyle?: StyleProp<ViewStyle>;
 };
 
 export const BoostInput = forwardRef<TextInput, BoostInputProps>(
