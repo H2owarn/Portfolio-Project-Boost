@@ -28,6 +28,11 @@ export default function RootLayout() {
 				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 				<Stack.Screen name="onboarding/welcome" options={{ headerShown: false }} />
 				<Stack.Screen name="onboarding/login" options={{ headerShown: false, presentation: 'card' }} />
+				<Stack.Screen name="screens/workout" options={{ headerTitle: 'Your Workout' }} />
+				<Stack.Screen name="screens/ExercisesScreen" options={{ headerTitle: 'Generator' }} />
+
+
+
 			</Stack>
 		</ThemeProvider>
 	);
