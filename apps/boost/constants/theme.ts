@@ -21,7 +21,15 @@ export const Colors = {
 		tabIconDefault: '#9CA3AF',
 		tabIconSelected: primary,
 		borderColor: '#666',
-		borderColorAlt: '#aaa'
+		borderColorAlt: '#aaa',
+		info: 'hsla(199, 89%, 48%, 1)',
+		infoTransparent: 'hsla(199, 89%, 48%, 0.2)',
+		success: 'hsla(142, 71%, 45%, 1)',
+		successTransparent: 'hsla(142, 71%, 45%, 0.2)',
+		warning: 'hsla(38, 92%, 50%, 1)',
+		warningTransparent: 'hsla(38, 92%, 50%, 0.2)',
+		error: 'hsla(0, 84%, 60%, 1)',
+		errorTransparent: 'hsla(0, 84%, 60%, 0.2)'
 	},
 	dark: {
 		text: textDark,
@@ -36,7 +44,15 @@ export const Colors = {
 		tabIconDefault: '#444',
 		tabIconSelected: primary,
 		borderColor: '#555',
-		borderColorAlt: '#333'
+		borderColorAlt: '#333',
+		info: 'hsla(199, 89%, 48%, 1)',
+		infoTransparent: 'hsla(199, 89%, 48%, 0.2)',
+		success: 'hsla(142, 71%, 45%, 1)',
+		successTransparent: 'hsla(142, 71%, 45%, 0.2)',
+		warning: 'hsla(38, 92%, 50%, 1)',
+		warningTransparent: 'hsla(38, 92%, 50%, 0.2)',
+		error: 'hsla(0, 84%, 60%, 1)',
+		errorTransparent: 'hsla(0, 84%, 60%, 0.2)'
 	}
 };
 
@@ -78,15 +94,12 @@ export const Radii = {
 
 export const Shadow = {
 	card: {
-		boxShadow: [
-			'0px 4px 12px rgba(15, 23, 42, 0.15)',
-		],
+		boxShadow:'0px 4px 12px rgba(15, 23, 42, 0.15)',
+
 		elevation: 4
 	},
 	overlay: {
-		boxShadow: [
-			'0px 10px 24px rgba(15, 23, 42, 0.28)',
-		],
+		boxShadow: '0px 10px 24px rgba(15, 23, 42, 0.28)',
 		elevation: 8
 	}
 } as const;
