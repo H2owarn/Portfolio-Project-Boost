@@ -32,7 +32,7 @@ export default function ProfileScreen() {
 				{/* Profile Section */}
 				<View style={styles.profileSection}>
 					<View style={styles.avatar}>
-						<Ionicons name="person" size={48} color="#7DF843" />
+						<Ionicons name="person" size={48} color={palette.text} />
 					</View>
 					<Text style={[styles.username, {color: palette.text}]}>{profile.name}</Text>
 					<Text style={[styles.joinedText, { color: palette.mutedText}]}>Joined {joined}</Text>
@@ -40,10 +40,10 @@ export default function ProfileScreen() {
 						<Text style={styles.linkText}>0 Friends</Text>
 					</View>
 					<View style={styles.buttonRow}>
-						<TouchableOpacity style={styles.addButton}>
-							<Text style={styles.addButtonText}>+ Add Friends</Text>
+						<TouchableOpacity style={[styles.addButton, {backgroundColor: palette.secondary}]}>
+							<Text style={[styles.addButtonText, {color: palette.primary}]}>+ Add Friends</Text>
 						</TouchableOpacity>
-						<TouchableOpacity style={styles.shareButton}>
+						<TouchableOpacity style={[styles.shareButton, {backgroundColor: palette.secondary}]}>
 							<Ionicons name="share-outline" size={20} color="white" />
 						</TouchableOpacity>
 					</View>
@@ -104,13 +104,14 @@ export default function ProfileScreen() {
 }
 
 function StatCard({ icon, value, label }: { icon: string; value: string | number; label: string }) {
+	const palette = Colors[useColorScheme() ?? 'dark'];
 	return (
 		<View style={{ marginBottom: 16, width: '48%' }}>
-			<View style={[styles.statCard, { height: 65, width: 170 }]}>
-				<MaterialIcons name={icon as any} size={28} color="#2ec91aff" />
-				<Text style={[styles.statValue, { color: '#F9FAFB' }]}>{value}</Text>
+			<View style={[styles.statCard, { height: 65, width: 170, backgroundColor: palette.surface }]}>
+				<MaterialIcons name={icon as any} size={28} color={palette.primary} />
+				<Text style={[styles.statValue, { color: palette.text }]}>{value}</Text>
 			</View>
-			<Text style={[styles.statLabel, { marginTop: 4, textAlign: 'center' }, {color: '#F9FAFB'}]}>{label}</Text>
+			<Text style={[styles.statLabel, { marginTop: 4, textAlign: 'center' }, {color: palette.text}]}>{label}</Text>
 		</View>
 	);
 }
@@ -165,7 +166,12 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		paddingVertical: 8,
 		borderRadius: 12,
-		marginRight: 8
+		marginRight: 8,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.3,
+		shadowRadius: 6,
+		elevation: 6,
 	},
 	addButtonText: {
 		color: 'white',
@@ -175,7 +181,11 @@ const styles = StyleSheet.create({
 		backgroundColor: '#374151ff',
 		paddingHorizontal: 12,
 		paddingVertical: 8,
-		borderRadius: 12
+		borderRadius: 12,
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.3,
+		shadowRadius: 6,
+		elevation: 6,
 	},
 	sectionTitle: {
 		fontSize: 18,
@@ -197,7 +207,11 @@ const styles = StyleSheet.create({
 		borderWidth: 2,
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 20
+		gap: 20,
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.3,
+		shadowRadius: 6,
+		elevation: 6,
 	},
 	statValue: {
 		color: 'black',

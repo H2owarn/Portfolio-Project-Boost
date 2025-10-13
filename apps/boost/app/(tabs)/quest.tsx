@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase";
 import { Colors, Shadow, Radii, Spacing, Font} from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { MaterialIcons } from "@expo/vector-icons";
+import { color } from "bun";
 
 
 export default function QuestScreen() {
@@ -179,24 +180,24 @@ export default function QuestScreen() {
         </View>
 
         {!!quest.description && (
-          <Text style={styles.description}>{quest.description}</Text>
+          <Text style={[styles.description, {color: palette.text}]}>{quest.description}</Text>
         )}
 
         <View style={styles.questSpecs}>
-          <View style={[styles.tagsRow, { backgroundColor: palette.primary + "10" }]}>
-            <MaterialIcons name="diamond" size={12} color={palette.primary} />
-            <Text style={[styles.specText, { color: palette.primary }]}>
+          <View style={[styles.tagsRow, { backgroundColor: palette.primary + "90" }]}>
+            <MaterialIcons name="diamond" size={12} color={palette.text} />
+            <Text style={[styles.specText, { color: palette.text }]}>
             {quest.xp_reward ?? 0} XP
             </Text>
           </View>
         </View>
 
-        <View style={styles.exercisesBox}>
-          <Text style={styles.exercisesTitle}>Exercises:</Text>
+        <View style={[styles.exercisesBox, {backgroundColor: palette.surfaceElevated}]}>
+          <Text style={[styles.exercisesTitle, {color: palette.text}]}>Exercises:</Text>
           <View style={styles.questSpecs}>
             {exerciseNames.length > 0 ? (
               exerciseNames.map((ex, i) => (
-                <Text key={`${quest.id}-ex-${i}`} style={[styles.exercise, { color: palette.primary }, { backgroundColor: palette.primary + "10" }]}>
+                <Text key={`${quest.id}-ex-${i}`} style={[styles.exercise, { color: palette.text }, { backgroundColor: palette.primary + "90" }]}>
                   {ex}
                 </Text>
               ))
@@ -213,11 +214,11 @@ export default function QuestScreen() {
           <Pressable
             style={[
               styles.startButton,
-              , { backgroundColor: palette.primary + "10" }]}
+              , { backgroundColor: palette.primary + "90" }]}
             android_ripple={{ color: palette.secondary + "20" }}
             onPress={() => console.log("Quest Selected:", quest.name)}
           >
-            <Text style={[styles.startButtonText, { color: palette.primary }]}>
+            <Text style={[styles.startButtonText, { color: palette.text }]}>
               {isLocked
                 ? `Level ${quest.min_level ?? 0} Required`
                 : userStamina < quest.stamina_cost
@@ -231,14 +232,14 @@ export default function QuestScreen() {
   };
 
   return (
-    <ScrollView contentInset={{ top: 45 }} style={styles.container}>
+    <ScrollView contentInset={{ top: 45 }} style={[styles.container, {backgroundColor: palette.background}]}>
       <View style={styles.header}>
         <Text style={[styles.headerTitle,{ color: palette.text }]}>
           Choose Your Quest
         </Text>
       </View>
 
-      <Text style={styles.sectionTitle}>
+      <Text style={[styles.sectionTitle, {color: palette.text}]}>
         ⚔️
         Main Quests</Text>
       {mainQuests.map((quest) => (
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   lockedText: { color: "#721c24", fontSize: 12, fontWeight: "600" },
-  description: { fontSize: 14, color: "#555", marginBottom: 8 },
+  description: { fontSize: 14, marginBottom: 8 },
   tagsRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -309,7 +310,6 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   exercisesBox: {
-    backgroundColor: "#050505ff",
     borderRadius: 8,
     padding: 10,
     marginBottom: 8,

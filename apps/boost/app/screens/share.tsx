@@ -1,10 +1,13 @@
 // app/screens/ShareScreen.tsx
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Share } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Share, useColorScheme } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Colors } from '@/constants/theme';
 
 export default function ShareScreen() {
   const router = useRouter();
+  const palette = Colors[useColorScheme() ?? "dark"];
   const { loggedWorkout } = useLocalSearchParams();
 
   const handleShare = async () => {
@@ -18,10 +21,10 @@ export default function ShareScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Workout Complete 🎉</Text>
-      <Text style={styles.subtitle}>Share your progress with your friends!</Text>
-
+    <View style={[styles.container, {backgroundColor: palette.background}]}>
+      <MaterialIcons name="local-fire-department" size={200} color={palette.primary}/>
+      <Text style={[styles.title, {color: palette.text}]}>Workout Complete 🎉</Text>
+      <Text style={[styles.subtitle, {color: palette.mutedText}]}>Share your progress with your friends!</Text>
       <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
         <Text style={styles.shareText}>Share Workout</Text>
       </TouchableOpacity>

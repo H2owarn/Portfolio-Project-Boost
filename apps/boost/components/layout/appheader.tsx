@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, useColorScheme } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
@@ -91,13 +91,13 @@ import { supabase } from "@/lib/supabase";
   const streak = 112;
 
   return (
-    <View style={[styles.header, { backgroundColor: '#1c1d2cff' }]}>
+    <View style={[styles.header, { backgroundColor: palette.surface}]}>
       <View style={styles.statsRow}>
         {/* Streak */}
         <View style={styles.statItem}>
           <View style={styles.iconValueRow}>
-            <Ionicons name="flame" size={20} color="orange" />
-            <Text style={styles.statValue}>{streak}</Text>
+            <MaterialIcons name="local-fire-department" size={20} color="orange" />
+            <Text style={[styles.statValue, { color: palette.text}]}>{streak}</Text>
           </View>
           <Text style={styles.statLabel}>Streak</Text>
         </View>

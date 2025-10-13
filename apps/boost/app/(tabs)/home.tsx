@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#222",
+    backgroundColor: "#000000ff",
   },
   progressBar: { marginTop: 6 },
   userName: { fontSize: 20, fontWeight: "bold" },
