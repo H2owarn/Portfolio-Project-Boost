@@ -29,8 +29,8 @@ export default function ExerciseInProgressScreen() {
   const exercise: Exercise = JSON.parse(params.exercise as string);
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [sets, setSets] = useState('3');
-  const [reps, setReps] = useState('12');
+  const [sets, setSets] = useState('0');
+  const [reps, setReps] = useState('0');
   const [completing, setCompleting] = useState(false);
   const [imageLoading, setImageLoading] = useState<{ [key: number]: boolean }>({});
   const [imagesPrefetched, setImagesPrefetched] = useState(false);
@@ -138,7 +138,7 @@ export default function ExerciseInProgressScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: exercise.name }} />
+      <Stack.Screen options={{ title: exercise.name, }} />
       <Screen scrollable={false} contentStyle={styles.container}>
         {/* Images Carousel */}
         {exercise.images && exercise.images.length > 0 ? (
@@ -216,8 +216,6 @@ export default function ExerciseInProgressScreen() {
 
           {/* Sets & Reps Input */}
           <View style={[styles.inputCard, { backgroundColor: palette.surface }]}>
-            <Text style={[styles.sectionTitle, { color: palette.text }]}>Your Workout</Text>
-            
             <View style={styles.inputRow}>
               <View style={styles.inputGroup}>
                 <Text style={[styles.inputLabel, { color: palette.mutedText }]}>Sets</Text>
@@ -233,7 +231,7 @@ export default function ExerciseInProgressScreen() {
                   value={sets}
                   onChangeText={setSets}
                   keyboardType="number-pad"
-                  placeholder="3"
+                  placeholder="0"
                   placeholderTextColor={palette.mutedText}
                 />
               </View>
@@ -252,7 +250,7 @@ export default function ExerciseInProgressScreen() {
                   value={reps}
                   onChangeText={setReps}
                   keyboardType="number-pad"
-                  placeholder="12"
+                  placeholder="0"
                   placeholderTextColor={palette.mutedText}
                 />
               </View>
@@ -437,7 +435,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: 0.5
+    letterSpacing: 0.5,
+    textAlign: 'center'
   },
   input: {
     height: 56,

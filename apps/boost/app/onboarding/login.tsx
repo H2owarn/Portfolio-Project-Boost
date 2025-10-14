@@ -44,67 +44,79 @@ export default function LoginScreen() {
 	const [password, setPassword] = useState('testing123');
 
 	return (
-		<Screen scrollable contentStyle={styles.container}>
-			<View style={styles.content}>
-				<View style={styles.header}>
-					<View style={[styles.icon, { backgroundColor: palette.surfaceElevated }]}>
-						<MaterialIcons name="fitness-center" size={36} color={palette.primary} />
-					</View>
-					<Text style={[styles.title, { color: palette.text }]}>Login</Text>
-					<Text style={[styles.subtitle, { color: palette.mutedText }]}>Welcome back to Boost</Text>
+	<Screen
+		scrollable
+		contentStyle={styles.container}
+		style={{ backgroundColor: palette.surface }}
+	>
+		<View style={styles.content}>
+			<View style={styles.header}>
+				<View style={[styles.icon, { backgroundColor: palette.surfaceElevated}]}>
+					<MaterialIcons name="local-fire-department" size={50} color={palette.primary} />
 				</View>
-				<View style={styles.form}>
-					{errors?.code === 'email_not_confirmed' && (
-						<Alert type="error" message="You must confirm your email before logging in." />
-					)}
-					{errors?.code === 'invalid_credentials' && <Alert type="error" message="Email or password are incorrect." />}
-					<BoostInput
-						placeholder="Email"
-						keyboardType="email-address"
-						leadingIcon={{ name: 'alternate-email' }}
-						autoCapitalize="none"
-						onChangeText={(value) => setEmail(value)}
-						value={email}
-						containerStyle={submitted && { opacity: 0.6, pointerEvents: 'none' }}
-					/>
-					<BoostInput
-						placeholder="Password"
-						leadingIcon={{ name: 'lock-outline' }}
-						trailingIcon={{ name: 'visibility-off' }}
-						secureTextEntry
-						autoCapitalize="none"
-						onChangeText={(value) => setPassword(value)}
-						value={password}
-						containerStyle={submitted && { opacity: 0.6, pointerEvents: 'none' }}
-					/>
-				</View>
-				<BoostButton
-					label="Login"
-					submitted={submitted}
-					onPress={() => submit(email, password)}
-					trailingIcon={<MaterialIcons name="arrow-forward" color="#000000" size={20} />}
+				<Text style={[styles.title, { color: palette.text }]}>Login</Text>
+				<Text style={[styles.subtitle, { color: palette.mutedText }]}>Welcome back to Boost</Text>
+			</View>
+
+			<View style={styles.form}>
+				{errors?.code === 'email_not_confirmed' && (
+					<Alert type="error" message="You must confirm your email before logging in." />
+				)}
+				{errors?.code === 'invalid_credentials' && (
+					<Alert type="error" message="Email or password are incorrect." />
+				)}
+
+				<BoostInput
+					placeholder="Email"
+					keyboardType="email-address"
+					leadingIcon={{ name: 'alternate-email' }}
+					autoCapitalize="none"
+					onChangeText={(value) => setEmail(value)}
+					value={email}
+					containerStyle={submitted && { opacity: 0.6, pointerEvents: 'none' }}
 				/>
-				<View style={styles.dividerRow}>
-					<View style={[styles.divider, { backgroundColor: palette.borderColorAlt }]} />
-					<Text style={[styles.dividerLabel, { color: palette.mutedText }]}>or</Text>
-					<View style={[styles.divider, { backgroundColor: palette.borderColorAlt }]} />
-				</View>
-				<View style={[styles.socialRow, submitted && { pointerEvents: 'none', opacity: 0.6 }]}>
-					<View style={[styles.socialButton, { backgroundColor: palette.surfaceElevated }]}>
-						<MaterialIcons name="photo-camera" size={24} color={palette.primary} />
-					</View>
+				<BoostInput
+					placeholder="Password"
+					leadingIcon={{ name: 'lock-outline' }}
+					trailingIcon={{ name: 'visibility-off' }}
+					secureTextEntry
+					autoCapitalize="none"
+					onChangeText={(value) => setPassword(value)}
+					value={password}
+					containerStyle={submitted && { opacity: 0.6, pointerEvents: 'none' }}
+				/>
+			</View>
+
+			<BoostButton
+				label="Login"
+				submitted={submitted}
+				onPress={() => submit(email, password)}
+				trailingIcon={<MaterialIcons name="arrow-forward" color="#000000" size={20} />}
+			/>
+
+			<View style={styles.dividerRow}>
+				<View style={[styles.divider, { backgroundColor: palette.borderColorAlt }]} />
+				<Text style={[styles.dividerLabel, { color: palette.mutedText }]}>or</Text>
+				<View style={[styles.divider, { backgroundColor: palette.borderColorAlt }]} />
+			</View>
+
+			<View style={[styles.socialRow, submitted && { pointerEvents: 'none', opacity: 0.6 }]}>
+				<View style={[styles.socialButton, { backgroundColor: palette.surfaceElevated }]}>
+					<MaterialIcons name="photo-camera" size={24} color={palette.text} />
 				</View>
 			</View>
-			<View style={styles.footer}>
-				<Text style={[styles.footerText, { color: palette.mutedText }]}>
-					New here?{' '}
-					<Link href="/onboarding/signup" style={[styles.link, { color: palette.primary }]}>
-						Sign up
-					</Link>
-				</Text>
-			</View>
-		</Screen>
-	);
+		</View>
+
+		<View style={styles.footer}>
+			<Text style={[styles.footerText, { color: palette.mutedText }]}>
+				New here?{' '}
+				<Link href="/onboarding/signup" style={[styles.link, { color: palette.primary }]}>
+					Sign up
+				</Link>
+			</Text>
+		</View>
+	</Screen>
+);
 }
 
 const styles = StyleSheet.create({

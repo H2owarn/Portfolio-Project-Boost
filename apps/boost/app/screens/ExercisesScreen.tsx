@@ -1,6 +1,6 @@
 // app/exercises/ExercisesScreen.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, ScrollView, TextInput } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
@@ -20,8 +20,7 @@ type Exercise = {
   images?: string[];
   xp_reward?: number;
   stamina_cost?: number;
-}
-
+};
 
 export default function ExercisesScreen() {
   const params = useLocalSearchParams();
@@ -35,14 +34,16 @@ export default function ExercisesScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [availableLevels, setAvailableLevels] = useState<string[]>([]);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState('');
 
   // Parse selectedMuscles safely
   let selectedMuscles: { [page: number]: string[] } = {};
   try {
     if (params.selectedMuscles) {
-      selectedMuscles = typeof params.selectedMuscles === 'string'
-        ? JSON.parse(params.selectedMuscles)
-        : params.selectedMuscles;
+      selectedMuscles =
+        typeof params.selectedMuscles === 'string'
+          ? JSON.parse(params.selectedMuscles)
+          : params.selectedMuscles;
     }
   } catch (err) {
     console.warn('Failed to parse selectedMuscles:', err);
@@ -53,20 +54,17 @@ export default function ExercisesScreen() {
     const fetchExercises = async () => {
       setLoading(true);
 
-      // Flatten selections and extract muscle names (before the '-' in uniqueId)
       const selectedNames = Object.values(selectedMuscles)
         .flat()
         .map((id: string) => id.split('-')[0].toLowerCase());
 
-      // Expand selections: if it's a group key, expand, otherwise keep the muscle itself
       const expandedMuscles = selectedNames.flatMap(name => {
         if (MUSCLE_GROUPS[name]) {
-          return MUSCLE_GROUPS[name].map(m => m.toLowerCase());  // expand group → muscles
+          return MUSCLE_GROUPS[name].map(m => m.toLowerCase());
         }
-        return [name]; // keep single muscle
+        return [name];
       });
 
-      // Fetch exercises from Supabase
       const { data, error } = await supabase
         .from('exercises')
         .select('id, name, primary_muscles, secondary_muscles, instructions, level, category, images, xp_reward, stamina_cost');
@@ -79,7 +77,6 @@ export default function ExercisesScreen() {
         return;
       }
 
-      // Filter by expanded group muscles
       const filtered = data.filter((ex: Exercise) =>
         ex.primary_muscles?.some(m => expandedMuscles.includes(m.toLowerCase()))
       );
@@ -87,7 +84,6 @@ export default function ExercisesScreen() {
       setExercises(filtered);
       setFilteredExercises(filtered);
 
-      // Extract unique levels and categories for filters
       const levels = [...new Set(filtered.map(ex => ex.level).filter(Boolean))] as string[];
       const categories = [...new Set(filtered.map(ex => ex.category).filter(Boolean))] as string[];
       setAvailableLevels(levels);
@@ -97,10 +93,8 @@ export default function ExercisesScreen() {
     };
 
     fetchExercises();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.selectedMuscles]);
 
-  // Filter exercises when level or category changes
   useEffect(() => {
     let filtered = exercises;
 
@@ -112,8 +106,17 @@ export default function ExercisesScreen() {
       filtered = filtered.filter(ex => ex.category === selectedCategory);
     }
 
+    if (searchText.trim() !== '') {
+      const lowerSearch = searchText.toLowerCase();
+      filtered = filtered.filter(ex =>
+        ex.name.toLowerCase().includes(lowerSearch) ||
+        ex.primary_muscles.some(m => m.toLowerCase().includes(lowerSearch)) ||
+        (ex.secondary_muscles?.some(m => m.toLowerCase().includes(lowerSearch)) ?? false)
+      );
+    }
+
     setFilteredExercises(filtered);
-  }, [exercises, selectedLevel, selectedCategory]);
+  }, [exercises, selectedLevel, selectedCategory, searchText]);
 
   const renderFilterChip = (
     label: string,
@@ -123,9 +126,11 @@ export default function ExercisesScreen() {
     <Pressable
       style={[
         styles.filterChip,
-        isSelected
-          ? { backgroundColor: palette.primary }
-          : { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.borderColor }
+        {
+          backgroundColor: isSelected ? palette.primary : palette.surface,
+          borderWidth: 1,
+          borderColor: palette.borderColor
+        }
       ]}
       onPress={onPress}
     >
@@ -145,12 +150,9 @@ export default function ExercisesScreen() {
       style={[styles.exerciseCard, { backgroundColor: palette.surface }]}
       android_ripple={{ color: palette.primary + '20' }}
       onPress={() => {
-        // Navigate to exercise in progress screen
         router.push({
           pathname: '/screens/ExerciseInProgressScreen' as any,
-          params: {
-            exercise: JSON.stringify(item)
-          }
+          params: { exercise: JSON.stringify(item) }
         });
       }}
     >
@@ -177,7 +179,7 @@ export default function ExercisesScreen() {
           {item.stamina_cost && (
             <View style={[styles.specBadge, { backgroundColor: palette.primary + '10' }]}>
               <MaterialIcons name="bolt" size={12} color={palette.primary} />
-              <Text style={[styles.specText, { color: palette.primary }]}>{item.stamina_cost} </Text>
+              <Text style={[styles.specText, { color: palette.primary }]}>{item.stamina_cost}</Text>
             </View>
           )}
           {item.level && (
@@ -204,77 +206,125 @@ export default function ExercisesScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Recommended Exercises' }} />
+      <Stack.Screen options={{ title: 'Recommended Exercises', headerShown: false }} />
       <Screen scrollable={false} contentStyle={styles.container}>
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={palette.primary} />
-        </View>
-      ) : exercises.length === 0 ? (
-        <View style={styles.errorContainer}>
-          <MaterialIcons name="search-off" size={48} color={palette.mutedText} />
-          <Text style={[styles.errorText, { color: palette.mutedText }]}>
-            No exercises found for the selected muscles.
-          </Text>
-        </View>
-      ) : (
-        <>
-          {/* Filters Section */}
-          {(availableLevels.length > 0 || availableCategories.length > 0) && (
-            <View style={styles.filtersSection}>
-              {availableLevels.length > 0 && (
-                <View style={styles.filterGroup}>
-                  <Text style={[styles.filterLabel, { color: palette.mutedText }]}>Level</Text>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.filterChips}
-                  >
-                    {availableLevels.map(level => (
-                      <View key={`level-${level}`}>
-                        {renderFilterChip(
-                          level,
-                          selectedLevel === level,
-                          () => setSelectedLevel(selectedLevel === level ? null : level)
-                        )}
-                      </View>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
-
-              {availableCategories.length > 0 && (
-                <View style={styles.filterGroup}>
-                  <Text style={[styles.filterLabel, { color: palette.mutedText }]}>Category</Text>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.filterChips}
-                  >
-                    {availableCategories.map(category => (
-                      <View key={`category-${category}`}>
-                        {renderFilterChip(
-                          category,
-                          selectedCategory === category,
-                          () => setSelectedCategory(selectedCategory === category ? null : category)
-                        )}
-                      </View>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={palette.primary} />
+          </View>
+        ) : exercises.length === 0 ? (
+          <View style={styles.errorContainer}>
+            <MaterialIcons name="search-off" size={48} color={palette.mutedText} />
+            <Text style={[styles.errorText, { color: palette.mutedText }]}>
+              No exercises found for the selected muscles.
+            </Text>
+          </View>
+        ) : (
+          <>
+            {/* Search Bar */}
+            <View style={{ paddingHorizontal: Spacing.lg, marginBottom: Spacing.md }}>
+              <TextInput
+                style={{
+                  backgroundColor: palette.surface,
+                  color: palette.text,
+                  borderRadius: Radii.md,
+                  paddingHorizontal: 16,
+                  paddingVertical: 20,
+                  borderWidth: 1,
+                  borderColor: palette.borderColor,
+                }}
+                placeholder="Search exercises..."
+                placeholderTextColor={palette.mutedText}
+                value={searchText}
+                onChangeText={setSearchText}
+              />
             </View>
-          )}
 
-          <FlatList
-            data={filteredExercises}
-            renderItem={renderExerciseCard}
-            keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={styles.list}
-            showsVerticalScrollIndicator={false}
-          />
-        </>
-      )}
+            {/* Filters Section */}
+            {(availableLevels.length > 0 || availableCategories.length > 0) && (
+              <View style={styles.filtersSection}>
+                {availableLevels.length > 0 && (
+                  <View style={styles.filterGroup}>
+                    <Text style={[styles.filterLabel, { color: palette.mutedText }]}>Level</Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.filterChips}
+                    >
+                      {availableLevels.map(level => (
+                        <View key={`level-${level}`}>
+                          {renderFilterChip(
+                            level,
+                            selectedLevel === level,
+                            () => setSelectedLevel(selectedLevel === level ? null : level)
+                          )}
+                        </View>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
+
+                {availableCategories.length > 0 && (
+                  <View style={styles.filterGroup}>
+                    <Text style={[styles.filterLabel, { color: palette.mutedText }]}>Category</Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.filterChips}
+                    >
+                      {availableCategories.map(category => (
+                        <View key={`category-${category}`}>
+                          {renderFilterChip(
+                            category,
+                            selectedCategory === category,
+                            () => setSelectedCategory(selectedCategory === category ? null : category)
+                          )}
+                        </View>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
+              </View>
+            )}
+
+            <FlatList
+              data={filteredExercises}
+              renderItem={renderExerciseCard}
+              keyExtractor={(item) => item.id.toString()}
+              contentContainerStyle={{ ...styles.list, paddingBottom: 120 }} // extra space for floating button
+              showsVerticalScrollIndicator={false}
+            />
+
+            {/* Floating Finish Workout Button */}
+            <Pressable
+              style={{
+                position: 'absolute',
+                bottom: 16,
+                left: 16,
+                right: 16,
+                zIndex: 20,
+                backgroundColor: palette.primary,
+                borderRadius: Radii.lg,
+                paddingVertical: 16,
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'row',
+                gap: 8,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.2,
+                shadowRadius: 6,
+                elevation: 6,
+              }}
+              onPress={() => router.push('/screens/share')}
+            >
+              <MaterialIcons name="check-circle" size={24} color="#000" />
+              <Text style={{ fontSize: 16, fontWeight: '700', color: '#000' }}>
+                Finish Workout
+              </Text>
+            </Pressable>
+          </>
+        )}
       </Screen>
     </>
   );
@@ -286,7 +336,7 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: Spacing.md,
-    paddingHorizontal: Spacing.lg
+    paddingHorizontal: Spacing.lg,
   },
   exerciseCard: {
     padding: 16,
@@ -295,39 +345,39 @@ const styles = StyleSheet.create({
     shadowColor: '#0f172a',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
-    shadowRadius: 12
+    shadowRadius: 12,
   },
   cardContent: {
-    gap: 12
+    gap: 12,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12
+    gap: 12,
   },
   exerciseIcon: {
     width: 40,
     height: 40,
     borderRadius: Radii.sm,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   exerciseInfo: {
     flex: 1,
-    gap: 4
+    gap: 4,
   },
   exerciseName: {
     fontSize: 18,
-    fontWeight: '600'
+    fontWeight: '600',
   },
   exerciseDescription: {
     fontSize: 14,
-    lineHeight: 20
+    lineHeight: 20,
   },
   exerciseSpecs: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8
+    gap: 8,
   },
   specBadge: {
     flexDirection: 'row',
@@ -335,54 +385,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: Radii.sm,
-    gap: 4
+    gap: 4,
   },
   specText: {
     fontSize: 12,
-    fontWeight: '500'
+    fontWeight: '500',
   },
   filtersSection: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xs,
     paddingBottom: Spacing.md,
-    gap: Spacing.md
+    gap: Spacing.md,
   },
   filterGroup: {
-    gap: Spacing.xs
+    gap: Spacing.xs,
   },
   filterLabel: {
     fontSize: 14,
     fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: 0.5
+    letterSpacing: 0.5,
   },
   filterChips: {
     gap: Spacing.xs,
-    paddingVertical: Spacing.xs
+    paddingVertical: Spacing.xs,
   },
   filterChip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: Radii.pill
+    borderRadius: Radii.pill,
   },
   filterChipText: {
     fontSize: 14,
     fontWeight: '500',
-    textTransform: 'capitalize'
+    textTransform: 'capitalize',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 16
+    gap: 16,
   },
   errorText: {
     fontSize: 16,
-    fontWeight: '500'
-  }
+    fontWeight: '500',
+  },
 });

@@ -1,10 +1,12 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Button, Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors, Font, Radii, Spacing } from '@/constants/theme';
 import AvatarBody from '@/components/avatar_parts/AvatarBody';
 import { musclesBack } from '@/components/avatar_parts/musclesBack';
 import { musclesFront } from '@/components/avatar_parts/musclesFront';
+import { color } from 'bun';
 
 const { width: screenWidth } = Dimensions.get('window');
 const musclesPages = [musclesFront, musclesBack];
@@ -13,6 +15,7 @@ const musclesPages = [musclesFront, musclesBack];
 }
 export default function AvatarScreen() {
 	const router = useRouter();
+	const palette = Colors[useColorScheme() ?? 'dark'];
 
 	const [selectedMuscles, setSelectedMuscles] = useState<{ [page: number]: string[] }>({});
 
@@ -37,7 +40,7 @@ export default function AvatarScreen() {
 	};
 
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, {backgroundColor: palette.background}]}>
 			<View style={styles.avatarWrapper}>
 				<AvatarBody fill="#161515af" width={500} height={500} style={{ marginTop: 20 }} />
 				{/* Muscle swap view*/}
@@ -70,7 +73,7 @@ export default function AvatarScreen() {
 				</ScrollView>
 			</View>
 
-			<View style={{ marginTop: 20 }}>
+			<View style={[styles.seemore, {marginTop: 20, backgroundColor: palette.surface}]}>
 				<Button title="See Recommended Exercises" onPress={handleContinue} />
 			</View>
 		</View>
@@ -82,7 +85,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: 'center',
 		justifyContent: 'center',
-		backgroundColor: '#2c2935ff'
 	},
 	avatarWrapper: {
 		position: 'relative',
@@ -95,5 +97,10 @@ const styles = StyleSheet.create({
 		position: 'absolute',
 		top: 0,
 		left: 0
+	},
+	seemore: {
+		padding: Spacing.sm,
+		borderRadius: Radii.md,
+		gap: Spacing.sm,
 	}
 });

@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 
 const primary = '#7DF843';
 const secondary = '#1F2937';
-const backgroundDark = '#000000';
+const backgroundDark = '#e41c1cff';
 const backgroundLight = '#FFFFFF';
 const textDark = '#F9FAFB';
 const textLight = '#111827';
@@ -11,7 +11,7 @@ export const Colors = {
 	light: {
 		text: textLight,
 		mutedText: '#6B7280',
-		background: backgroundLight,
+		background: '#dfdadaff',
 		surface: '#fff',
 		surfaceElevated: '#eee',
 		primary,
@@ -34,9 +34,9 @@ export const Colors = {
 	dark: {
 		text: textDark,
 		mutedText: '#999',
-		background: backgroundDark,
-		surface: '#0c0a09',
-		surfaceElevated: '#11100f',
+		background: '#0f0e0eef',
+		surface: '#242121ff',
+		surfaceElevated: '#2b2a29ff',
 		primary,
 		secondary,
 		tint: primary,
