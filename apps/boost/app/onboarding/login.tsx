@@ -51,7 +51,7 @@ export default function LoginScreen() {
 	>
 		<View style={styles.content}>
 			<View style={styles.header}>
-				<View style={[styles.icon, { backgroundColor: palette.text }]}>
+				<View style={[styles.icon, { backgroundColor: palette.surfaceElevated}]}>
 					<MaterialIcons name="local-fire-department" size={50} color={palette.primary} />
 				</View>
 				<Text style={[styles.title, { color: palette.text }]}>Login</Text>

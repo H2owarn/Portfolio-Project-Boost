@@ -1,120 +1,45 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
-import { useRouter } from "expo-router";
-import { supabase } from "@/lib/supabase";
+import { useXp } from '@/contexts/Xpcontext';
+import { useStamina } from '@/contexts/Staminacontext';
 
+export default function HeaderBar() {
+  const palette = Colors[useColorScheme() ?? 'dark'];
+  const { xp, level, minExp, maxExp } = useXp();
+  const { stamina: currentStamina, maxStamina } = useStamina();
 
+  const progress = maxExp > minExp ? Math.round(((xp - minExp) / (maxExp - minExp)) * 100) : 0;
 
-  type Profile = {
-    id: string;
-    name: string;
-    level: number;
-    exp: number;
-    stamina: number;
-  };
-
-  type LevelRow = {
-    level_number: number;
-    min_exp: number;
-    max_exp: number | null;
-  };
-
-  export default function headerBar() {
-    const palette = Colors[useColorScheme() ?? "dark"];
-    const router = useRouter();
-    const [profile, setProfile] = useState<Profile | null>(null);
-    const [users, setUsers] = useState<Profile[]>([]);
-    const [levelInfo, setLevelInfo] = useState<LevelRow | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-      let mounted = true;
-
-      (async () => {
-        // Auth User
-        const { data: { user }, error: userErr } = await supabase.auth.getUser();
-        if (userErr) console.error("User error:", userErr);
-        if (!user) {
-          if (mounted) setLoading(false);
-          return;
-        }
-
-        // Profile
-
-        const { data: profileData, error: profileErr } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-
-        if (profileErr) console.error("Profile fetxh error:", profileErr);
-
-        let fetchedLevelInfo: LevelRow | null = null;
-
-        if (profileData) {
-          const { data: leveData, error: levelErr } = await supabase
-            .from("levels")
-            .select("min_exp, max_exp")
-            .eq("level_number", profileData.level)
-            .maybeSingle<LevelRow>();
-
-        if (levelErr) console.error("Level fetch error:", levelErr);
-        fetchedLevelInfo = leveData ?? null;
-        }
-
-        if (mounted) {
-          setProfile(profileData ?? null);
-          setLevelInfo(fetchedLevelInfo);
-          setLoading(false);
-        }
-
-      }) ();
-
-    return () => {
-      mounted = false;
-    };
-    }, []);
-
- // XP, streak and stamina ratios.
-
-  const currentExp = profile?.exp ?? 0;
-  const minExp = levelInfo?.min_exp ?? 0;
-  const maxExp = levelInfo?.max_exp ?? 0;
-
-  const progress = Math.round(((currentExp - minExp) / (maxExp - minExp)) * 100);
-
-  const currentStamina = profile?.stamina ?? 0;
-  const maxStamina = 100;
   const staminaWidth = Math.floor((currentStamina / maxStamina) * 100);
-  const streak = 112;
+  const streak = 112; // placeholder
 
   return (
-    <View style={[styles.header, { backgroundColor: palette.surface}]}>
+    <View style={[styles.header, { backgroundColor: palette.surface }]}>
       <View style={styles.statsRow}>
         {/* Streak */}
         <View style={styles.statItem}>
           <View style={styles.iconValueRow}>
             <MaterialIcons name="local-fire-department" size={20} color="orange" />
-            <Text style={[styles.statValue, { color: palette.text}]}>{streak}</Text>
+            <Text style={[styles.statValue, { color: palette.text }]}>{streak}</Text>
           </View>
           <Text style={styles.statLabel}>Streak</Text>
         </View>
 
-        {/* XP Bar with number */}
+        {/* XP Bar */}
         <View style={styles.statItem}>
           <View style={styles.iconValueRow}>
             <Ionicons name="star" size={20} color="gold" />
             <View style={styles.xpBarContainer}>
               <View style={[styles.xpBarFill, { width: `${progress}%` }]} />
-              <Text style={styles.barText}>{currentExp}/{maxExp}</Text>
+              <Text style={styles.barText}>{xp}/{maxExp}</Text>
             </View>
           </View>
           <Text style={styles.statLabel}>XP</Text>
         </View>
 
-        {/* Stamina Bar */}
+        {/* Stamina */}
         <View style={styles.statItem}>
           <View style={styles.iconValueRow}>
             <MaterialCommunityIcons name="lightning-bolt-circle" size={20} color="#7ee926ff" />

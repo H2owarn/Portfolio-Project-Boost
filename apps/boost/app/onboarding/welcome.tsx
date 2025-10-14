@@ -30,9 +30,9 @@
 // 	const glowShadow = `0px 12px 24px ${hexToRgba(palette.primary, 0.35)}`;
 
 // 	return (
-// 		<Screen scrollable={false} contentStyle={styles.content} style={{ backgroundColor: palette.background }}>
+// 		<Screen scrollable={false} contentStyle={styles.content} style={{ backgroundColor: palette.surface }}>
 // 			<View style={[styles.heroIcon, { backgroundColor: palette.primary, boxShadow: [glowShadow] }]}>
-// 				<MaterialIcons name="local-fire-department" size={64} color={palette.background} />
+// 				<MaterialIcons name="local-fire-department" size={64} color={palette.surface} />
 // 			</View>
 // 			<View style={styles.copy}>
 // 				<Text style={[styles.heading, { color: palette.text }]}>Welcome to</Text>
@@ -40,7 +40,7 @@
 // 			</View>
 // 			<BoostButton
 // 				label="Get Started"
-// 				onPress={() => router.push('/(app)/onboarding/login')}
+// 				onPress={() => router.push('/onboarding/login')}
 // 				icon={<MaterialIcons name="arrow-forward" size={20} color="#000000" />}
 // 			/>
 // 		</Screen>

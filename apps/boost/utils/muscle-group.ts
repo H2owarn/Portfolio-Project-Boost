@@ -1,7 +1,7 @@
 export const MUSCLE_GROUPS: Record<string, string[]> = {
-  armsf: ["biceps", "triceps", "forearms"],
-  armsb: ["biceps", "triceps", "forearms"],
-  legsf: ["quadriceps", "abductors", "adductors"],
+  armsf: ["biceps", "forearms"],
+  armsb: ["triceps", "forearms"],
+  legs: ["quadriceps", "abductors", "adductors"],
   legsb: ["hamstrings", "calves", "glutes", "abductors", "adductors"],
   shouldersf: ["shoulders", "traps"],
   shouldersb: ["shoulders", "traps"],
