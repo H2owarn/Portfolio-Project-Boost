@@ -35,4 +35,5 @@ export interface Profile {
 		id: number;
 		name: RankDivision;
 	} | null;
+	weight: number;
 }

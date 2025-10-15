@@ -1,10 +1,11 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { BoostButton } from '@/components/boost-button';
 import { Screen } from '@/components/layout/screen';
 import { Colors, Radii } from '@/constants/theme';
+import { useAuth } from '@/hooks/use-auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 function hexToRgba(hex: string, alpha: number) {
