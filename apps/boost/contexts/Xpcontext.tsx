@@ -6,6 +6,7 @@ type XpContextType = {
   level: number;
   minExp: number;
   maxExp: number;
+  xpWeek: number;
   addXp: (amount: number) => Promise<void>;
 };
 
@@ -14,11 +15,13 @@ const XpContext = createContext<XpContextType>({
   level: 0,
   minExp: 0,
   maxExp: 0,
+  xpWeek: 0,
   addXp: async () => {},
 });
 
 export const XpProvider = ({ children }: { children: React.ReactNode }) => {
   const [xp, setXp] = useState(0);
+  const [xpWeek, setXpWeek] = useState(0);
   const [level, setLevel] = useState(0);
   const [minExp, setMinExp] = useState(0);
   const [maxExp, setMaxExp] = useState(0);
@@ -30,7 +33,7 @@ export const XpProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const { data: profile, error: profileErr } = await supabase
           .from('profiles')
-          .select('exp, level')
+          .select('exp, exp_week, level')
           .eq('id', userId)
           .single();
 
@@ -43,6 +46,7 @@ export const XpProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (mounted) {
           setXp(profile.exp ?? 0);
+          setXpWeek(profile.exp_week ?? 0);
           setLevel(profile.level ?? 0);
         }
 
@@ -92,17 +96,18 @@ export const XpProvider = ({ children }: { children: React.ReactNode }) => {
 
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('exp, level')
+      .select('exp, exp_week, level')
       .eq('id', user.id)
       .single();
 
     if (error || !profile) throw error || new Error('Profile not found');
 
     const newXp = (profile.exp || 0) + amount;
+    const newXpWeek = (profile.exp_week || 0) + amount;
 
     const { error: updateError } = await supabase
       .from('profiles')
-      .update({ exp: newXp })
+      .update({ exp: newXp, exp_week: newXpWeek })
       .eq('id', user.id);
 
     if (updateError) throw updateError;
@@ -118,13 +123,16 @@ export const XpProvider = ({ children }: { children: React.ReactNode }) => {
     const newLevel = levelData?.level_number ?? profile.level ?? 0;
 
     setXp(newXp);
+    setXpWeek(newXpWeek);
     setLevel(newLevel);
     setMinExp(levelData?.min_exp ?? 0);
     setMaxExp(levelData?.max_exp ?? 0);
+
+    console.log(`+${amount} XP — Total: ${newXp}, Weekly: ${newXpWeek}`);
   };
 
   return (
-    <XpContext.Provider value={{ xp, level, minExp, maxExp, addXp }}>
+    <XpContext.Provider value={{ xp, xpWeek, level, minExp, maxExp, addXp }}>
       {children}
     </XpContext.Provider>
   );

@@ -4,16 +4,16 @@ import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-ic
 import { Colors } from '@/constants/theme';
 import { useXp } from '@/contexts/Xpcontext';
 import { useStamina } from '@/contexts/Staminacontext';
+import { useStreak } from '@/contexts/StreakContext';
 
 export default function HeaderBar() {
   const palette = Colors[useColorScheme() ?? 'dark'];
   const { xp, level, minExp, maxExp } = useXp();
   const { stamina: currentStamina, maxStamina } = useStamina();
+  const { streak } = useStreak();
 
   const progress = maxExp > minExp ? Math.round(((xp - minExp) / (maxExp - minExp)) * 100) : 0;
-
   const staminaWidth = Math.floor((currentStamina / maxStamina) * 100);
-  const streak = 112; // placeholder
 
   return (
     <View style={[styles.header, { backgroundColor: palette.surface }]}>
