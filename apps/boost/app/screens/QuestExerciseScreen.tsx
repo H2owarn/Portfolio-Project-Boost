@@ -34,6 +34,7 @@ type Quest = {
   name: string;
   quest_type: string;
   xp_reward: number;
+  stamina_cost: number;
 };
 
 export default function QuestExerciseScreen() {
@@ -56,7 +57,7 @@ const [reps, setReps] = useState('10');
       if (!quest_id) return;
       const { data: questData, error } = await supabase
         .from("quests")
-        .select("id, name, quest_type, xp_reward")
+        .select("id, name, quest_type, xp_reward, stamina_cost")
         .eq("id", quest_id)
         .single();
 
@@ -74,45 +75,48 @@ const [reps, setReps] = useState('10');
   };
 
   const handleCompleteQuestExercise = async () => {
-    if (!data || !quest_id) return;
+  if (!data || !quest_id) return;
+  setLoading(true);
 
-    setLoading(true);
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      const user = userData.user;
-      if (!user) {
-        Alert.alert("Login Required", "Please log in to complete quest exercises.");
-        setLoading(false);
-        return;
-      }
-
-      const { error: progressErr } = await supabase
-        .from("user_quest_exercises")
-        .upsert({
-          user_id: user.id,
-          quest_id,
-          exercise_id: data.id,
-          completed: true,
-          completed_at: new Date().toISOString(),
-        });
-
-      if (progressErr) {
-        console.error("Quest exercise insert error:", progressErr);
-        Alert.alert("Error", "Failed to record quest exercise progress.");
-      } else {
-        Alert.alert(
-          "✅ Exercise Complete",
-          `You finished ${data.name} and earned ${quest?.xp_reward ?? 0} XP from the quest!`,
-          [{ text: "OK", onPress: () => router.back() }]
-        );
-      }
-    } catch (err) {
-      console.error("Error completing quest exercise:", err);
-      Alert.alert("Error", "An unexpected error occurred.");
-    } finally {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      Alert.alert("Login Required", "Please log in to complete exercises.");
       setLoading(false);
+      return;
     }
-  };
+
+    // 🟩 Record this exercise completion
+    const { error: insertErr } = await supabase
+      .from("completed_quest_exercises")
+      .upsert({
+        user_id: user.id,
+        quest_id,
+        exercise_id: data.id,
+        completed: true,
+        completed_at: new Date().toISOString(),
+      });
+
+    if (insertErr) {
+      console.error("Insert progress error:", insertErr);
+      Alert.alert("Error", "Could not record progress.");
+      setLoading(false);
+      return;
+    }
+
+    // 🟩 Go back to QuestScreen
+    Alert.alert("✅ Exercise Complete!", `You finished ${data.name}!`, [
+      { text: "OK", onPress: () => router.back() },
+    ]);
+  } catch (err) {
+    console.error("Error completing quest exercise:", err);
+    Alert.alert("Error", "An unexpected error occurred.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   if (!data) {
     return (
