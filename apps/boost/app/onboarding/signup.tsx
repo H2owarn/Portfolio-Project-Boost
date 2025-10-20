@@ -43,7 +43,7 @@ export default function SignUpScreen() {
 			return;
 		}
 
-		router.replace('/(tabs)/home');
+		if (type === 'success') router.replace('/onboarding/login');
 	};
 
 	return (

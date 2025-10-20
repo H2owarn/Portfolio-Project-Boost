@@ -68,6 +68,8 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 				}
 			};
 
+		setSession(login.data.session);
+
 		const { data: profileData, error: profileErr } = await supabase
 			.from('profiles')
 			.select(
@@ -148,14 +150,11 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 			};
 		}
 
-		if (!signUp.data.user) {
+		if (!signUp.data.user)
 			return {
 				type: 'error',
 				data: { code: 'something_went_wrong' }
 			};
-		}
-
-		setAuthedUser(signUp.data.user);
 
 		// Create default profile
 		const profile = await supabase.from('profiles').insert<Partial<Profile>>({
@@ -163,14 +162,13 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 			weight
 		});
 
-		if (profile.error || !profile.data) {
+		if (profile.error)
 			return {
 				type: 'error',
 				data: profile.error
 			};
-		}
 
-		setAuthedProfile(profile.data);
+		await supabase.auth.signOut();
 
 		return {
 			type: 'success'

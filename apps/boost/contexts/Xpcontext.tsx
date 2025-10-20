@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
+import { useAuth } from '@/hooks/use-auth';
 import { supabase } from '@/lib/supabase';
 
 type XpContextType = {
@@ -23,6 +24,7 @@ export const XpProvider = ({ children }: { children: React.ReactNode }) => {
 	const [level, setLevel] = useState(0);
 	const [minExp, setMinExp] = useState(0);
 	const [maxExp, setMaxExp] = useState(0);
+	const { authedUser, session } = useAuth();
 
 	useEffect(() => {
 		let mounted = true;
@@ -66,18 +68,16 @@ export const XpProvider = ({ children }: { children: React.ReactNode }) => {
 		};
 
 		const init = async () => {
-			const {
-				data: { session }
-			} = await supabase.auth.getSession();
-
 			if (session?.user) {
 				console.log('is session user');
 				await loadXpData(session.user.id);
 			}
 
 			const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-				console.log('onAuthStateChange');
-				if (session?.user) loadXpData(session.user.id);
+				if (session?.user) {
+					console.log('onAuthStateChange');
+					loadXpData(session.user.id);
+				}
 			});
 
 			return () => {
@@ -87,7 +87,7 @@ export const XpProvider = ({ children }: { children: React.ReactNode }) => {
 		};
 
 		init();
-	}, []);
+	}, [authedUser, session]);
 
 	const addXp = async (amount: number) => {
 		const {
