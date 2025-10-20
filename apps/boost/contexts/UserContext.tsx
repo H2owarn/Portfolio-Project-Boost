@@ -52,6 +52,14 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 
 		const login = await supabase.auth.signInWithPassword({ email, password });
 
+		if (!login.data.user) {
+			return {
+				type: 'validation',
+				data: {
+					code: 'account_not_found'
+				}
+			};
+		}
 		if (login.error)
 			return {
 				type: 'validation',
@@ -114,6 +122,14 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 			};
 		}
 
+		// Check if username is taken
+		const username = await supabase.from('profiles').select('name').eq('name', name).single();
+		if (username.data)
+			return {
+				type: 'validation',
+				data: { code: 'name_taken' }
+			};
+
 		const signUp = await supabase.auth.signUp({
 			email,
 			password
@@ -131,14 +147,6 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 				data: signUp.error
 			};
 		}
-
-		// // Check if username is taken
-		const username = await supabase.from('profiles').select('name').eq('name', name).single();
-		if (username.data)
-			return {
-				type: 'validation',
-				data: { code: 'name_taken' }
-			};
 
 		if (!signUp.data.user) {
 			return {
@@ -237,7 +245,7 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 
 	useEffect(() => {
 		getAuthedUser();
-	}, [authChecked]);
+	}, []);
 
 	return (
 		<AuthedUserContext.Provider

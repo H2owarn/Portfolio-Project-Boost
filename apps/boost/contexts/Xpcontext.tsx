@@ -28,25 +28,17 @@ export const XpProvider = ({ children }: { children: React.ReactNode }) => {
 		let mounted = true;
 
 		const loadXpData = async (userId: string) => {
-			console.log('----');
-			console.log('LOADXPDATA', userId);
-			console.log('----');
 			try {
 				const { data, error: profileErr } = await supabase
 					.from('profiles')
 					.select('exp, level')
 					.eq('id', userId);
 				const profile = data?.[0];
-				console.log('----');
-				console.log('PROFILE', profile);
-				console.log('----');
 
-				if (profileErr) {
+				if (profileErr || !profile) {
 					console.error('Error loading profile XP:', profileErr);
 					return;
 				}
-
-				if (!profile) return;
 
 				if (mounted) {
 					setXp(profile.exp ?? 0);
@@ -79,10 +71,12 @@ export const XpProvider = ({ children }: { children: React.ReactNode }) => {
 			} = await supabase.auth.getSession();
 
 			if (session?.user) {
+				console.log('is session user');
 				await loadXpData(session.user.id);
 			}
 
 			const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+				console.log('onAuthStateChange');
 				if (session?.user) loadXpData(session.user.id);
 			});
 

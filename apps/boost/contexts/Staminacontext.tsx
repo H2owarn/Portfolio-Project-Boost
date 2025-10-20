@@ -28,16 +28,17 @@ export const StaminaProvider = ({ children }: { children: React.ReactNode }) => 
 		let mounted = true;
 
 		const loadProfile = async (userId: string) => {
-			const { data: profile, error } = await supabase
+			const { data, error } = await supabase
 				.from('profiles')
 				.select('stamina, stamina_last_updated_at')
-				.eq('id', userId)
-				.single();
+				.eq('id', userId);
 
 			if (error) {
 				console.error('Error loading stamina:', error);
 				return;
 			}
+
+			const profile = data[0];
 
 			sessionUser.current = userId;
 

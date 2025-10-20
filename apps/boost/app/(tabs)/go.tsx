@@ -1,14 +1,13 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Button, Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Colors, Font, Radii, Spacing } from '@/constants/theme';
+import { Button, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+
 import AvatarBody from '@/components/avatar_parts/AvatarBody';
 import { musclesBack } from '@/components/avatar_parts/musclesBack';
 import { musclesFront } from '@/components/avatar_parts/musclesFront';
-import { color } from 'bun';
+import { Colors, Radii, Spacing } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
-const { width: screenWidth } = Dimensions.get('window');
 const musclesPages = [musclesFront, musclesBack];
 {
 	/* Muscle and page tracking*/
@@ -25,7 +24,9 @@ export default function AvatarScreen() {
 			const isSelected = pageMuscles.includes(uniqueId);
 			return {
 				...prev,
-				[page]: isSelected ? pageMuscles.filter((id) => id !== uniqueId) : [...pageMuscles, uniqueId]
+				[page]: isSelected
+					? pageMuscles.filter((id) => id !== uniqueId)
+					: [...pageMuscles, uniqueId]
 			};
 		});
 	};
@@ -40,7 +41,7 @@ export default function AvatarScreen() {
 	};
 
 	return (
-		<View style={[styles.container, {backgroundColor: palette.background}]}>
+		<View style={[styles.container, { backgroundColor: palette.background }]}>
 			<View style={styles.avatarWrapper}>
 				<AvatarBody fill="#161515af" width={500} height={500} style={{ marginTop: 20 }} />
 				{/* Muscle swap view*/}
@@ -64,7 +65,11 @@ export default function AvatarScreen() {
 										style={{ position: 'absolute', top, left, zIndex: z }}
 										onPress={() => handleMusclePress(uniqueId, page)}
 									>
-										<Component width={width} height={height} fill={isSelected ? '#37d137' : '#fcfcfc91'} />
+										<Component
+											width={width}
+											height={height}
+											fill={isSelected ? '#37d137' : '#fcfcfc91'}
+										/>
 									</TouchableOpacity>
 								);
 							})}
@@ -73,7 +78,7 @@ export default function AvatarScreen() {
 				</ScrollView>
 			</View>
 
-			<View style={[styles.seemore, {marginTop: 20, backgroundColor: palette.surface}]}>
+			<View style={[styles.seemore, { marginTop: 20, backgroundColor: palette.surface }]}>
 				<Button title="See Recommended Exercises" onPress={handleContinue} />
 			</View>
 		</View>
@@ -84,7 +89,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		alignItems: 'center',
-		justifyContent: 'center',
+		justifyContent: 'center'
 	},
 	avatarWrapper: {
 		position: 'relative',
@@ -101,6 +106,6 @@ const styles = StyleSheet.create({
 	seemore: {
 		padding: Spacing.sm,
 		borderRadius: Radii.md,
-		gap: Spacing.sm,
+		gap: Spacing.sm
 	}
 });

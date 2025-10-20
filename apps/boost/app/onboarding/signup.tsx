@@ -6,7 +6,6 @@ import { StyleSheet, Text, View } from 'react-native';
 import { BoostButton } from '@/components/boost-button';
 import { BoostInput } from '@/components/boost-input';
 import { Screen } from '@/components/layout/screen';
-import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/alert';
 import { Colors, Font, Radii, Spacing } from '@/constants/theme';
 import type { SignUpBody } from '@/contexts/UserContext';

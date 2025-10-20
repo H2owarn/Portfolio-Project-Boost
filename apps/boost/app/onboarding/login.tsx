@@ -64,6 +64,9 @@ export default function LoginScreen() {
 					{errors?.code === 'invalid_credentials' && (
 						<Alert type="error" message="Email or password are incorrect." />
 					)}
+					{errors?.code === 'account_not_found' && (
+						<Alert type="error" message="We couldn't find an account with that email address." />
+					)}
 
 					<BoostInput
 						placeholder="Email"
