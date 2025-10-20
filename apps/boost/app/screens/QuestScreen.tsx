@@ -5,6 +5,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useXp } from '@/contexts/Xpcontext';
+import { useStamina } from '@/contexts/Staminacontext';
 
 export default function QuestDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -13,7 +15,8 @@ export default function QuestDetailScreen() {
   const [exercises, setExercises] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [completedExercises, setCompletedExercises] = useState<Record<string, boolean>>({});
-
+  const { addXp } = useXp();
+  const { spendStamina } = useStamina();
   const completedCount = Object.values(completedExercises).filter(Boolean).length;
   const totalCount = exercises.length;
 
@@ -96,7 +99,7 @@ export default function QuestDetailScreen() {
     if (!user) return Alert.alert("Login required");
 
     // Mark quest completed in user_quests
-    const { error: questUpdateErr } = await supabase
+    await supabase
       .from("user_quests")
       .update({
         status: "completed",
@@ -104,8 +107,6 @@ export default function QuestDetailScreen() {
       })
       .eq("user_id", user.id)
       .eq("quest_id", quest.id);
-
-    if (questUpdateErr) throw questUpdateErr;
 
     // Record in completed_quests (history)
     await supabase.from("completed_quests").insert({
@@ -122,16 +123,9 @@ export default function QuestDetailScreen() {
 
     if (!profile) throw new Error("Profile not found");
 
-    // Apply quest rewards
-    const newExp = profile.exp + (quest.xp_reward ?? 0);
-    const newStamina = Math.max(0, profile.stamina - (quest.stamina_cost ?? 0));
-
-    const { error: updateErr } = await supabase
-      .from("profiles")
-      .update({ exp: newExp, stamina: newStamina })
-      .eq("id", user.id);
-
-    if (updateErr) throw updateErr;
+    //  reward system
+    await spendStamina(quest.stamina_cost ?? 0);
+    await addXp(quest.xp_reward ?? 0);
 
     // Optional: trigger level recalculation
     try {
