@@ -7,6 +7,8 @@ import { AuthedUserProvider } from '@/contexts/UserContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { XpProvider } from '@/contexts/Xpcontext';
 import { StaminaProvider } from '@/contexts/Staminacontext';
+import { RelationshipProvider } from '@/contexts/FriendContext';
+import { StreakProvider } from '@/contexts/StreakContext';
 
 export const unstable_settings = {
 	initialRouteName: '(tabs)'
@@ -18,8 +20,10 @@ export default function RootLayout() {
 
 	return (
 		<AuthedUserProvider>
+			<StreakProvider>
 			<XpProvider>
 			<StaminaProvider>
+			<RelationshipProvider>
 			<ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
 				<StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 				<Stack
@@ -38,8 +42,10 @@ export default function RootLayout() {
 					<Stack.Screen name="onboarding/login" options={{ headerShown: false, presentation: 'card' }} />
 				</Stack>
 			</ThemeProvider>
+			</RelationshipProvider>
 			</StaminaProvider>
 			</XpProvider>
+			</StreakProvider>
 		</AuthedUserProvider>
 	);
 }

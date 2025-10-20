@@ -1,5 +1,5 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { Redirect } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '@/constants/theme';
@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/use-auth';
 export default function ProfileScreen() {
 	const { authedProfile: profile, authChecked } = useAuth();
 	const palette = Colors[useColorScheme() ?? 'dark'];
+	const router = useRouter();
 
 	if (!authChecked) {
 		return <Text>Loading...</Text>;
@@ -40,10 +41,12 @@ export default function ProfileScreen() {
 						<Text style={styles.linkText}>0 Friends</Text>
 					</View>
 					<View style={styles.buttonRow}>
-						<TouchableOpacity style={[styles.addButton, {backgroundColor: palette.secondary}]}>
+						<TouchableOpacity style={[styles.addButton, {backgroundColor: palette.secondary}]}
+						onPress={() => router.push('/screens/testfriend')}>
 							<Text style={[styles.addButtonText, {color: palette.primary}]}>+ Add Friends</Text>
 						</TouchableOpacity>
-						<TouchableOpacity style={[styles.shareButton, {backgroundColor: palette.secondary}]}>
+						<TouchableOpacity style={[styles.shareButton, {backgroundColor: palette.secondary}]}
+						onPress={() => router.push('/screens/streaktest')}>
 							<Ionicons name="share-outline" size={20} color="white" />
 						</TouchableOpacity>
 					</View>

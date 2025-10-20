@@ -4,88 +4,16 @@ import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-ic
 import { Colors } from '@/constants/theme';
 import { useXp } from '@/contexts/Xpcontext';
 import { useStamina } from '@/contexts/Staminacontext';
-import { useRouter } from "expo-router";
-import { supabase } from "@/lib/supabase";
+import { useStreak } from '@/contexts/StreakContext';
 
+export default function HeaderBar() {
+  const palette = Colors[useColorScheme() ?? 'dark'];
+  const { xp, level, minExp, maxExp } = useXp();
+  const { stamina: currentStamina, maxStamina } = useStamina();
+  const { streak } = useStreak();
 
-  type Profile = {
-    id: string;
-    name: string;
-    level: number;
-    exp: number;
-    stamina: number;
-  };
-
-  type LevelRow = {
-    level_number: number;
-    min_exp: number;
-    max_exp: number | null;
-  };
-
-  export default function headerBar() {
-    const palette = Colors[useColorScheme() ?? "dark"];
-    const router = useRouter();
-    const [profile, setProfile] = useState<Profile | null>(null);
-    const [users, setUsers] = useState<Profile[]>([]);
-    const [levelInfo, setLevelInfo] = useState<LevelRow | null>(null);
-    const [loading, setLoading] = useState(true);
-    const { xp, level, minExp, maxExp } = useXp();
-
-
-    useEffect(() => {
-    let mounted = true;
-
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Initial fetch
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (mounted) setProfile(profileData ?? null);
-
-      // live updates for this user’s profile
-      const channel = supabase
-        .channel(`profile-updates-${user.id}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*", // can be 'UPDATE', 'INSERT', 'DELETE'
-            schema: "public",
-            table: "profiles",
-            filter: `id=eq.${user.id}`,
-          },
-          (payload) => {
-            console.log("🔄 Profile updated:", payload.new);
-            if (mounted) setProfile(payload.new as Profile);
-          }
-        )
-        .subscribe();
-
-      return () => {
-        mounted = false;
-        supabase.removeChannel(channel);
-      };
-    })();
-  }, []);
-
-
- // XP, streak and stamina ratios.
-
-  const currentExp = profile?.exp ?? 0;
-  const progress = Math.round(((currentExp - minExp) / (maxExp - minExp)) * 100);
-  const currentStamina = profile?.stamina?? 0;
-  const maxStamina = 100;
-
-
+  const progress = maxExp > minExp ? Math.round(((xp - minExp) / (maxExp - minExp)) * 100) : 0;
   const staminaWidth = Math.floor((currentStamina / maxStamina) * 100);
-  const streak = 112;
-
-
 
   return (
     <View style={[styles.header, { backgroundColor: palette.surface }]}>
