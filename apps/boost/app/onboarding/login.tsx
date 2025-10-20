@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { Link, router } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function LoginScreen() {
+	const params = useLocalSearchParams();
 	const palette = Colors[useColorScheme() ?? 'dark'];
 	const { login } = useAuth();
 	const [errors, setErrors] = useState<Record<string, any> | null>(null);
@@ -67,6 +68,7 @@ export default function LoginScreen() {
 					{errors?.code === 'account_not_found' && (
 						<Alert type="error" message="We couldn't find an account with that email address." />
 					)}
+					{params.signedUp && <Alert type="success" message="Account successfully signed up." />}
 
 					<BoostInput
 						placeholder="Email"

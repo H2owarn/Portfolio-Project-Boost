@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { Link, router } from 'expo-router';
+import { Link, Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -43,7 +43,11 @@ export default function SignUpScreen() {
 			return;
 		}
 
-		if (type === 'success') router.replace('/onboarding/login');
+		if (type === 'success')
+			router.push({
+				pathname: '/onboarding/login',
+				params: { signedUp: 'success' }
+			});
 	};
 
 	return (

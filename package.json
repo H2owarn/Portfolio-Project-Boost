@@ -1,5 +1,8 @@
 {
 	"name": "portfolio-project-boost",
+	"scripts": {
+		"app": "cd apps/boost && bun start"
+	},
 	"workspaces": [
 		"apps/*"
 	],
