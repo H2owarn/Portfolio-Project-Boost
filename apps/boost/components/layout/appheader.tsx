@@ -15,6 +15,8 @@ export default function HeaderBar() {
   const progress = maxExp > minExp ? Math.round(((xp - minExp) / (maxExp - minExp)) * 100) : 0;
   const staminaWidth = Math.floor((currentStamina / maxStamina) * 100);
 
+
+
   return (
     <View style={[styles.header, { backgroundColor: palette.surface }]}>
       <View style={styles.statsRow}>
@@ -33,7 +35,7 @@ export default function HeaderBar() {
             <Ionicons name="star" size={20} color="gold" />
             <View style={styles.xpBarContainer}>
               <View style={[styles.xpBarFill, { width: `${progress}%` }]} />
-              <Text style={styles.barText}>{profile?.exp ?? 0}/{maxExp}</Text>
+              <Text style={styles.barText}>{xp ?? 0}/{maxExp}</Text>
             </View>
           </View>
           <Text style={styles.statLabel}>XP</Text>
