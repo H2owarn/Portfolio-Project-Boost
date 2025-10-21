@@ -11,6 +11,7 @@ import { Alert } from '@/components/ui/alert';
 import { Colors, Font, Radii, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
 	const palette = Colors[useColorScheme() ?? 'dark'];
@@ -19,29 +20,42 @@ export default function LoginScreen() {
 	const [submitted, setSubmitted] = useState(false);
 
 	const submit = async (email: string, password: string) => {
-		// Prevent from sending multiple requests.
-		if (submitted) return;
+  if (submitted) return;
+  setSubmitted(true);
 
-		setSubmitted(true);
-		const { type, data } = await login({ email, password });
-		setSubmitted(false);
+  const { type, data } = await login({ email, password });
+  setSubmitted(false);
 
-		if (type === 'error') {
-			console.error(data);
-			return;
-		}
+  if (type === 'error') {
+    console.error(data);
+    return;
+  }
 
-		if (type === 'validation') {
-			console.log(data);
-			if (data) setErrors(data);
-			return;
-		}
+  if (type === 'validation') {
+    if (data) setErrors(data);
+    return;
+  }
 
-		router.replace('/(tabs)/home');
-	};
+  // Wait a moment to make sure auth context updates
+  setTimeout(async () => {
+    try {
+      const hideTutorial = await AsyncStorage.getItem('hideTutorial');
+      if (hideTutorial === 'true') {
+        router.replace('/(tabs)/home');
+      } else {
+        router.replace('/onboarding'); // show tutorial once
+      }
+    } catch (error) {
+      console.error('Error checking tutorial flag:', error);
+      router.replace('/onboarding');
+    }
+  }, 300); // small delay ensures useAuth() has updated
+};
 
-	const [email, setEmail] = useState('a@gibbu.dev');
-	const [password, setPassword] = useState('testing123');
+
+
+	const [email, setEmail] = useState('test@example.com');
+	const [password, setPassword] = useState('1234');
 
 	return (
 	<Screen

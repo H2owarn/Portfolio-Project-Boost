@@ -11,41 +11,42 @@ import { RelationshipProvider } from '@/contexts/FriendContext';
 import { StreakProvider } from '@/contexts/StreakContext';
 
 export const unstable_settings = {
-	initialRouteName: '(tabs)'
+  initialRouteName: 'onboarding/login', // 👈 Start at login
 };
 
 export default function RootLayout() {
-	const colorScheme = useColorScheme() ?? 'dark';
-	const palette = Colors[colorScheme];
+  const colorScheme = useColorScheme() ?? 'dark';
+  const palette = Colors[colorScheme];
 
-	return (
-		<AuthedUserProvider>
-			<StreakProvider>
-			<XpProvider>
-			<StaminaProvider>
-			<RelationshipProvider>
-			<ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-				<StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-				<Stack
-					screenOptions={{
-						headerStyle: { backgroundColor: palette.background },
-						headerTintColor: palette.text,
-						headerShadowVisible: false,
-						headerTitleStyle: { fontWeight: '600' },
-						contentStyle: { backgroundColor: palette.background }
-					}}
-				>
-					<Stack.Screen name="testxpscreen" options={{ headerShown: false }} />
-					<Stack.Screen name="index" options={{ headerShown: false }} />
-					<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-					<Stack.Screen name="onboarding/welcome" options={{ headerShown: false }} />
-					<Stack.Screen name="onboarding/login" options={{ headerShown: false, presentation: 'card' }} />
-				</Stack>
-			</ThemeProvider>
-			</RelationshipProvider>
-			</StaminaProvider>
-			</XpProvider>
-			</StreakProvider>
-		</AuthedUserProvider>
-	);
+  return (
+    <AuthedUserProvider>
+      <StreakProvider>
+        <XpProvider>
+          <StaminaProvider>
+            <RelationshipProvider>
+              <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+                <Stack
+                  screenOptions={{
+                    headerStyle: { backgroundColor: palette.background },
+                    headerTintColor: palette.text,
+                    headerShadowVisible: false,
+                    headerTitleStyle: { fontWeight: '600' },
+                    contentStyle: { backgroundColor: palette.background },
+                  }}
+                >
+                  <Stack.Screen name="onboarding/login" options={{ headerShown: false }} />
+                  <Stack.Screen name="onboarding/index" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)/home" options={{ headerShown: false }} />
+                  <Stack.Screen name="testxpscreen" options={{ headerShown: false }} />
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                </Stack>
+              </ThemeProvider>
+            </RelationshipProvider>
+          </StaminaProvider>
+        </XpProvider>
+      </StreakProvider>
+    </AuthedUserProvider>
+  );
 }
