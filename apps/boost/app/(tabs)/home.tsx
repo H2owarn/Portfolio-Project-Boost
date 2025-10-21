@@ -5,7 +5,8 @@ import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { Colors, Radii, Shadow } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-
+import { checkAndAwardBadges } from "@/utils/awardBadges";
+import { getBadgeImage } from "@/utils/getbadgeimage";
 
 type Profile = {
   id: string;
@@ -31,97 +32,98 @@ type UserQuestRow = {
 
 const FALLBACK_FRIEND_AVATAR = "https://via.placeholder.com/60";
 
-
 export default function HomeScreen() {
   const palette = Colors[useColorScheme() ?? "dark"];
   const router = useRouter();
 
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [users, setUsers] = useState<Profile[]>([]);
   const [quests, setQuests] = useState<UserQuestRow[]>([]);
   const [levelInfo, setLevelInfo] = useState<LevelRow | null>(null);
+  const [badges, setBadges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  let mounted = true;
+    let mounted = true;
 
-  (async () => {
-    // 1) Auth user
-    const { data: { user }, error: userErr } = await supabase.auth.getUser();
-    if (userErr) console.error("User error:", userErr);
-    if (!user) {
-      if (mounted) setLoading(false);
-      return;
-    }
+    (async () => {
+      // 1️⃣ Auth user
+      const { data: { user }, error: userErr } = await supabase.auth.getUser();
+      if (userErr) console.error("User error:", userErr);
+      if (!user) {
+        if (mounted) setLoading(false);
+        return;
+      }
 
-    // 2) Profile
-    const { data: profileData, error: profileErr } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
+      // 🏅 Check for badges
+      await checkAndAwardBadges(user.id);
 
-    if (profileErr) console.error("Profile fetch error:", profileErr);
+      // 2️⃣ Fetch profile
+      const { data: profileData, error: profileErr } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
 
-    // 2.2) Level info (based on profile.level)
+      if (profileErr) console.error("Profile fetch error:", profileErr);
 
-    let fetchedLevelInfo: LevelRow | null = null;
+      // 3️⃣ Fetch level info
+      let fetchedLevelInfo: LevelRow | null = null;
 
-    if (profileData) {
-      const { data: levelData, error: levelErr } = await supabase
-        .from("levels")
-        .select("min_exp, max_exp")
-        .eq("level_number", profileData.level)
-        .maybeSingle<LevelRow>();
+      if (profileData) {
+        const { data: levelData, error: levelErr } = await supabase
+          .from("levels")
+          .select("min_exp, max_exp")
+          .eq("level_number", profileData.level)
+          .maybeSingle<LevelRow>();
 
-      if (levelErr) console.error("Level fetch error:", levelErr);
-      fetchedLevelInfo = levelData ?? null;
-    }
+        if (levelErr) console.error("Level fetch error:", levelErr);
+        fetchedLevelInfo = levelData ?? null;
+      }
 
-    // 3) Recommended rivals
-    const { data: usersData, error: usersErr } = await supabase
-      .from("profiles")
-      .select("id, name, level, exp")
-      .neq("id", user.id)
-      .order("level", { ascending: false })
-      .limit(2)
+      // 4️⃣ Active quests
+      const { data: questsData, error: questsErr } = await supabase
+        .from("user_quests")
+        .select(`
+          quest_id,
+          quests ( id, name, description )
+        `)
+        .eq("user_id", user.id)
+        .eq("status", "active");
 
-    if (usersErr) console.error("Users fetch error:", usersErr);
+      if (questsErr) console.error("Quests fetch error:", questsErr);
 
-    // 4) Active quests
-    const { data: questsData, error: questsErr } = await supabase
-      .from("user_quests")
-      .select(`
-        quest_id,
-        quests ( id, name, description )
-      `)
-      .eq("user_id", user.id)
-      .eq("status", "active");
+      const normalizedQuests = (questsData ?? []).map((q: any) => ({
+        quest_id: q.quest_id,
+        quest: q.quests ?? null,
+      }));
 
-    if (questsErr) console.error("Quests fetch error:", questsErr);
+      // 5️⃣ Fetch earned badges
+      const { data: earnedBadges, error: badgesErr } = await supabase
+        .from("user_badges")
+        .select(`
+          badge_id,
+          badges ( name, description, asset_key )
+        `)
+        .eq("user_id", user.id);
 
-    const normalizedQuests = (questsData ?? []).map((q: any) => ({
-      quest_id: q.quest_id,
-      quest: q.quests?? null,
-    }));
+      if (badgesErr) console.error("Badge fetch error:", badgesErr);
 
-    // ✅ Set all state once
-    if (mounted) {
-      setProfile(profileData ?? null);
-      setLevelInfo(fetchedLevelInfo);
-      setUsers(usersData ?? []);
-      setQuests(normalizedQuests as UserQuestRow[]);
-      setLoading(false);
-    }
-  })();
+      if (mounted) {
+        setProfile(profileData ?? null);
+        setLevelInfo(fetchedLevelInfo);
+        setQuests(normalizedQuests as UserQuestRow[]);
+        setBadges(earnedBadges ?? []);
+        setLoading(false);
+      }
 
+    })();
 
-  return () => {
-    mounted = false;
-  };
-}, []);
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
- // ---- EXP calculation here ----
+  // ---- EXP calculation ----
   const currentExp = profile?.exp ?? 0;
   const minExp = levelInfo?.min_exp ?? 0;
   const maxExp = levelInfo?.max_exp ?? null;
@@ -129,7 +131,6 @@ export default function HomeScreen() {
     levelInfo && profile
       ? (currentExp - minExp) / ((maxExp ?? currentExp) - minExp)
       : 0;
-
 
   if (loading) {
     return (
@@ -146,10 +147,7 @@ export default function HomeScreen() {
     >
       {/* Header / Profile */}
       <View style={[styles.header, { backgroundColor: palette.surface }]}>
-        <Image
-          source={{ uri: FALLBACK_FRIEND_AVATAR  }}
-          style={styles.avatar}
-        />
+        <Image source={{ uri: FALLBACK_FRIEND_AVATAR }} style={styles.avatar} />
         <View style={styles.headerCopy}>
           <Text style={[styles.userName, { color: palette.text }]}>{profile?.name ?? "—"}</Text>
           <Text style={[styles.userLevel, { color: palette.mutedText }]}>
@@ -170,7 +168,6 @@ export default function HomeScreen() {
           <Text style={[styles.xpText, { color: palette.mutedText }]}>
             {currentExp}/{maxExp ?? "∞"} XP
           </Text>
-
         </View>
       </View>
 
@@ -186,14 +183,15 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        {/* If you want to show up to 3 active quests here */}
         <View style={styles.questGrid}>
           {(quests.slice(0, 3)).map((q) => (
-            <View key={q.quest_id} style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
+            <View
+              key={q.quest_id}
+              style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}
+            >
               <Text style={styles.questEmoji}>{q.quest?.name?.slice(0, 2) ?? "🌟"}</Text>
             </View>
           ))}
-          {/* If none yet, show placeholders */}
           {quests.length === 0 && (
             <>
               <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
@@ -218,43 +216,33 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      {/* Friends */}
+      {/* 🏅 Badges Section */}
       <View style={[styles.section, { backgroundColor: palette.surface }]}>
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: palette.text }]}>Recommended Rivals</Text>
-          <Pressable
-            onPress={() => console.log("See all friends")}
-            android_ripple={{ color: palette.primary + "20" }}
-          >
-          </Pressable>
+          <Text style={[styles.sectionTitle, { color: palette.text }]}>Your Badges</Text>
         </View>
 
-          <View style={styles.recommendContainer}>
-      {users.map((u) => (
-        <View
-          key={u.id}
-          style={[
-            styles.recommendCard,
-            { backgroundColor: palette.surfaceElevated ?? palette.surface },
-          ]}
-        >
-          <Image
-            source={{ uri: FALLBACK_FRIEND_AVATAR }}
-            style={styles.recommendAvatar}
-          />
-          <View style={styles.recommendInfo}>
-            <Text style={[styles.recommendName, { color: palette.text }]}>
-              {u.name ?? "—"}
-            </Text>
-            <Text style={[styles.recommendLevel, { color: palette.mutedText }]}>
-              Level {u.level}
-            </Text>
-          </View>
-          <Text style={[styles.arrow, { color: palette.primary }]}>➡️</Text>
+        <View style={styles.badgeGrid}>
+          {badges.length > 0 ? (
+            badges.map((b) => (
+              <View
+                key={b.badge_id}
+                style={[styles.badgeCard, { backgroundColor: palette.surfaceElevated ?? palette.surface }]}
+              >
+                <Image
+                  source={
+                    getBadgeImage(b.badges.asset_key)
+                  }
+                  style={styles.badgeImage}
+                />
+                <Text style={[styles.badgeName, { color: palette.text }]}>{b.badges.name}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={{ color: palette.mutedText }}>No badges yet — keep training!</Text>
+          )}
         </View>
-      ))}
-    </View>
-    </View>
+      </View>
     </ScrollView>
   );
 }
@@ -281,13 +269,12 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#000000ff",
+    backgroundColor: "#000",
   },
   progressBar: { marginTop: 6 },
   userName: { fontSize: 20, fontWeight: "bold" },
   userLevel: { fontSize: 14, fontWeight: "600" },
   xpText: { fontSize: 12 },
-
   questSection: {
     borderRadius: Radii.lg,
     padding: 20,
@@ -307,7 +294,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: { fontSize: 18, fontWeight: "700" },
   seeAll: { fontSize: 14, fontWeight: "600" },
-
   questGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -322,41 +308,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   questEmoji: { fontSize: 28 },
-
   quickStartBtn: { borderRadius: Radii.md, paddingVertical: 14, alignItems: "center" },
   quickStartText: { fontWeight: "700", letterSpacing: 0.4 },
-
-  recommendCard: {
+  badgeGrid: {
     flexDirection: "row",
-    alignItems: "center",
-    borderRadius: Radii.md,
-    padding: 12,
-    gap: 12,
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 16,
+    marginTop: 12,
   },
-  recommendAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  badgeCard: {
+    alignItems: "center",
+    width: 80,
+    gap: 6,
+    borderRadius: Radii.md,
+    padding: 8,
+    ...Shadow.card,
+  },
+  badgeImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: "#111",
   },
-
-  recommendContainer: {
-  gap: 12,
-  marginTop: 8,
+  badgeName: {
+    fontSize: 12,
+    fontWeight: "600",
+    textAlign: "center",
   },
-
-  recommendInfo: {
-    flex: 1,
-    gap: 4
-  },
-  recommendName: {
-    fontSize: 16,
-    fontWeight: "600"
-  },
-  recommendLevel: {
-    fontSize: 13
-  },
-  arrow: {
-    fontSize: 18
-    },
 });

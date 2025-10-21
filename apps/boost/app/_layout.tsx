@@ -9,6 +9,7 @@ import { XpProvider } from '@/contexts/Xpcontext';
 import { StaminaProvider } from '@/contexts/Staminacontext';
 import { RelationshipProvider } from '@/contexts/FriendContext';
 import { StreakProvider } from '@/contexts/StreakContext';
+import { WorkoutSessionProvider } from '@/contexts/WorkoutSessionContext';
 
 export const unstable_settings = {
 	initialRouteName: '(tabs)'
@@ -20,6 +21,7 @@ export default function RootLayout() {
 
 	return (
 		<AuthedUserProvider>
+			<WorkoutSessionProvider>
 			<StreakProvider>
 			<XpProvider>
 			<StaminaProvider>
@@ -46,6 +48,7 @@ export default function RootLayout() {
 			</StaminaProvider>
 			</XpProvider>
 			</StreakProvider>
+			</WorkoutSessionProvider>
 		</AuthedUserProvider>
 	);
 }

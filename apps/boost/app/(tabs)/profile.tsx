@@ -1,9 +1,10 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Redirect, useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState} from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { supabase } from '@/lib/supabase';
 
 import { useAuth } from '@/hooks/use-auth';
 
@@ -12,6 +13,27 @@ export default function ProfileScreen() {
 	const { authedProfile: profile, authChecked } = useAuth();
 	const palette = Colors[useColorScheme() ?? 'dark'];
 	const router = useRouter();
+	const [badgeCount, setBadgeCount] = useState<number>(0);
+
+	useEffect(() => {
+	const fetchBadgeCount = async () => {
+		if (!profile?.id) return;
+
+		const { count, error } = await supabase
+		.from('user_badges')
+		.select('*', { count: 'exact', head: true })
+		.eq('user_id', profile.id);
+
+		if (error) {
+		console.error('Badge count error:', error);
+		return;
+		}
+
+		setBadgeCount(count ?? 0);
+	};
+
+	fetchBadgeCount();
+	}, [profile?.id]);
 
 	if (!authChecked) {
 		return <Text>Loading...</Text>;
@@ -57,7 +79,7 @@ export default function ProfileScreen() {
 				<View style={styles.statsGrid}>
 					<StatCard
 					icon="local-fire-department"
-					value="112"
+					value={profile.streak}
 					label="Streak"
 					/>
 					<StatCard
@@ -71,7 +93,7 @@ export default function ProfileScreen() {
 					/>
 					<StatCard
 					icon="workspace-premium"
-					value="4"
+					value={badgeCount}
 					label="Badges"
 					/>
 				</View>

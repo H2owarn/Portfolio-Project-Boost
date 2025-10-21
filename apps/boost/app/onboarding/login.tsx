@@ -40,7 +40,7 @@ export default function LoginScreen() {
 		router.replace('/(tabs)/home');
 	};
 
-	const [email, setEmail] = useState('a@gibbu.dev');
+	const [email, setEmail] = useState('me@gibbu.dev');
 	const [password, setPassword] = useState('testing123');
 
 	return (

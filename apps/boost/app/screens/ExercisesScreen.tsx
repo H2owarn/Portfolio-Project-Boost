@@ -1,6 +1,6 @@
 // app/exercises/ExercisesScreen.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, ScrollView, TextInput, Alert } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
@@ -8,6 +8,8 @@ import { MUSCLE_GROUPS } from "@/utils/muscle-group";
 import { Screen } from '@/components/layout/screen';
 import { Colors, Radii, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useXp } from '@/contexts/Xpcontext';
+import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 
 type Exercise = {
   id: number;
@@ -19,7 +21,6 @@ type Exercise = {
   category?: string;
   images?: string[];
   xp_reward?: number;
-  stamina_cost?: number;
 };
 
 export default function ExercisesScreen() {
@@ -28,6 +29,9 @@ export default function ExercisesScreen() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
+  const { startWorkout, endWorkout, currentSessionId } = useWorkoutSession();
+
+  const { addXp } = useXp();
 
   // Filter states
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
@@ -49,6 +53,10 @@ export default function ExercisesScreen() {
     console.warn('Failed to parse selectedMuscles:', err);
     selectedMuscles = {};
   }
+
+  useEffect(() => {
+    if (!currentSessionId) startWorkout(); // start automatically when screen loads
+  }, []);
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -176,12 +184,6 @@ export default function ExercisesScreen() {
               <Text style={[styles.specText, { color: palette.primary }]}>{item.xp_reward} XP</Text>
             </View>
           )}
-          {item.stamina_cost && (
-            <View style={[styles.specBadge, { backgroundColor: palette.primary + '10' }]}>
-              <MaterialIcons name="bolt" size={12} color={palette.primary} />
-              <Text style={[styles.specText, { color: palette.primary }]}>{item.stamina_cost}</Text>
-            </View>
-          )}
           {item.level && (
             <View style={[styles.specBadge, { backgroundColor: palette.primary + '10' }]}>
               <MaterialIcons name="signal-cellular-alt" size={12} color={palette.primary} />
@@ -203,6 +205,68 @@ export default function ExercisesScreen() {
       </View>
     </Pressable>
   );
+
+  const handleFinishWorkout = async () => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("No user logged in");
+
+    // Get all completed exercises for the user (e.g., for today)
+    const { data: completed, error: completedErr } = await supabase
+      .from("completed_exercises")
+      .select("id, exercise_id")
+      .eq("user_id", user.id)
+      .eq("claimed", false);
+
+
+    if (completedErr) throw completedErr;
+    if (!completed?.length) {
+      Alert.alert("No completed exercises", "Do some exercises first!");
+      return;
+    }
+
+    // Get XP rewards for those exercises
+    const ids = completed.map((c) => c.exercise_id);
+    const { data: exercises, error: exErr } = await supabase
+      .from("exercises")
+      .select("id, xp_reward")
+      .in("id", ids);
+
+    if (exErr || !exercises?.length) throw exErr;
+
+    //  Calculate total XP
+    const totalXp = exercises.reduce((sum, ex) => sum + ex.xp_reward, 0);
+
+    //  Add XP in one go
+    await addXp(totalXp);
+
+    Alert.alert(
+      "🎉 Workout Complete!",
+      `You earned a total of +${totalXp} XP!`,
+      [{ text: "OK", onPress: () => router.push('/home') }]
+    );
+
+
+    // update claimed to TRUE
+    const completedIds = completed.map((c) => c.id);
+
+    await supabase
+      .from("completed_exercises")
+      .update({ claimed: true })
+      .in("id", completedIds);
+    
+    await endWorkout();
+
+  } catch (err) {
+    console.error("Error finishing workout:", err);
+    Alert.alert("❌ Error", "Could not finish workout.");
+  }
+  
+  
+
+
+};
+
 
   return (
     <>
@@ -316,7 +380,10 @@ export default function ExercisesScreen() {
                 shadowRadius: 6,
                 elevation: 6,
               }}
-              onPress={() => router.push('/screens/share')}
+              onPress={async () => {
+                await handleFinishWorkout();
+                router.push('/screens/share');
+              }}
             >
               <MaterialIcons name="check-circle" size={24} color="#000" />
               <Text style={{ fontSize: 16, fontWeight: '700', color: '#000' }}>
