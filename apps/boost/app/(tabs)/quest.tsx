@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase";
 import { Colors, Shadow, Radii, Spacing, Font} from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { color } from "bun";
 
 
@@ -208,7 +209,7 @@ export default function QuestScreen() {
         </View>
 
         <View style={styles.cardFooter}>
-          <Text style={styles.stamina}>
+          <Text style={[styles.stamina, {color: palette.primary}]}>
             Stamina Cost: <MaterialIcons name="bolt" size={12} color={palette.primary} /> {quest.stamina_cost ?? 0}
           </Text>
           <Pressable
@@ -216,7 +217,14 @@ export default function QuestScreen() {
               styles.startButton,
               , { backgroundColor: palette.primary + "90" }]}
             android_ripple={{ color: palette.secondary + "20" }}
-            onPress={() => console.log("Quest Selected:", quest.name)}
+            onPress={() =>
+              !isLocked && userStamina >= (quest.stamina_cost ?? 0)
+                ? router.push({
+                    pathname: '/screens/QuestScreen',
+                    params: { id: quest.id.toString() }, // 👈 pass quest ID
+                  })
+                : console.log("Quest Locked or Not Enough Stamina")
+            }
           >
             <Text style={[styles.startButtonText, { color: palette.text }]}>
               {isLocked
