@@ -26,7 +26,10 @@ type UserQuestRow = {
     id: number;
     name: string;
     description?: string | null;
+    exercise_ids?: number[];
   } | null;
+  completed_exercises: number;
+  total_exercises: number;
 };
 
 const FALLBACK_FRIEND_AVATAR = "https://via.placeholder.com/60";
@@ -88,22 +91,42 @@ export default function HomeScreen() {
 
     if (usersErr) console.error("Users fetch error:", usersErr);
 
-    // 4) Active quests
+    // 4) Active quests with progress
     const { data: questsData, error: questsErr } = await supabase
       .from("user_quests")
       .select(`
         quest_id,
-        quests ( id, name, description )
+        quests ( id, name, description, exercise_ids )
       `)
       .eq("user_id", user.id)
       .eq("status", "active");
 
     if (questsErr) console.error("Quests fetch error:", questsErr);
 
-    const normalizedQuests = (questsData ?? []).map((q: any) => ({
-      quest_id: q.quest_id,
-      quest: q.quests?? null,
-    }));
+    const normalizedQuests = await Promise.all(
+      (questsData ?? []).map(async (q: any) => {
+        const quest = q.quests;
+        const exerciseIds = quest?.exercise_ids ?? [];
+        const totalExercises = exerciseIds.length;
+
+        // Get completed exercises count for this quest
+        const { data: completedData } = await supabase
+          .from("user_quest_exercises")
+          .select("exercise_id")
+          .eq("user_id", user.id)
+          .eq("quest_id", q.quest_id)
+          .eq("completed", true);
+
+        const completedExercises = completedData?.length ?? 0;
+
+        return {
+          quest_id: q.quest_id,
+          quest: quest ?? null,
+          completed_exercises: completedExercises,
+          total_exercises: totalExercises,
+        };
+      })
+    );
 
     // ✅ Set all state once
     if (mounted) {
@@ -186,35 +209,77 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        {/* If you want to show up to 3 active quests here */}
-        <View style={styles.questGrid}>
-          {(quests.slice(0, 3)).map((q) => (
-            <View key={q.quest_id} style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
-              <Text style={styles.questEmoji}>{q.quest?.name?.slice(0, 2) ?? "🌟"}</Text>
-            </View>
-          ))}
-          {/* If none yet, show placeholders */}
-          {quests.length === 0 && (
-            <>
-              <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
-                <Text style={styles.questEmoji}>👑</Text>
-              </View>
-              <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
-                <Text style={styles.questEmoji}>🦴</Text>
-              </View>
-              <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
-                <Text style={styles.questEmoji}>💎</Text>
-              </View>
-            </>
-          )}
-        </View>
+        {/* Active Quests with Progress */}
+        {quests.length > 0 ? (
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.questList}
+          >
+            {quests.slice(0, 3).map((q) => {
+              const progress = q.total_exercises > 0 
+                ? q.completed_exercises / q.total_exercises 
+                : 0;
+              const hasProgress = q.completed_exercises > 0;
+
+              return (
+                <Pressable
+                  key={q.quest_id}
+                  style={[styles.questCard, { backgroundColor: palette.surfaceElevated ?? palette.surface }]}
+                  onPress={() => router.push(`/screens/QuestScreen?id=${q.quest?.id}`)}
+                  android_ripple={{ color: palette.primary + "20" }}
+                >
+                  <View style={styles.questCardContent}>
+                    <View style={styles.questCardTop}>
+                      <Text style={[styles.questCardEmoji, { backgroundColor: palette.primary + "15" }]}>
+                        {q.quest?.name?.slice(0, 2) ?? "�"}
+                      </Text>
+                      <Text style={[styles.questCardName, { color: palette.text }]} numberOfLines={2}>
+                        {q.quest?.name ?? "Quest"}
+                      </Text>
+                    </View>
+
+                    {hasProgress ? (
+                      <View style={styles.questProgressContainer}>
+                        <View style={[styles.progressBarWrapper, { borderColor: palette.borderColor, backgroundColor: palette.background }]}>
+                          <View 
+                            style={[
+                              styles.progressBarFill, 
+                              { 
+                                width: `${progress * 100}%`,
+                                backgroundColor: palette.primary 
+                              }
+                            ]} 
+                          />
+                          <Text style={[styles.progressBarText, { color: palette.text }]}>
+                            {q.completed_exercises}/{q.total_exercises}
+                          </Text>
+                        </View>
+                      </View>
+                    ) : (
+                    <View style={[styles.goButton, { backgroundColor: palette.primary }]}>
+                      <Text style={[styles.goButtonText, { color: palette.secondary }]}>GO</Text>
+                    </View>
+                  )}
+                  </View>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        ) : (
+          <View style={styles.noQuestsContainer}>
+            <Text style={[styles.noQuestsText, { color: palette.mutedText }]}>
+              No active quests. Tap &quot;See All&quot; to start a quest!
+            </Text>
+          </View>
+        )}
 
         <Pressable
           style={[styles.quickStartBtn, { backgroundColor: palette.primary }]}
           android_ripple={{ color: palette.secondary + "20" }}
           onPress={() => router.push("/(tabs)/quest")}
         >
-          <Text style={[styles.quickStartText, { color: palette.secondary }]}>Quick Start</Text>
+          <Text style={[styles.quickStartText, { color: palette.secondary }]}>Browse All Quests</Text>
         </Pressable>
       </View>
 
@@ -307,6 +372,109 @@ const styles = StyleSheet.create({
   },
   sectionTitle: { fontSize: 18, fontWeight: "700" },
   seeAll: { fontSize: 14, fontWeight: "600" },
+
+  questList: {
+    gap: 12,
+    paddingRight: 16,
+    justifyContent: "center",
+    flexGrow: 1,
+  },
+  questCard: {
+    borderRadius: Radii.md,
+    padding: 16,
+    gap: 12,
+    minWidth: 100,
+    flex: 1,
+    ...Shadow.card,
+  },
+  questCardContent: {
+    flex: 1,
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 16,
+  },
+  questCardTop: {
+    alignItems: "center",
+    gap: 12,
+    width: "100%",
+  },
+  questCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  questCardLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    gap: 12,
+  },
+  questCardEmoji: {
+    width: 60,
+    height: 60,
+    borderRadius: Radii.md,
+    textAlign: "center",
+    lineHeight: 60,
+    fontSize: 28,
+  },
+  questCardInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  questCardName: {
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  questCardDesc: {
+    fontSize: 13,
+    textAlign: "center",
+  },
+  goButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: Radii.sm,
+    width: "100%",
+    alignItems: "center",
+  },
+  goButtonText: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
+  questProgressContainer: {
+    gap: 6,
+    width: "100%",
+  },
+  progressBarWrapper: {
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    overflow: "hidden",
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  progressBarFill: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    borderRadius: 14,
+  },
+  progressBarText: {
+    fontSize: 14,
+    fontWeight: "700",
+    zIndex: 1,
+  },
+  noQuestsContainer: {
+    padding: 24,
+    alignItems: "center",
+  },
+  noQuestsText: {
+    fontSize: 14,
+    textAlign: "center",
+  },
 
   questGrid: {
     flexDirection: "row",
