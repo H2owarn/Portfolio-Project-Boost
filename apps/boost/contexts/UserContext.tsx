@@ -1,4 +1,3 @@
-import { Redirect } from 'expo-router';
 import { type ReactNode, createContext, useEffect, useState } from 'react';
 
 import { supabase } from '@/lib/supabase';
@@ -88,6 +87,11 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 
 	// Remove the user session/tokens from local/async storage.
 	const logout: Context['logout'] = async () => {
+		await supabase.auth.signOut();
+
+		setAuthedProfile(undefined);
+		setAuthedUser(undefined);
+
 		return {
 			type: 'success'
 		};

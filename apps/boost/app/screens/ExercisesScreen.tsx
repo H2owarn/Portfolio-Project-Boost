@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { MUSCLE_GROUPS } from "@/utils/muscle-group";
 import { Screen } from '@/components/layout/screen';
 import { Colors, Radii, Spacing } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/hooks/use-theme';
 
 type Exercise = {
   id: number;
@@ -24,7 +24,7 @@ type Exercise = {
 
 export default function ExercisesScreen() {
   const params = useLocalSearchParams();
-  const palette = Colors[useColorScheme() ?? 'dark'];
+  const {palette} = useTheme();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);

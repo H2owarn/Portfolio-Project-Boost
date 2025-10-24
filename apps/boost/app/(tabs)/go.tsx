@@ -1,21 +1,19 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Button, Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Colors, Font, Radii, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
+import { Colors, Radii, Spacing } from '@/constants/theme';
 import AvatarBody from '@/components/avatar_parts/AvatarBody';
 import { musclesBack } from '@/components/avatar_parts/musclesBack';
 import { musclesFront } from '@/components/avatar_parts/musclesFront';
-import { color } from 'bun';
 
-const { width: screenWidth } = Dimensions.get('window');
 const musclesPages = [musclesFront, musclesBack];
 {
 	/* Muscle and page tracking*/
 }
 export default function AvatarScreen() {
 	const router = useRouter();
-	const palette = Colors[useColorScheme() ?? 'dark'];
+	const {palette} = useTheme();
 
 	const [selectedMuscles, setSelectedMuscles] = useState<{ [page: number]: string[] }>({});
 

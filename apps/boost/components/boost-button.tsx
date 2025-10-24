@@ -1,13 +1,13 @@
 import { ReactNode } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Colors, Radii, Spacing } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/hooks/use-theme';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 
 type BoostButtonProps = {
-	label: string;
+	label?: string;
 	onPress?: () => void;
 	variant?: ButtonVariant;
 	icon?: ReactNode;
@@ -17,20 +17,21 @@ type BoostButtonProps = {
 	submitted?: boolean;
 };
 
-export function BoostButton({
-	label,
-	onPress,
-	variant = 'primary',
-	icon,
-	trailingIcon,
-	fullWidth = true,
-	disabled = false,
-	submitted = false
-}: BoostButtonProps) {
-	const colorScheme = useColorScheme() ?? 'dark';
-	const palette = Colors[colorScheme];
+export function BoostButton(
+	{
+		label,
+		onPress,
+		variant = 'primary',
+		icon,
+		trailingIcon,
+		fullWidth = true,
+		disabled = false,
+		submitted = false
+	}: BoostButtonProps
+) {
+	const { palette } = useTheme();
 
-	const styles = createStyles(palette, variant, fullWidth, disabled);
+	const styles = createStyles(palette, variant, fullWidth, disabled, !icon || !trailingIcon);
 
 	return (
 		<Pressable
@@ -44,7 +45,8 @@ export function BoostButton({
 			) : icon ? (
 				<View style={styles.icon}>{icon}</View>
 			) : null}
-			<Text style={styles.label}>{label}</Text>
+
+			{label && <Text style={styles.label}>{label}</Text>}
 
 			{submitted && trailingIcon ? (
 				<ActivityIndicator color="black" size={20} />
@@ -59,19 +61,20 @@ const createStyles = (
 	palette: (typeof Colors)['light'],
 	variant: ButtonVariant,
 	fullWidth: boolean,
-	disabled: boolean
+	disabled: boolean,
+	iconOnly: boolean
 ) => {
 	const base = {
 		justifyContent: 'center',
 		alignItems: 'center',
 		borderRadius: Radii.lg,
 		paddingVertical: Spacing.md,
-		paddingHorizontal: Spacing.lg,
+		paddingHorizontal: iconOnly ? Spacing.md : Spacing.lg,
 		flexDirection: 'row',
 		gap: Spacing.sm
 	} as const;
 
-	const variants: Record<ButtonVariant, { backgroundColor: string; borderColor?: string; textColor: string }> = {
+	const selected = {
 		primary: {
 			backgroundColor: disabled ? '#14532d' : palette.primary,
 			textColor: '#000000'
@@ -85,9 +88,7 @@ const createStyles = (
 			borderColor: '#374151',
 			textColor: palette.mutedText
 		}
-	};
-
-	const selected = variants[variant];
+	}[variant];
 
 	return StyleSheet.create({
 		button: {

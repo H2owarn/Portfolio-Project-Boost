@@ -4,19 +4,17 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  ActivityIndicator,
-  FlatList,
   ScrollView,
 } from "react-native";
 import { supabase } from "@/lib/supabase";
-import { Colors, Shadow, Radii, Spacing, Font} from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Shadow, Radii, Spacing, Font} from "@/constants/theme";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTheme } from "@/hooks/use-theme";
 
 
 export default function QuestScreen() {
-  const palette = Colors[useColorScheme() ?? "dark"];
+  const {palette} = useTheme()
   const [quests, setQuests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);

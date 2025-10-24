@@ -3,8 +3,8 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-nati
 import * as Progress from "react-native-progress";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
-import { Colors, Radii, Shadow } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Radii, Shadow } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
 
 
 type Profile = {
@@ -33,7 +33,7 @@ const FALLBACK_FRIEND_AVATAR = "https://via.placeholder.com/60";
 
 
 export default function HomeScreen() {
-  const palette = Colors[useColorScheme() ?? "dark"];
+  const {palette} = useTheme()
   const router = useRouter();
 
   const [profile, setProfile] = useState<Profile | null>(null);

@@ -5,7 +5,7 @@
 // import { BoostButton } from '@/components/boost-button';
 // import { Screen } from '@/components/layout/screen';
 // import { Colors, Radii } from '@/constants/theme';
-// import { useColorScheme } from '@/hooks/use-color-scheme';
+// import { useTheme } from '@/hooks/use-theme';
 
 // function hexToRgba(hex: string, alpha: number) {
 // 	const sanitized = hex.replace('#', '');
@@ -26,7 +26,7 @@
 
 // export default function WelcomeScreen() {
 // 	const router = useRouter();
-// 	const palette = Colors[useColorScheme() ?? 'dark'];
+// 	const {palette} = useTheme();
 // 	const glowShadow = `0px 12px 24px ${hexToRgba(palette.primary, 0.35)}`;
 
 // 	return (

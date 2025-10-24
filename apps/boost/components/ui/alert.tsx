@@ -1,7 +1,8 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { Text, View, useColorScheme } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { Colors, Radii, Spacing } from '@/constants/theme';
+import { Radii, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 interface AlertProps {
 	type: 'info' | 'success' | 'warning' | 'error';
@@ -9,7 +10,7 @@ interface AlertProps {
 }
 
 export const Alert = ({ type, message }: AlertProps) => {
-	const palette = Colors[useColorScheme() ?? 'dark'];
+	const { palette } = useTheme();
 	const colours = {
 		info: palette.infoTransparent,
 		success: palette.successTransparent,

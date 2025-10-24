@@ -2,51 +2,62 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Redirect, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
+import { BoostButton } from '@/components/boost-button';
 import { useAuth } from '@/hooks/use-auth';
-
+import { useTheme } from '@/hooks/use-theme';
 
 export default function ProfileScreen() {
 	const { authedProfile: profile, authChecked } = useAuth();
-	const palette = Colors[useColorScheme() ?? 'dark'];
+	const {palette} = useTheme()
 	const router = useRouter();
 
 	if (!authChecked) {
 		return <Text>Loading...</Text>;
 	}
 
-   if (!profile) {
+	if (!profile) {
 		return <Redirect href="/onboarding/login" />;
 	}
 
-  const joined = useMemo(() => {
+	const joined = useMemo(() => {
 		if (!profile?.created_at) return '';
 		const d = new Date(profile.created_at);
 		return d.toLocaleString(undefined, { month: 'long', year: 'numeric' });
 	}, [profile?.created_at]);
 
 	return (
-		<View style={[styles.container, {backgroundColor: palette.background}]}>
+		<View style={[styles.container, { backgroundColor: palette.background }]}>
 			<ScrollView contentContainerStyle={styles.scrollContent}>
+				<View style={{ position: 'absolute', top: 20, right: 20 }}>
+					<BoostButton
+						variant="secondary"
+						icon={<MaterialIcons name="settings" size={20} color={palette.text} />}
+						fullWidth={false}
+						onPress={() => router.push('/(tabs)/settings')}
+					/>
+				</View>
 				{/* Profile Section */}
 				<View style={styles.profileSection}>
 					<View style={styles.avatar}>
 						<Ionicons name="person" size={48} color={palette.text} />
 					</View>
-					<Text style={[styles.username, {color: palette.text}]}>{profile.name}</Text>
-					<Text style={[styles.joinedText, { color: palette.mutedText}]}>Joined {joined}</Text>
+					<Text style={[styles.username, { color: palette.text }]}>{profile.name}</Text>
+					<Text style={[styles.joinedText, { color: palette.mutedText }]}>Joined {joined}</Text>
 					<View style={styles.followRow}>
 						<Text style={styles.linkText}>0 Friends</Text>
 					</View>
 					<View style={styles.buttonRow}>
-						<TouchableOpacity style={[styles.addButton, {backgroundColor: palette.secondary}]}
-						onPress={() => router.push('/screens/testfriend')}>
-							<Text style={[styles.addButtonText, {color: palette.primary}]}>+ Add Friends</Text>
+						<TouchableOpacity
+							style={[styles.addButton, { backgroundColor: palette.secondary }]}
+							onPress={() => router.push('/screens/testfriend')}
+						>
+							<Text style={[styles.addButtonText, { color: palette.primary }]}>+ Add Friends</Text>
 						</TouchableOpacity>
-						<TouchableOpacity style={[styles.shareButton, {backgroundColor: palette.secondary}]}
-						onPress={() => router.push('/screens/streaktest')}>
+						<TouchableOpacity
+							style={[styles.shareButton, { backgroundColor: palette.secondary }]}
+							onPress={() => router.push('/screens/streaktest')}
+						>
 							<Ionicons name="share-outline" size={20} color="white" />
 						</TouchableOpacity>
 					</View>
@@ -55,31 +66,16 @@ export default function ProfileScreen() {
 				{/* Statistics */}
 				<Text style={[styles.sectionTitle, { color: palette.text }]}>Overview</Text>
 				<View style={styles.statsGrid}>
-					<StatCard
-					icon="local-fire-department"
-					value="112"
-					label="Streak"
-					/>
-					<StatCard
-					icon="star"
-					value={profile.exp}
-					label="Total XP"
-					/>
-					<StatCard
-					icon="shield"
-					value={profile.rank_divisions?.name?? "?"} label="Current league"
-					/>
-					<StatCard
-					icon="workspace-premium"
-					value="4"
-					label="Badges"
-					/>
+					<StatCard icon="local-fire-department" value="112" label="Streak" />
+					<StatCard icon="star" value={profile.exp} label="Total XP" />
+					<StatCard icon="shield" value={profile.rank_divisions?.name ?? '?'} label="Current league" />
+					<StatCard icon="workspace-premium" value="4" label="Badges" />
 				</View>
 
 				{/* Friends Section */}
-				<Text style={[styles.sectionTitle, {color: palette.text }]}>Friends</Text>
+				<Text style={[styles.sectionTitle, { color: palette.text }]}>Friends</Text>
 				<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rivalsRow}>
-					{/* Repeat for each rival */}
+					{/* TODO: implement friends */}
 					<View style={styles.rivalAvatarContainer}>
 						<View style={styles.avatar}>
 							<Ionicons name="person" size={48} color="gray" />
@@ -107,21 +103,21 @@ export default function ProfileScreen() {
 }
 
 function StatCard({ icon, value, label }: { icon: string; value: string | number; label: string }) {
-	const palette = Colors[useColorScheme() ?? 'dark'];
+	const {palette} = useTheme()
 	return (
 		<View style={{ marginBottom: 16, width: '48%' }}>
 			<View style={[styles.statCard, { height: 65, width: 170, backgroundColor: palette.surface }]}>
 				<MaterialIcons name={icon as any} size={28} color={palette.primary} />
 				<Text style={[styles.statValue, { color: palette.text }]}>{value}</Text>
 			</View>
-			<Text style={[styles.statLabel, { marginTop: 4, textAlign: 'center' }, {color: palette.text}]}>{label}</Text>
+			<Text style={[styles.statLabel, { marginTop: 4, textAlign: 'center' }, { color: palette.text }]}>{label}</Text>
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
+		flex: 1
 	},
 	scrollContent: {
 		padding: 16
@@ -174,7 +170,7 @@ const styles = StyleSheet.create({
 		shadowOffset: { width: 0, height: 4 },
 		shadowOpacity: 0.3,
 		shadowRadius: 6,
-		elevation: 6,
+		elevation: 6
 	},
 	addButtonText: {
 		color: 'white',
@@ -188,7 +184,7 @@ const styles = StyleSheet.create({
 		shadowOffset: { width: 0, height: 4 },
 		shadowOpacity: 0.3,
 		shadowRadius: 6,
-		elevation: 6,
+		elevation: 6
 	},
 	sectionTitle: {
 		fontSize: 18,
@@ -214,7 +210,7 @@ const styles = StyleSheet.create({
 		shadowOffset: { width: 0, height: 4 },
 		shadowOpacity: 0.3,
 		shadowRadius: 6,
-		elevation: 6,
+		elevation: 6
 	},
 	statValue: {
 		color: 'black',

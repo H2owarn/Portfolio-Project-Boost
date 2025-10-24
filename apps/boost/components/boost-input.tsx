@@ -3,7 +3,7 @@ import { forwardRef, useState } from 'react';
 import { StyleProp, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
 
 import { Colors, Radii, Spacing } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/hooks/use-theme';
 
 type IconProps = {
 	name: keyof typeof MaterialIcons.glyphMap;
@@ -14,14 +14,13 @@ type BoostInputProps = TextInputProps & {
 	hint?: string;
 	leadingIcon?: IconProps;
 	trailingIcon?: IconProps;
-	containerStyle?: StyleProp<ViewStyle>;
-	inputRowStyle?: StyleProp<ViewStyle>;
+	containerStyle?: StyleProp;
+	inputRowStyle?: StyleProp;
 };
 
 export const BoostInput = forwardRef<TextInput, BoostInputProps>(
 	({ label, hint, leadingIcon, trailingIcon, style, containerStyle, inputRowStyle, ...rest }, ref) => {
-		const colorScheme = useColorScheme() ?? 'dark';
-		const palette = Colors[colorScheme];
+		const { palette } = useTheme();
 		const styles = createStyles(palette);
 		const [focused, setFocused] = useState(false);
 

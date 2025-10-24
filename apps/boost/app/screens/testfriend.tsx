@@ -7,7 +7,7 @@ import { Colors } from '@/constants/theme';
 export default function FriendTestScreen() {
   const [searchName, setSearchName] = useState('');
   const [foundUserId, setFoundUserId] = useState<string | null>(null);
-  const palette = Colors[useColorScheme() ?? 'dark'];
+  const {palette} = useTheme();
 
   const {
     friends,

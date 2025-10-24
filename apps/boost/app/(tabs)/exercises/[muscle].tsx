@@ -5,11 +5,11 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Screen } from '@/components/layout/screen';
 import { type Exercise, getExercisesForMuscle, getMuscleById } from '@/constants/exercise-data';
 import { Colors, Font, Radii, Shadow, Spacing } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function MuscleExercisesScreen() {
 	const { muscle } = useLocalSearchParams<{ muscle: string }>();
-	const palette = Colors[useColorScheme() ?? 'dark'];
+	const { palette } = useTheme();
 
 	const selectedMuscle = getMuscleById(muscle);
 	const exercises = getExercisesForMuscle(muscle);
@@ -71,11 +71,11 @@ export default function MuscleExercisesScreen() {
 
 	return (
 		<>
-			<Stack.Screen 
-				options={{ 
+			<Stack.Screen
+				options={{
 					title: selectedMuscle.name,
 					headerShown: true
-				}} 
+				}}
 			/>
 			<Screen scrollable={false} contentStyle={styles.container}>
 				<View style={styles.header}>

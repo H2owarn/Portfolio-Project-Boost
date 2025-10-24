@@ -5,14 +5,12 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AppHeader from '@/components/layout/appheader';
-import { Colors } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function TabLayout() {
   const { authedUser } = useAuth();
-  const colorScheme = useColorScheme() ?? 'dark';
-  const palette = Colors[colorScheme];
+	const {palette} = useTheme()
   const insets = useSafeAreaInsets();
 
   const baseTabBarHeight = 45;
@@ -23,7 +21,6 @@ export default function TabLayout() {
   const questLift = Math.max((questButtonSize - baseTabBarHeight) / 2 + 8, 0);
 
   const sideTabSpacing = 16;
-  const baseTabItemStyle = { paddingTop: 1 };
 
   if (!authedUser) return <Redirect href="/onboarding/login" />;
 
@@ -80,13 +77,12 @@ export default function TabLayout() {
           tabBarInactiveTintColor: palette.mutedText,
           tabBarStyle: {
             backgroundColor: palette.surface,
-            borderTopColor: 'rgba(255,255,255,0.05)',
+            borderTopColor: 'rgba(255,255,255,0)',
             height: tabBarHeight,
             paddingBottom: tabBarBottomPadding,
             paddingTop: 12,
             overflow: 'visible', 
           },
-          tabBarItemStyle: baseTabItemStyle,
           tabBarLabelStyle: { marginBottom: 0 },
         }}
       >
@@ -104,7 +100,7 @@ export default function TabLayout() {
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="fitness-center" color={color} size={size} />
             ),
-            tabBarItemStyle: { ...baseTabItemStyle, marginRight: sideTabSpacing },
+            tabBarItemStyle: {marginRight: sideTabSpacing },
           }}
         />
         <Tabs.Screen
@@ -123,7 +119,7 @@ export default function TabLayout() {
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="auto-awesome" color={color} size={size} />
             ),
-            tabBarItemStyle: { ...baseTabItemStyle, marginLeft: sideTabSpacing },
+            tabBarItemStyle: {marginLeft: sideTabSpacing },
           }}
         />
         <Tabs.Screen
@@ -135,6 +131,12 @@ export default function TabLayout() {
         />
         <Tabs.Screen
           name="exercises/[muscle]"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="settings"
           options={{
             href: null,
           }}
