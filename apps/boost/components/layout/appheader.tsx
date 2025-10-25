@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 import { useXp } from '@/contexts/Xpcontext';
 import { useStamina } from '@/contexts/Staminacontext';
@@ -8,6 +9,7 @@ import { useStreak } from '@/contexts/StreakContext';
 
 export default function HeaderBar() {
   const palette = Colors[useColorScheme() ?? 'dark'];
+  const insets = useSafeAreaInsets();
   const { xp, level, minExp, maxExp } = useXp();
   const { stamina: currentStamina, maxStamina } = useStamina();
   const { streak } = useStreak();
@@ -16,7 +18,7 @@ export default function HeaderBar() {
   const staminaWidth = Math.floor((currentStamina / maxStamina) * 100);
 
   return (
-    <View style={[styles.header, { backgroundColor: palette.surface }]}>
+    <View style={[styles.header, { backgroundColor: palette.surface, paddingTop: insets.top + 12 }]}>
       <View style={styles.statsRow}>
         {/* Streak */}
         <View style={styles.statItem}>
@@ -57,7 +59,6 @@ export default function HeaderBar() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: 60,
     paddingBottom: 12,
     paddingHorizontal: 16,
   },

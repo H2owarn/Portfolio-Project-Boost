@@ -33,15 +33,22 @@ export default function LeaderboardPage() {
 
   if (loading) {
     return (
-      <ScrollView style={[styles.container, { backgroundColor: palette.background }]}>
+      <ScrollView 
+        style={{ backgroundColor: palette.background }}
+        contentContainerStyle={styles.container}
+      >
         <View style={[styles.card, { backgroundColor: palette.surface }]}>
           <Skeleton style={{ height: 20, width: 160, alignSelf: 'center', marginBottom: 16 }} borderRadius={6} />
           <View style={styles.podiumRow}>
-            {[0,1,2].map((i) => (
-              <View key={i} style={[styles.podiumWrapper, { height: 100 }]}>
-                <Skeleton style={{ width: 56, height: 56 }} borderRadius={28} />
-              </View>
-            ))}
+            <View style={[styles.podiumWrapper, styles.podiumWrapper23]}>
+              <Skeleton style={{ width: 56, height: 56 }} borderRadius={28} />
+            </View>
+            <View style={[styles.podiumWrapper, styles.podiumWrapper1]}>
+              <Skeleton style={{ width: 56, height: 56 }} borderRadius={28} />
+            </View>
+            <View style={[styles.podiumWrapper, styles.podiumWrapper23]}>
+              <Skeleton style={{ width: 56, height: 56 }} borderRadius={28} />
+            </View>
           </View>
           {[0,1,2].map((i) => (
             <View key={`row-${i}`} style={[styles.listItem, { backgroundColor: palette.surfaceElevated }]}> 
@@ -61,7 +68,10 @@ export default function LeaderboardPage() {
   const others = leaderboard.slice(3);
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: palette.background }]}>
+    <ScrollView 
+      style={{ backgroundColor: palette.background }}
+      contentContainerStyle={styles.container}
+    >
       <View style={[styles.card, { backgroundColor: palette.surface }]}>
         <Text style={[styles.header, { color: palette.text }]}>Leaderboard</Text>
 
@@ -69,94 +79,91 @@ export default function LeaderboardPage() {
         {top3.length === 3 && (
           <View style={styles.podiumRow}>
             {/* 2nd place */}
-            <View style={[styles.podiumWrapper, { height: 100 }]}>
+            <View style={[styles.podiumWrapper, styles.podiumWrapper23]}>
               <View style={[styles.badgeBottom, { borderTopColor: palette.borderColorAlt }]} />
-              <View style={[styles.badgeContent, { backgroundColor: palette.surfaceElevated }]}></View>
-              <Avatar name={top3[1].name} size={56} />
-              <Text
-                style={[
-                  styles.rankCircle,
-                  styles.rankCircle1,
-                  { backgroundColor: palette.primary, color: palette.secondary },
-                ]}
-              >
-                2
-              </Text>
-              <Text
-                style={[
-                  styles.podiumName23,
-                  styles.podiumName,
-                  { color: palette.text },
-                ]}
-              >
-                {top3[1].name}
-              </Text>
-              <Text style={[styles.podiumScore, { color: palette.text }]}>
-                {top3[1].exp}
-              </Text>
+              <View style={[styles.badgeContent, { backgroundColor: palette.surfaceElevated }]}>
+                <View style={styles.podiumContentInner}>
+                  <View style={styles.avatarContainer}>
+                    <Avatar name={top3[1].name} size={56} />
+                    <Text
+                      style={[
+                        styles.rankCircle,
+                        { backgroundColor: palette.primary, color: palette.secondary },
+                      ]}
+                    >
+                      2
+                    </Text>
+                  </View>
+                  <Text
+                    style={[styles.podiumName, { color: palette.text }]}
+                    numberOfLines={1}
+                  >
+                    {top3[1].name}
+                  </Text>
+                  <Text style={[styles.podiumScore, { color: palette.text }]}>
+                    {top3[1].exp}
+                  </Text>
+                </View>
+              </View>
             </View>
 
             {/* 1st place */}
-            <View style={[styles.podiumWrapper, { height: 130 }]}>
+            <View style={[styles.podiumWrapper, styles.podiumWrapper1]}>
               <View style={[styles.badgeBottom, { borderTopColor: palette.borderColorAlt }]} />
-              <View
-                style={[
-                  styles.badgeContent,
-                  { bottom: -20 },
-                  { backgroundColor: palette.surfaceElevated },
-                ]}
-              ></View>
-              <View style={[{ position: 'relative' }, styles.avatar1]}>
-                <Avatar name={top3[0].name} size={56} />
-                <Text style={styles.crown}>👑</Text>
+              <View style={[styles.badgeContent, { backgroundColor: palette.surfaceElevated }]}>
+                <View style={styles.podiumContentInner}>
+                  <View style={styles.avatarContainer}>
+                    <Avatar name={top3[0].name} size={56} />
+                    <Text style={styles.crown}>👑</Text>
+                    <Text
+                      style={[
+                        styles.rankCircle,
+                        { backgroundColor: palette.primary, color: palette.secondary },
+                      ]}
+                    >
+                      1
+                    </Text>
+                  </View>
+                  <Text
+                    style={[styles.podiumName, { color: palette.text }]}
+                    numberOfLines={1}
+                  >
+                    {top3[0].name}
+                  </Text>
+                  <Text style={[styles.podiumScore, { color: palette.text }]}>
+                    {top3[0].exp}
+                  </Text>
+                </View>
               </View>
-              <Text style={[styles.rankCircle, { backgroundColor: palette.primary, color: palette.secondary }]}>1</Text>
-              <Text
-                style={[
-                  styles.podiumName1,
-                  styles.podiumName,
-                  { color: palette.text },
-                ]}
-              >
-                {top3[0].name}
-              </Text>
-              <Text
-                style={[
-                  styles.podiumScore,
-                  styles.podiumScore1,
-                  { color: palette.text },
-                ]}
-              >
-                {top3[0].exp}
-              </Text>
             </View>
 
             {/* 3rd place */}
-            <View style={[styles.podiumWrapper, { height: 100 }]}>
+            <View style={[styles.podiumWrapper, styles.podiumWrapper23]}>
               <View style={[styles.badgeBottom, { borderTopColor: palette.borderColorAlt }]} />
-              <View style={[styles.badgeContent, { backgroundColor: palette.surfaceElevated }]}></View>
-              <Avatar name={top3[2].name} size={56} />
-              <Text
-                style={[
-                  styles.rankCircle,
-                  styles.rankCircle1,
-                  { backgroundColor: palette.primary, color: palette.secondary },
-                ]}
-              >
-                3
-              </Text>
-              <Text
-                style={[
-                  styles.podiumName23,
-                  styles.podiumName,
-                  { color: palette.text },
-                ]}
-              >
-                {top3[2].name}
-              </Text>
-              <Text style={[styles.podiumScore, { color: palette.text }]}>
-                {top3[2].exp}
-              </Text>
+              <View style={[styles.badgeContent, { backgroundColor: palette.surfaceElevated }]}>
+                <View style={styles.podiumContentInner}>
+                  <View style={styles.avatarContainer}>
+                    <Avatar name={top3[2].name} size={56} />
+                    <Text
+                      style={[
+                        styles.rankCircle,
+                        { backgroundColor: palette.primary, color: palette.secondary },
+                      ]}
+                    >
+                      3
+                    </Text>
+                  </View>
+                  <Text
+                    style={[styles.podiumName, { color: palette.text }]}
+                    numberOfLines={1}
+                  >
+                    {top3[2].name}
+                  </Text>
+                  <Text style={[styles.podiumScore, { color: palette.text }]}>
+                    {top3[2].exp}
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
         )}
@@ -186,8 +193,9 @@ export default function LeaderboardPage() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 12,
+    gap: 12,
   },
   card: {
     borderRadius: 20,
@@ -197,8 +205,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
-    marginTop: 12,
-    marginBottom: 12,
   },
   header: {
     fontSize: 20,
@@ -210,22 +216,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "flex-end",
-    marginBottom: 16,
-    gap: 15,
+    marginBottom: 24,
+    gap: 8,
   },
   podiumWrapper: {
-    width: 100,
+    width: 110,
     alignItems: "center",
     justifyContent: "flex-end",
     position: "relative",
+  },
+  podiumWrapper1: {
+    height: 160,
+  },
+  podiumWrapper23: {
+    height: 140,
   },
   badgeBottom: {
     position: "absolute",
     bottom: -20,
     width: 0,
     height: 0,
-    borderLeftWidth: 50,
-    borderRightWidth: 50,
+    borderLeftWidth: 55,
+    borderRightWidth: 55,
     borderTopWidth: 20,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
@@ -236,30 +248,40 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     alignItems: "center",
-    justifyContent: "flex-end",
+    justifyContent: "center",
     paddingBottom: 8,
+  },
+  podiumContentInner: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingTop: 8,
+  },
+  avatarContainer: {
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
   },
   avatar: {
     width: 56,
     height: 56,
     borderRadius: 28,
     backgroundColor: "#111827",
-    marginBottom: 6,
     alignItems: "center",
     justifyContent: "center",
-    bottom: 18,
   },
   avatar1: {
-    bottom: 45,
+    bottom: 0,
   },
   crown: {
     position: "absolute",
     fontSize: 24,
-    top: -14,
+    top: -18,
   },
   rankCircle: {
     position: "absolute",
-    bottom: 68,
+    bottom: -8,
     fontSize: 14,
     fontWeight: "bold",
     borderRadius: 12,
@@ -268,24 +290,31 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   rankCircle1: {
-    bottom: 42,
+    bottom: -8,
+  },
+  rankCircle23: {
+    bottom: -8,
   },
   podiumName: {
     fontWeight: "600",
     textAlign: "center",
+    fontSize: 13,
+    maxWidth: "100%",
+    paddingHorizontal: 4,
   },
   podiumName1: {
-    top: -30,
+    top: 0,
   },
   podiumName23: {
-    top: -10,
+    top: 0,
   },
   podiumScore: {
-    fontSize: 13,
+    fontSize: 12,
     textAlign: "center",
+    fontWeight: "bold",
   },
   podiumScore1: {
-    top: -20,
+    top: 0,
   },
   listItem: {
     flexDirection: "row",
@@ -294,19 +323,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 10,
     marginBottom: 10,
-    top: 0,
     ...Shadow.card,
   },
   rowLeft: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  smallAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#111827",
-    marginRight: 10,
+    gap: 10,
+    flex: 1,
   },
   listName: {
     fontSize: 14,
