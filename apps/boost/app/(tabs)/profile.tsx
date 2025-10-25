@@ -36,7 +36,7 @@ export default function ProfileScreen() {
 			{/* Profile Header Card */}
 			<View style={[styles.profileCard, { backgroundColor: palette.surface }]}>
 				<View style={styles.profileSection}>
-					<Avatar name={profile.name} level={profile.level} size={96} />
+					<Avatar name={profile.name} level={profile.level} size={80} />
 					<Text style={[styles.username, {color: palette.text}]}>{profile.name}</Text>
 					<Text style={[styles.joinedText, { color: palette.mutedText}]}>Joined {joined}</Text>
 					<Text style={[styles.friendsText, { color: palette.text }]}>0 Friends</Text>
@@ -52,7 +52,7 @@ export default function ProfileScreen() {
 							style={[styles.shareButton, {backgroundColor: palette.surfaceElevated}]}
 							onPress={() => router.push('/screens/streaktest')}
 						>
-							<Ionicons name="share-outline" size={20} color={palette.text} />
+							<Ionicons name="share-outline" size={18} color={palette.text} />
 						</TouchableOpacity>
 					</View>
 				</View>
@@ -94,17 +94,17 @@ export default function ProfileScreen() {
 					contentContainerStyle={styles.friendsRow}
 				>
 					<View style={styles.friendCard}>
-						<Avatar name={'Kaj Kennedy'} size={64} />
+						<Avatar name={'Kaj Kennedy'} size={56} />
 						<Text style={[styles.friendName, { color: palette.text }]}>Kaj Kennedy</Text>
 					</View>
 
 					<View style={styles.friendCard}>
-						<Avatar name={'WaWa'} size={64} />
+						<Avatar name={'WaWa'} size={56} />
 						<Text style={[styles.friendName, { color: palette.text }]}>WaWa</Text>
 					</View>
 
 					<View style={styles.friendCard}>
-						<Avatar name={'Jin Lieu'} size={64} />
+						<Avatar name={'Jin Lieu'} size={56} />
 						<Text style={[styles.friendName, { color: palette.text }]}>Jin Lieu</Text>
 					</View>
 				</ScrollView>
@@ -129,104 +129,105 @@ function StatCard({ icon, value, label }: { icon: string; value: string | number
 const styles = StyleSheet.create({
 	container: {
 		flexGrow: 1,
-		padding: 12,
-		gap: 12,
+		padding: 10,
+		gap: 10,
 	},
 	profileCard: {
 		borderRadius: Radii.lg,
-		padding: 16,
+		padding: 12,
 		...Shadow.card,
 	},
 	profileSection: {
 		alignItems: 'center',
-		gap: 8,
+		gap: 6,
 	},
 	username: {
-		fontSize: 20,
+		fontSize: 18,
 		fontWeight: 'bold',
-		marginTop: 8,
+		marginTop: 4,
 	},
 	joinedText: {
-		fontSize: 13,
+		fontSize: 12,
 	},
 	friendsText: {
-		fontSize: 14,
-		marginTop: 4,
+		fontSize: 13,
+		marginTop: 2,
 	},
 	buttonRow: {
 		flexDirection: 'row',
-		marginTop: 12,
+		marginTop: 8,
 		gap: 8,
 	},
 	addButton: {
-		paddingHorizontal: 20,
-		paddingVertical: 10,
+		paddingHorizontal: 16,
+		paddingVertical: 8,
 		borderRadius: Radii.md,
 		...Shadow.card,
 	},
 	addButtonText: {
 		fontWeight: 'bold',
-		fontSize: 14,
+		fontSize: 13,
 	},
 	shareButton: {
-		paddingHorizontal: 12,
-		paddingVertical: 10,
+		paddingHorizontal: 10,
+		paddingVertical: 8,
 		borderRadius: Radii.md,
 		...Shadow.card,
 	},
 	section: {
 		borderRadius: Radii.lg,
-		padding: 16,
-		gap: 12,
+		padding: 12,
+		gap: 10,
 		...Shadow.card,
 		alignItems: 'center',
 	},
 	sectionTitle: {
-		fontSize: 18,
+		fontSize: 16,
 		fontWeight: 'bold',
 		textAlign: 'center',
 		width: '100%',
+		marginBottom: 4,
 	},
 	statsGrid: {
 		flexDirection: 'row',
 		flexWrap: 'wrap',
 		justifyContent: 'center',
-		gap: 12,
+		gap: 10,
 		width: '100%',
 	},
 	statCardContainer: {
 		width: '48%',
 		alignItems: 'center',
-		gap: 6,
+		gap: 4,
 	},
 	statCard: {
 		borderRadius: Radii.md,
-		padding: 12,
+		padding: 10,
 		width: '100%',
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'center',
-		gap: 8,
+		gap: 6,
 		...Shadow.card,
 	},
 	statValue: {
-		fontSize: 18,
+		fontSize: 16,
 		fontWeight: 'bold',
 	},
 	statLabel: {
-		fontSize: 12,
+		fontSize: 11,
 		textAlign: 'center',
 	},
 	friendsRow: {
-		paddingVertical: 4,
-		gap: 12,
+		paddingVertical: 2,
+		gap: 10,
 	},
 	friendCard: {
 		alignItems: 'center',
-		gap: 8,
+		gap: 6,
 	},
 	friendName: {
-		fontSize: 13,
+		fontSize: 12,
 		fontWeight: '600',
 	},
 });
