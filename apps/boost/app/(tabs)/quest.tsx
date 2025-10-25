@@ -252,15 +252,25 @@ export default function QuestScreen() {
         <Text style={[styles.sectionTitle, {color: palette.text}]}>
           ⚔️ Main Quests
         </Text>
-        {mainQuests.map((quest) => (
-          <QuestCard key={quest.id} quest={quest} />
+        {mainQuests.map((quest, index) => (
+          <React.Fragment key={quest.id}>
+            <QuestCard quest={quest} />
+            {index < mainQuests.length - 1 && (
+              <View style={[styles.questDivider, { backgroundColor: palette.borderColorAlt }]} />
+            )}
+          </React.Fragment>
         ))}
       </View>
 
       <View style={[styles.section, { backgroundColor: palette.surface }]}>
         <Text style={[styles.sectionTitle, { color: palette.text }]}>⭐ Side Quests</Text>
-        {sideQuests.map((quest) => (
-          <QuestCard key={quest.id} quest={quest} />
+        {sideQuests.map((quest, index) => (
+          <React.Fragment key={quest.id}>
+            <QuestCard quest={quest} />
+            {index < sideQuests.length - 1 && (
+              <View style={[styles.questDivider, { backgroundColor: palette.borderColorAlt }]} />
+            )}
+          </React.Fragment>
         ))}
       </View>
     </ScrollView>
@@ -284,13 +294,19 @@ const styles = StyleSheet.create({
   },
   section: {
     borderRadius: Radii.lg,
-    padding: 12,
-    gap: 12,
+    padding: 16,
+    gap: 16,
     ...Shadow.card,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
+    marginBottom: 4,
+  },
+  questDivider: {
+    height: 1,
+    borderRadius: 1,
+    marginVertical: 4,
   },
   card: { backgroundColor: "#fff", borderRadius: 12, padding: 16, marginBottom: 12 },
   cardHeader: {
