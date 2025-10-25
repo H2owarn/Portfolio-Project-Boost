@@ -60,18 +60,22 @@ export default function HeaderBar() {
 const styles = StyleSheet.create({
   header: {
     paddingBottom: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
   },
   statsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
   },
   statItem: {
     alignItems: 'center',
+    flex: 1,
   },
   iconValueRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   statValue: {
     marginLeft: 6,
