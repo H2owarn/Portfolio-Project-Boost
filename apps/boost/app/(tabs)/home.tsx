@@ -47,6 +47,7 @@ export default function HomeScreen() {
   const [quests, setQuests] = useState<UserQuestRow[]>([]);
   const [levelInfo, setLevelInfo] = useState<LevelRow | null>(null);
   const [loading, setLoading] = useState(true);
+  const [questRowWidth, setQuestRowWidth] = useState(0);
 
   useEffect(() => {
   let mounted = true;
@@ -226,7 +227,7 @@ export default function HomeScreen() {
     >
       {/* Header / Profile */}
       <View style={[styles.header, { backgroundColor: palette.surface }]}>
-        <Avatar name={profile?.name ?? undefined} level={profile?.level} size={80} />
+        <Avatar name={profile?.name ?? undefined} level={profile?.level} size={64} />
         <View style={styles.headerCopy}>
           <Text style={[styles.userName, { color: palette.text }]}>{profile?.name ?? "—"}</Text>
           <Text style={[styles.userLevel, { color: palette.mutedText }]}>
@@ -267,12 +268,14 @@ export default function HomeScreen() {
 
         {/* Active Quests with Progress */}
         {quests.length > 0 ? (
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.questList}
+          <View
+            style={styles.questList}
+            onLayout={(e) => setQuestRowWidth(e.nativeEvent.layout.width)}
           >
-            {quests.slice(0, 3).map((q) => {
+            {quests.slice(0, 3).map((q, idx, arr) => {
+              const cardsCount = arr.length || 1;
+              const gap = 10; // must match styles.questList gap
+              const cardWidth = questRowWidth > 0 ? (questRowWidth - gap * (cardsCount - 1)) / cardsCount : undefined;
               const progress = q.total_exercises > 0 
                 ? q.completed_exercises / q.total_exercises 
                 : 0;
@@ -281,7 +284,7 @@ export default function HomeScreen() {
               return (
                 <Pressable
                   key={q.quest_id}
-                  style={[styles.questCard, { backgroundColor: palette.surfaceElevated ?? palette.surface }]}
+                  style={[styles.questCard, { backgroundColor: palette.surfaceElevated ?? palette.surface, width: cardWidth }]}
                   onPress={() => router.push(`/screens/QuestScreen?id=${q.quest?.id}`)}
                   android_ripple={{ color: palette.primary + "20" }}
                 >
@@ -321,7 +324,7 @@ export default function HomeScreen() {
                 </Pressable>
               );
             })}
-          </ScrollView>
+          </View>
         ) : (
           <EmptyState
             icon="auto-awesome"
@@ -361,7 +364,7 @@ export default function HomeScreen() {
             { backgroundColor: palette.surfaceElevated ?? palette.surface },
           ]}
         >
-          <Avatar name={u.name} level={u.level} size={50} />
+          <Avatar name={u.name} level={u.level} size={40} />
           <View style={styles.recommendInfo}>
             <Text style={[styles.recommendName, { color: palette.text }]}>
               {u.name ?? "—"}
@@ -382,42 +385,36 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 16,
-    gap: 16,
+    padding: 12,
+    gap: 12,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 20,
+    padding: 12,
     borderRadius: Radii.lg,
     ...Shadow.card,
   },
   headerCopy: {
     flex: 1,
     marginLeft: 12,
-    gap: 6,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#000000ff",
+    gap: 4,
   },
   progressBar: { marginTop: 6 },
-  userName: { fontSize: 20, fontWeight: "bold" },
-  userLevel: { fontSize: 14, fontWeight: "600" },
-  xpText: { fontSize: 12 },
+  userName: { fontSize: 18, fontWeight: "bold" },
+  userLevel: { fontSize: 12, fontWeight: "600" },
+  xpText: { fontSize: 11 },
 
   questSection: {
     borderRadius: Radii.lg,
-    padding: 20,
-    gap: 18,
+    padding: 12,
+    gap: 10,
     ...Shadow.card,
   },
   section: {
     borderRadius: Radii.lg,
-    padding: 20,
-    gap: 14,
+    padding: 12,
+    gap: 10,
     ...Shadow.card,
   },
   sectionHeader: {
@@ -425,32 +422,31 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  sectionTitle: { fontSize: 18, fontWeight: "700" },
-  seeAll: { fontSize: 14, fontWeight: "600" },
+  sectionTitle: { fontSize: 16, fontWeight: "700" },
+  seeAll: { fontSize: 12, fontWeight: "600" },
 
   questList: {
-    gap: 12,
-    paddingRight: 16,
+    flexDirection: "row",
+    gap: 10,
+    paddingRight: 0,
     justifyContent: "center",
     flexGrow: 1,
   },
   questCard: {
     borderRadius: Radii.md,
-    padding: 16,
-    gap: 12,
-    minWidth: 100,
-    flex: 1,
+    padding: 12,
+    gap: 10,
     ...Shadow.card,
   },
   questCardContent: {
     flex: 1,
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 16,
+    gap: 12,
   },
   questCardTop: {
     alignItems: "center",
-    gap: 12,
+    gap: 8,
     width: "100%",
   },
   questCardHeader: {
@@ -465,19 +461,19 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   questCardEmoji: {
-    width: 60,
-    height: 60,
+    width: 44,
+    height: 44,
     borderRadius: Radii.md,
     textAlign: "center",
-    lineHeight: 60,
-    fontSize: 28,
+    lineHeight: 44,
+    fontSize: 22,
   },
   questCardInfo: {
     flex: 1,
     gap: 4,
   },
   questCardName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     textAlign: "center",
   },
@@ -486,8 +482,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   goButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
     borderRadius: Radii.sm,
     width: "100%",
     alignItems: "center",
@@ -546,15 +542,15 @@ const styles = StyleSheet.create({
   },
   questEmoji: { fontSize: 28 },
 
-  quickStartBtn: { borderRadius: Radii.md, paddingVertical: 14, alignItems: "center" },
+  quickStartBtn: { borderRadius: Radii.md, paddingVertical: 10, alignItems: "center" },
   quickStartText: { fontWeight: "700", letterSpacing: 0.4 },
 
   recommendCard: {
     flexDirection: "row",
     alignItems: "center",
     borderRadius: Radii.md,
-    padding: 12,
-    gap: 12,
+    padding: 10,
+    gap: 10,
   },
   recommendAvatar: {
     width: 50,
@@ -564,8 +560,8 @@ const styles = StyleSheet.create({
   },
 
   recommendContainer: {
-  gap: 12,
-  marginTop: 8,
+    gap: 10,
+    marginTop: 8,
   },
 
   recommendInfo: {
@@ -573,11 +569,11 @@ const styles = StyleSheet.create({
     gap: 4
   },
   recommendName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600"
   },
   recommendLevel: {
-    fontSize: 13
+    fontSize: 12
   },
   arrow: {
     fontSize: 18

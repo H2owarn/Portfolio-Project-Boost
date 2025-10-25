@@ -272,7 +272,7 @@ export default function QuestScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10
+    padding: 12
 },
   header: {
     alignItems: "center",

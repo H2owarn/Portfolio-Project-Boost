@@ -58,7 +58,7 @@ export default function HeaderBar() {
 const styles = StyleSheet.create({
   header: {
     paddingTop: 60,
-    paddingBottom: 10,
+    paddingBottom: 12,
     paddingHorizontal: 16,
   },
   statsRow: {

@@ -116,9 +116,9 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
-	scrollContent: {
-		padding: 16
-	},
+    scrollContent: {
+        padding: 12
+    },
 	profileSection: {
 		alignItems: 'center',
 		marginBottom: 24
