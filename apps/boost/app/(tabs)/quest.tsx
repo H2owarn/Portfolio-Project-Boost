@@ -4,8 +4,6 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  ActivityIndicator,
-  FlatList,
   ScrollView,
 } from "react-native";
 import { supabase } from "@/lib/supabase";
@@ -152,14 +150,7 @@ export default function QuestScreen() {
   const mainQuests = quests.filter((q) => q.quest_type?.toLowerCase() === "main");
   const sideQuests = quests.filter((q) => q.quest_type?.toLowerCase() === "side");
 
-
-  const canStartQuest = (quest: any) =>
-    userStamina >= (quest.stamina_cost ?? 0) &&
-    userLevel >= (quest.min_level ?? 0) &&
-    (quest.max_level == null || userLevel <= quest.max_level);
-
   const QuestCard = ({ quest }: { quest: any }) => {
-    const canStart = canStartQuest(quest);
     const isLocked = userLevel < (quest.min_level ?? 0);
     const exerciseNames: string[] = Array.isArray(quest.exercises)
       ? quest.exercises
@@ -247,44 +238,59 @@ export default function QuestScreen() {
   };
 
   return (
-    <ScrollView contentInset={{ top: 45 }} style={[styles.container, {backgroundColor: palette.background}]}>
-      <View style={styles.header}>
+    <ScrollView 
+      style={{ backgroundColor: palette.background }}
+      contentContainerStyle={styles.container}
+    >
+      <View style={[styles.header, { backgroundColor: palette.surface }]}>
         <Text style={[styles.headerTitle,{ color: palette.text }]}>
           Choose Your Quest
         </Text>
       </View>
 
-      <Text style={[styles.sectionTitle, {color: palette.text}]}>
-        ⚔️
-        Main Quests</Text>
-      {mainQuests.map((quest) => (
-        <QuestCard key={quest.id} quest={quest} />
-      ))}
+      <View style={[styles.section, { backgroundColor: palette.surface }]}>
+        <Text style={[styles.sectionTitle, {color: palette.text}]}>
+          ⚔️ Main Quests
+        </Text>
+        {mainQuests.map((quest) => (
+          <QuestCard key={quest.id} quest={quest} />
+        ))}
+      </View>
 
-      <Text style={[styles.sectionTitle, { color: palette.text }]}>⭐ Side Quests</Text>
-      {sideQuests.map((quest) => (
-        <QuestCard key={quest.id} quest={quest} />
-      ))}
+      <View style={[styles.section, { backgroundColor: palette.surface }]}>
+        <Text style={[styles.sectionTitle, { color: palette.text }]}>⭐ Side Quests</Text>
+        {sideQuests.map((quest) => (
+          <QuestCard key={quest.id} quest={quest} />
+        ))}
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 12
-},
+    flexGrow: 1,
+    padding: 12,
+    gap: 12,
+  },
   header: {
     alignItems: "center",
-    marginBottom: Spacing.md,
-    gap: Spacing.xs,
+    padding: 12,
+    borderRadius: Radii.lg,
+    ...Shadow.card,
   },
-  headerTitle: Font.title,
-
+  headerTitle: {
+    ...Font.title,
+  },
+  section: {
+    borderRadius: Radii.lg,
+    padding: 12,
+    gap: 12,
+    ...Shadow.card,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginVertical: 10,
   },
   card: { backgroundColor: "#fff", borderRadius: 12, padding: 16, marginBottom: 12 },
   cardHeader: {
@@ -369,7 +375,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     gap: Spacing.xs,
-    marginBottom: Spacing.sm,
   },
   specText: {
     fontSize: 12,

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Colors } from "@/constants/theme";
+import { Colors, Radii, Shadow } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 
@@ -17,11 +17,6 @@ export default function QuestDetailScreen() {
   const [completedExercises, setCompletedExercises] = useState<Record<string, boolean>>({});
   const completedCount = Object.values(completedExercises).filter(Boolean).length;
   const totalCount = exercises.length;
-  const { exercise } = useLocalSearchParams<{ exercise: string }>();
-  const exerciseData = exercise ? JSON.parse(exercise) : null;
-
-
-
 
   useEffect(() => {
     const loadQuest = async () => {
@@ -102,14 +97,24 @@ export default function QuestDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: palette.background }]}>
-      <Text style={[styles.title, { color: palette.text }]}>{quest.name}</Text>
-      <Text style={[styles.desc, { color: palette.mutedText }]}>{quest.description}</Text>
+      {/* Header Card */}
+      <View style={[styles.header, { backgroundColor: palette.surface }]}>
+        <Text style={[styles.title, { color: palette.text }]}>{quest.name}</Text>
+        <Text style={[styles.desc, { color: palette.mutedText }]}>{quest.description}</Text>
 
-      <View style={styles.stats}>
-        <Text style={{ color: palette.primary }}><MaterialIcons name="star" size={16} color={palette.primary} /> {totalXP} XP</Text>
-        <Text style={{ color: palette.secondary }}><MaterialIcons name="flash-on" size={20} color={palette.primary} /> {totalStamina} Stamina</Text>
+        <View style={styles.stats}>
+          <View style={[styles.statBadge, { backgroundColor: palette.primary + "20" }]}>
+            <MaterialIcons name="star" size={16} color={palette.primary} />
+            <Text style={[styles.statText, { color: palette.primary }]}>{totalXP} XP</Text>
+          </View>
+          <View style={[styles.statBadge, { backgroundColor: palette.primary + "20" }]}>
+            <MaterialIcons name="flash-on" size={16} color={palette.primary} />
+            <Text style={[styles.statText, { color: palette.primary }]}>{totalStamina} Stamina</Text>
+          </View>
+        </View>
       </View>
 
+      {/* Exercises List */}
       <FlatList
   data={exercises}
   keyExtractor={(item) => item.id.toString()}
@@ -129,9 +134,9 @@ export default function QuestDetailScreen() {
       {/* Left side: exercise info */}
       <View style={styles.row}>
         <MaterialIcons name="fitness-center" size={24} color={palette.primary} />
-        <View style={{ marginLeft: 8 }}>
+        <View style={styles.exerciseInfo}>
           <Text style={[styles.exerciseName, { color: palette.text }]}>{item.name}</Text>
-          <Text style={{ color: palette.mutedText }}>
+          <Text style={[styles.muscleText, { color: palette.mutedText }]}>
             {item.primary_muscles?.join(", ")}
           </Text>
         </View>
@@ -168,42 +173,69 @@ export default function QuestDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16
-},
+    padding: 12,
+    gap: 12,
+  },
   center: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center"
-},
+    alignItems: "center",
+  },
+  header: {
+    borderRadius: Radii.lg,
+    padding: 16,
+    gap: 8,
+    ...Shadow.card,
+  },
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 6 },
+  },
   desc: {
     fontSize: 14,
-    marginBottom: 12
-},
+    lineHeight: 20,
+  },
   stats: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16
-},
+    gap: 12,
+    marginTop: 8,
+  },
+  statBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: Radii.sm,
+    gap: 4,
+  },
+  statText: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
   exerciseCard: {
-    borderRadius: 12,
+    borderRadius: Radii.md,
     padding: 12,
     marginBottom: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    elevation: 3,
+    ...Shadow.card,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
-    flex: 1
-},
+    flex: 1,
+    gap: 10,
+  },
+  exerciseInfo: {
+    flex: 1,
+    gap: 4,
+  },
   exerciseName: {
     fontSize: 16,
-    fontWeight: "600"
-},
+    fontWeight: "600",
+  },
+  muscleText: {
+    fontSize: 13,
+  },
 });
