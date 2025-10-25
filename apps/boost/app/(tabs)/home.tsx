@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import * as Progress from "react-native-progress";
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { Colors, Radii, Shadow } from "@/constants/theme";
@@ -152,6 +152,7 @@ export default function HomeScreen() {
     levelInfo && profile
       ? (currentExp - minExp) / ((maxExp ?? currentExp) - minExp)
       : 0;
+  const clampedProgress = Math.min(1, Math.max(0, progress));
 
 
   if (loading) {
@@ -179,16 +180,18 @@ export default function HomeScreen() {
             Level {profile?.level ?? 1}
           </Text>
 
-          <Progress.Bar
-            progress={progress}
-            width={220}
-            height={12}
-            color={palette.primary}
-            unfilledColor={palette.primary + "20"}
-            borderWidth={1}
-            borderColor={palette.borderColor}
-            style={styles.progressBar}
-          />
+          <View style={[styles.progressBarWrapper, { borderColor: palette.borderColor, backgroundColor: palette.background, height: 12, borderRadius: 6, width: '100%' }]}>
+            <View
+              style={[
+                styles.progressBarFill,
+                {
+                  width: `${clampedProgress * 100}%`,
+                  backgroundColor: palette.primary,
+                  borderRadius: 6,
+                },
+              ]}
+            />
+          </View>
 
           <Text style={[styles.xpText, { color: palette.mutedText }]}>
             {currentExp}/{maxExp ?? "∞"} XP
@@ -315,7 +318,7 @@ export default function HomeScreen() {
               Level {u.level}
             </Text>
           </View>
-          <Text style={[styles.arrow, { color: palette.primary }]}>➡️</Text>
+          <MaterialIcons name="chevron-right" size={20} color={palette.primary} />
         </View>
       ))}
     </View>
