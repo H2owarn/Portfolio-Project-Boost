@@ -143,7 +143,7 @@ export default function QuestScreen() {
   }, [profile]);
 
   if (loading) {
-    return <Text style={{ color: "#fff" }}>Loading quests…</Text>;
+    return <Text style={{ color: palette.text }}>Loading quests…</Text>;
   }
 
   const userLevel = profile?.level ?? 1;
@@ -184,10 +184,10 @@ export default function QuestScreen() {
         )}
 
         <View style={styles.questSpecs}>
-          <View style={[styles.tagsRow, { backgroundColor: palette.primary + "90" }]}>
-            <MaterialIcons name="diamond" size={12} color={palette.text} />
-            <Text style={[styles.specText, { color: palette.text }]}>
-            {quest.xp_reward ?? 0} XP
+          <View style={[styles.tagsRow, { backgroundColor: palette.primary + "20" }]}>
+            <MaterialIcons name="diamond" size={12} color={palette.primary} />
+            <Text style={[styles.specText, { color: palette.primary }]}>
+              {quest.xp_reward ?? 0} XP
             </Text>
           </View>
         </View>
@@ -197,7 +197,14 @@ export default function QuestScreen() {
           <View style={styles.questSpecs}>
             {exerciseNames.length > 0 ? (
               exerciseNames.map((ex, i) => (
-                <Text key={`${quest.id}-ex-${i}`} style={[styles.exercise, { color: palette.text }, { backgroundColor: palette.primary + "90" }]}>
+                <Text
+                  key={`${quest.id}-ex-${i}`}
+                  style={[
+                    styles.exercise,
+                    { color: palette.primary },
+                    { backgroundColor: palette.primary + "20" },
+                  ]}
+                >
                   {ex}
                 </Text>
               ))
@@ -214,7 +221,8 @@ export default function QuestScreen() {
           <Pressable
             style={[
               styles.startButton,
-              , { backgroundColor: palette.primary + "90" }]}
+              { backgroundColor: palette.primary }
+            ]}
             android_ripple={{ color: palette.secondary + "20" }}
             onPress={() =>
               !isLocked && userStamina >= (quest.stamina_cost ?? 0)
@@ -225,7 +233,7 @@ export default function QuestScreen() {
                 : console.log("Quest Locked or Not Enough Stamina")
             }
           >
-            <Text style={[styles.startButtonText, { color: palette.text }]}>
+            <Text style={[styles.startButtonText, { color: palette.secondary }]}>
               {isLocked
                 ? `Level ${quest.min_level ?? 0} Required`
                 : userStamina < quest.stamina_cost

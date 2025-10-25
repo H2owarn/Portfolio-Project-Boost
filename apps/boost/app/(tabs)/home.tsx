@@ -5,6 +5,9 @@ import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { Colors, Radii, Shadow } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import Avatar from "@/components/ui/avatar";
+import EmptyState from "@/components/ui/empty-state";
+import Skeleton from "@/components/ui/skeleton";
 
 
 type Profile = {
@@ -32,7 +35,7 @@ type UserQuestRow = {
   total_exercises: number;
 };
 
-const FALLBACK_FRIEND_AVATAR = "https://via.placeholder.com/60";
+// Avatar fallback is handled by <Avatar/> component
 
 
 export default function HomeScreen() {
@@ -157,9 +160,62 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { paddingTop: 45, backgroundColor: palette.background }]}>
-        <Text style={{ color: palette.text }}>Loading…</Text>
-      </View>
+      <ScrollView
+        style={{ backgroundColor: palette.background }}
+        contentContainerStyle={styles.container}
+      >
+        {/* Header skeleton */}
+        <View style={[styles.header, { backgroundColor: palette.surface }]}>
+          <Skeleton style={{ width: 80, height: 80 }} borderRadius={40} />
+          <View style={styles.headerCopy}>
+            <Skeleton style={{ height: 18, width: '50%' }} borderRadius={6} />
+            <Skeleton style={{ height: 14, width: '30%' }} borderRadius={6} />
+            <Skeleton style={{ height: 12, width: '100%', marginTop: 8 }} borderRadius={6} />
+            <Skeleton style={{ height: 12, width: 100, marginTop: 8 }} borderRadius={6} />
+          </View>
+        </View>
+
+        {/* Quest Board skeleton */}
+        <View style={[styles.questSection, { backgroundColor: palette.surface }]}>
+          <View style={styles.sectionHeader}>
+            <Skeleton style={{ height: 20, width: 120 }} borderRadius={6} />
+            <Skeleton style={{ height: 16, width: 60 }} borderRadius={6} />
+          </View>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.questList}>
+            {[0, 1, 2].map((i) => (
+              <View key={i} style={[styles.questCard, { backgroundColor: palette.surfaceElevated }]}>
+                <View style={styles.questCardContent}>
+                  <View style={styles.questCardTop}>
+                    <Skeleton style={{ width: 60, height: 60 }} borderRadius={Radii.md} />
+                    <Skeleton style={{ height: 14, width: 80 }} borderRadius={6} />
+                  </View>
+                  <Skeleton style={{ height: 12, width: '100%' }} borderRadius={6} />
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Rivals skeleton */}
+        <View style={[styles.section, { backgroundColor: palette.surface }]}>
+          <View style={styles.sectionHeader}>
+            <Skeleton style={{ height: 20, width: 180 }} borderRadius={6} />
+          </View>
+          <View style={styles.recommendContainer}>
+            {[0, 1].map((i) => (
+              <View key={i} style={[styles.recommendCard, { backgroundColor: palette.surfaceElevated }]}>
+                <Skeleton style={{ width: 50, height: 50 }} borderRadius={25} />
+                <View style={styles.recommendInfo}>
+                  <Skeleton style={{ height: 14, width: 120 }} borderRadius={6} />
+                  <Skeleton style={{ height: 12, width: 80, marginTop: 6 }} borderRadius={6} />
+                </View>
+                <Skeleton style={{ width: 20, height: 20 }} borderRadius={4} />
+              </View>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
     );
   }
 
@@ -170,17 +226,14 @@ export default function HomeScreen() {
     >
       {/* Header / Profile */}
       <View style={[styles.header, { backgroundColor: palette.surface }]}>
-        <Image
-          source={{ uri: FALLBACK_FRIEND_AVATAR  }}
-          style={styles.avatar}
-        />
+        <Avatar name={profile?.name ?? undefined} level={profile?.level} size={80} />
         <View style={styles.headerCopy}>
           <Text style={[styles.userName, { color: palette.text }]}>{profile?.name ?? "—"}</Text>
           <Text style={[styles.userLevel, { color: palette.mutedText }]}>
             Level {profile?.level ?? 1}
           </Text>
 
-          <View style={[styles.progressBarWrapper, { borderColor: palette.borderColor, backgroundColor: palette.background, height: 12, borderRadius: 6, width: '100%' }]}>
+          <View style={[styles.progressBarWrapper, { borderColor: palette.borderColorAlt, backgroundColor: palette.background, width: '100%' }]}>
             <View
               style={[
                 styles.progressBarFill,
@@ -244,7 +297,7 @@ export default function HomeScreen() {
 
                     {hasProgress ? (
                       <View style={styles.questProgressContainer}>
-                        <View style={[styles.progressBarWrapper, { borderColor: palette.borderColor, backgroundColor: palette.background }]}>
+                        <View style={[styles.progressBarWrapper, { borderColor: palette.borderColorAlt, backgroundColor: palette.background }]}>
                           <View 
                             style={[
                               styles.progressBarFill, 
@@ -254,27 +307,29 @@ export default function HomeScreen() {
                               }
                             ]} 
                           />
-                          <Text style={[styles.progressBarText, { color: palette.text }]}>
-                            {q.completed_exercises}/{q.total_exercises}
-                          </Text>
                         </View>
+                        <Text style={[styles.progressBarText, { color: palette.mutedText, textAlign: 'center' }]}>
+                          {q.completed_exercises}/{q.total_exercises}
+                        </Text>
                       </View>
                     ) : (
-                    <View style={[styles.goButton, { backgroundColor: palette.primary }]}>
-                      <Text style={[styles.goButtonText, { color: palette.secondary }]}>GO</Text>
-                    </View>
-                  )}
+                      <View style={[styles.goButton, { backgroundColor: palette.primary }]}>
+                        <Text style={[styles.goButtonText, { color: palette.secondary }]}>GO</Text>
+                      </View>
+                    )}
                   </View>
                 </Pressable>
               );
             })}
           </ScrollView>
         ) : (
-          <View style={styles.noQuestsContainer}>
-            <Text style={[styles.noQuestsText, { color: palette.mutedText }]}>
-              No active quests. Tap &quot;See All&quot; to start a quest!
-            </Text>
-          </View>
+          <EmptyState
+            icon="auto-awesome"
+            title="No active quests"
+            message="Browse quests and start your next challenge."
+            actionLabel="Browse All Quests"
+            onActionPress={() => router.push("/(tabs)/quest")}
+          />
         )}
 
         <Pressable
@@ -306,10 +361,7 @@ export default function HomeScreen() {
             { backgroundColor: palette.surfaceElevated ?? palette.surface },
           ]}
         >
-          <Image
-            source={{ uri: FALLBACK_FRIEND_AVATAR }}
-            style={styles.recommendAvatar}
-          />
+          <Avatar name={u.name} level={u.level} size={50} />
           <View style={styles.recommendInfo}>
             <Text style={[styles.recommendName, { color: palette.text }]}>
               {u.name ?? "—"}
@@ -450,9 +502,9 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   progressBarWrapper: {
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 1,
     overflow: "hidden",
     position: "relative",
     justifyContent: "center",
@@ -463,12 +515,12 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
-    borderRadius: 14,
+    borderRadius: 6,
   },
   progressBarText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "700",
-    zIndex: 1,
+    marginTop: 6,
   },
   noQuestsContainer: {
     padding: 24,

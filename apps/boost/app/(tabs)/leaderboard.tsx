@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import Avatar from "@/components/ui/avatar";
 
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -30,7 +31,7 @@ export default function LeaderboardPage() {
   }, []);
 
   if (loading) {
-    return <Text style={{ color: "#fff" }}>Loading leaderboard…</Text>;
+    return <Text style={{ color: palette.text }}>Loading leaderboard…</Text>;
   }
 
   const top3 = leaderboard.slice(0, 3);
@@ -48,12 +49,12 @@ export default function LeaderboardPage() {
             <View style={[styles.podiumWrapper, { height: 100 }]}>
               <View style={[styles.badgeBottom, { borderTopColor: palette.secondary }]} />
               <View style={[styles.badgeContent, { backgroundColor: palette.secondary }]}></View>
-              <View style={styles.avatar} />
+              <Avatar name={top3[1].name} size={70} />
               <Text
                 style={[
                   styles.rankCircle,
                   styles.rankCircle1,
-                  { backgroundColor: palette.primary },
+                  { backgroundColor: palette.primary, color: palette.secondary },
                 ]}
               >
                 2
@@ -62,12 +63,12 @@ export default function LeaderboardPage() {
                 style={[
                   styles.podiumName23,
                   styles.podiumName,
-                  { color: 'white' },
+                  { color: palette.text },
                 ]}
               >
                 {top3[1].name}
               </Text>
-              <Text style={[styles.podiumScore, { color: 'white' }]}>
+              <Text style={[styles.podiumScore, { color: palette.text }]}>
                 {top3[1].exp}
               </Text>
             </View>
@@ -82,15 +83,16 @@ export default function LeaderboardPage() {
                   { backgroundColor: palette.secondary },
                 ]}
               ></View>
-              <View style={[styles.avatar, styles.avatar1]}>
+              <View style={[{ position: 'relative' }, styles.avatar1]}>
+                <Avatar name={top3[0].name} size={70} />
                 <Text style={styles.crown}>👑</Text>
               </View>
-              <Text style={[styles.rankCircle, { backgroundColor: palette.primary }]}>1</Text>
+              <Text style={[styles.rankCircle, { backgroundColor: palette.primary, color: palette.secondary }]}>1</Text>
               <Text
                 style={[
                   styles.podiumName1,
                   styles.podiumName,
-                  { color: 'white' },
+                  { color: palette.text },
                 ]}
               >
                 {top3[0].name}
@@ -99,7 +101,7 @@ export default function LeaderboardPage() {
                 style={[
                   styles.podiumScore,
                   styles.podiumScore1,
-                  { color: 'white' },
+                  { color: palette.text },
                 ]}
               >
                 {top3[0].exp}
@@ -110,12 +112,12 @@ export default function LeaderboardPage() {
             <View style={[styles.podiumWrapper, { height: 100 }]}>
               <View style={[styles.badgeBottom, { borderTopColor: palette.secondary }]} />
               <View style={[styles.badgeContent, { backgroundColor: palette.secondary }]}></View>
-              <View style={styles.avatar} />
+              <Avatar name={top3[2].name} size={70} />
               <Text
                 style={[
                   styles.rankCircle,
                   styles.rankCircle1,
-                  { backgroundColor: palette.primary },
+                  { backgroundColor: palette.primary, color: palette.secondary },
                 ]}
               >
                 3
@@ -124,12 +126,12 @@ export default function LeaderboardPage() {
                 style={[
                   styles.podiumName23,
                   styles.podiumName,
-                  { color: 'white' },
+                  { color: palette.text },
                 ]}
               >
                 {top3[2].name}
               </Text>
-              <Text style={[styles.podiumScore, { color: 'white' }]}>
+              <Text style={[styles.podiumScore, { color: palette.text }]}>
                 {top3[2].exp}
               </Text>
             </View>
@@ -143,7 +145,7 @@ export default function LeaderboardPage() {
             style={[styles.listItem, { backgroundColor: palette.secondary }]}
           >
             <View style={styles.rowLeft}>
-              <View style={styles.smallAvatar} />
+              <Avatar name={player.name} size={40} />
               <Text style={[styles.listName, { color: palette.text }]}>{player.name}</Text>
             </View>
             <Text style={[styles.listScore, { color: palette.text }]}>{player.exp}</Text>
@@ -230,7 +232,6 @@ const styles = StyleSheet.create({
   rankCircle: {
     position: "absolute",
     bottom: 90,
-    color: "#111827",
     fontSize: 14,
     fontWeight: "bold",
     borderRadius: 12,

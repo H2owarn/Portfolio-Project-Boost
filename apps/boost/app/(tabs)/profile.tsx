@@ -6,6 +6,7 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 import { useAuth } from '@/hooks/use-auth';
+import Avatar from '@/components/ui/avatar';
 
 
 export default function ProfileScreen() {
@@ -32,23 +33,21 @@ export default function ProfileScreen() {
 			<ScrollView contentContainerStyle={styles.scrollContent}>
 				{/* Profile Section */}
 				<View style={styles.profileSection}>
-					<View style={styles.avatar}>
-						<Ionicons name="person" size={48} color={palette.text} />
-					</View>
+                <Avatar name={profile.name} level={profile.level} size={96} />
 					<Text style={[styles.username, {color: palette.text}]}>{profile.name}</Text>
 					<Text style={[styles.joinedText, { color: palette.mutedText}]}>Joined {joined}</Text>
 					<View style={styles.followRow}>
-						<Text style={styles.linkText}>0 Friends</Text>
+                    <Text style={[styles.linkText, { color: palette.primary }]}>0 Friends</Text>
 					</View>
 					<View style={styles.buttonRow}>
 						<TouchableOpacity style={[styles.addButton, {backgroundColor: palette.secondary}]}
 						onPress={() => router.push('/screens/testfriend')}>
 							<Text style={[styles.addButtonText, {color: palette.primary}]}>+ Add Friends</Text>
 						</TouchableOpacity>
-						<TouchableOpacity style={[styles.shareButton, {backgroundColor: palette.secondary}]}
-						onPress={() => router.push('/screens/streaktest')}>
-							<Ionicons name="share-outline" size={20} color="white" />
-						</TouchableOpacity>
+                    <TouchableOpacity style={[styles.shareButton, {backgroundColor: palette.secondary}]}
+                    onPress={() => router.push('/screens/streaktest')}>
+                        <Ionicons name="share-outline" size={20} color={palette.text} />
+                    </TouchableOpacity>
 					</View>
 				</View>
 
@@ -80,26 +79,20 @@ export default function ProfileScreen() {
 				<Text style={[styles.sectionTitle, {color: palette.text }]}>Friends</Text>
 				<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rivalsRow}>
 					{/* Repeat for each rival */}
-					<View style={styles.rivalAvatarContainer}>
-						<View style={styles.avatar}>
-							<Ionicons name="person" size={48} color="gray" />
-						</View>
-						<Text style={[styles.username, { color: palette.text }]}>Kaj Kennedy</Text>
-					</View>
+                <View style={styles.rivalAvatarContainer}>
+                    <Avatar name={'Kaj Kennedy'} size={72} />
+                    <Text style={[styles.username, { color: palette.text }]}>Kaj Kennedy</Text>
+                </View>
 
-					<View style={styles.rivalAvatarContainer}>
-						<View style={styles.avatar}>
-							<Ionicons name="person" size={48} color="gray" />
-						</View>
-						<Text style={[styles.username, { color: palette.text }]}>WaWa</Text>
-					</View>
+                <View style={styles.rivalAvatarContainer}>
+                    <Avatar name={'WaWa'} size={72} />
+                    <Text style={[styles.username, { color: palette.text }]}>WaWa</Text>
+                </View>
 
-					<View style={styles.rivalAvatarContainer}>
-						<View style={styles.avatar}>
-							<Ionicons name="person" size={48} color="gray" />
-						</View>
-						<Text style={[styles.username, { color: palette.text }]}>Jin Lieu</Text>
-					</View>
+                <View style={styles.rivalAvatarContainer}>
+                    <Avatar name={'Jin Lieu'} size={72} />
+                    <Text style={[styles.username, { color: palette.text }]}>Jin Lieu</Text>
+                </View>
 				</ScrollView>
 			</ScrollView>
 		</View>
@@ -156,40 +149,38 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		marginTop: 8
 	},
-	linkText: {
-		color: '#3b82f6',
-		marginHorizontal: 8
-	},
+    linkText: {
+        marginHorizontal: 8
+    },
 	buttonRow: {
 		flexDirection: 'row',
 		marginTop: 12
 	},
-	addButton: {
-		backgroundColor: '#2563eb',
-		paddingHorizontal: 16,
-		paddingVertical: 8,
-		borderRadius: 12,
-		marginRight: 8,
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.3,
-		shadowRadius: 6,
-		elevation: 6,
-	},
-	addButtonText: {
-		color: 'white',
-		fontWeight: 'bold'
-	},
-	shareButton: {
-		backgroundColor: '#374151ff',
-		paddingHorizontal: 12,
-		paddingVertical: 8,
-		borderRadius: 12,
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.3,
-		shadowRadius: 6,
-		elevation: 6,
-	},
+    addButton: {
+        backgroundColor: 'transparent',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 12,
+        marginRight: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        elevation: 6,
+    },
+    addButtonText: {
+        fontWeight: 'bold'
+    },
+    shareButton: {
+        backgroundColor: 'transparent',
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 12,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        elevation: 6,
+    },
 	sectionTitle: {
 		fontSize: 18,
 		fontWeight: 'bold',
@@ -201,30 +192,28 @@ const styles = StyleSheet.create({
 		flexWrap: 'wrap',
 		justifyContent: 'space-between'
 	},
-	statCard: {
-		backgroundColor: '#1F2937',
-		borderRadius: 16,
-		padding: 16,
-		width: '48%',
-		marginBottom: 1,
-		borderWidth: 2,
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 20,
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.3,
-		shadowRadius: 6,
-		elevation: 6,
-	},
-	statValue: {
-		color: 'black',
-		fontSize: 18,
-		fontWeight: 'bold',
-		marginTop: 4
-	},
-	statLabel: {
-		color: '#000000ff'
-	},
+    statCard: {
+        backgroundColor: 'transparent',
+        borderRadius: 16,
+        padding: 16,
+        width: '48%',
+        marginBottom: 1,
+        borderWidth: 2,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 20,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        elevation: 6,
+    },
+    statValue: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginTop: 4
+    },
+    statLabel: {
+    },
 	rivalsRow: {
 		paddingVertical: 8,
 		paddingHorizontal: 4,
