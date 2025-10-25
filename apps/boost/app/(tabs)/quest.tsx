@@ -173,8 +173,8 @@ export default function QuestScreen() {
           </Text>
           <Text style={[styles.questName, { color: palette.text }]}>{quest.name}</Text>
           {isLocked && (
-            <View style={styles.lockedTag}>
-              <Text style={styles.lockedText}>Locked</Text>
+            <View style={[styles.lockedTag, { backgroundColor: palette.errorTransparent }]}>
+              <Text style={[styles.lockedText, { color: palette.error }]}>Locked</Text>
             </View>
           )}
         </View>
@@ -261,7 +261,7 @@ export default function QuestScreen() {
         <QuestCard key={quest.id} quest={quest} />
       ))}
 
-      <Text style={styles.sectionTitle}>⭐ Side Quests</Text>
+      <Text style={[styles.sectionTitle, { color: palette.text }]}>⭐ Side Quests</Text>
       {sideQuests.map((quest) => (
         <QuestCard key={quest.id} quest={quest} />
       ))}
@@ -284,7 +284,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#fff",
     marginVertical: 10,
   },
   card: { backgroundColor: "#fff", borderRadius: 12, padding: 16, marginBottom: 12 },
@@ -300,12 +299,11 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   lockedTag: {
-    backgroundColor: "#f8d7da",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
   },
-  lockedText: { color: "#721c24", fontSize: 12, fontWeight: "600" },
+  lockedText: { fontSize: 12, fontWeight: "600" },
   description: { fontSize: 14, marginBottom: 8 },
   tagsRow: {
     flexDirection: "row",
