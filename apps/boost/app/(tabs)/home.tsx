@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { Colors, Radii, Shadow } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-
+import { playPreloaded, preloadSounds } from "@/utils/sound";
 
 type Profile = {
   id: string;
@@ -43,6 +43,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+  preloadSounds();
   let mounted = true;
 
   (async () => {
@@ -131,6 +132,7 @@ export default function HomeScreen() {
       : 0;
 
 
+
   if (loading) {
     return (
       <View style={[styles.container, { paddingTop: 45, backgroundColor: palette.background }]}>
@@ -179,7 +181,10 @@ export default function HomeScreen() {
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: palette.text }]}>Quest Board</Text>
           <Pressable
-            onPress={() => router.push("/(tabs)/quest")}
+            onPress={ () => {
+              playPreloaded("click");
+              router.push("/(tabs)/quest");
+            }}
             android_ripple={{ color: palette.primary + "20" }}
           >
             <Text style={[styles.seeAll, { color: palette.primary }]}>See All</Text>

@@ -8,6 +8,7 @@
 		"@types/bun": "latest"
 	},
 	"dependencies": {
-		"dayjs": "^1.11.18"
+		"dayjs": "^1.11.18",
+		"expo-av": "~16.0.7"
 	}
 }
