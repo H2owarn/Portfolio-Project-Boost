@@ -95,9 +95,8 @@ export default function ExerciseInProgressScreen() {
         console.error('Error saving completed exercise:', error);
         alert('Failed to save exercise. Please try again.');
       } else {
-        // Success! Navigate back or show success message
-        alert(`Great job! You completed ${sets} sets of ${reps} reps and earned ${exercise.xp_reward} XP!`);
-        router.back();
+        // Success! Navigate to share screen
+        router.push('/screens/share');
       }
     } catch (err) {
       console.error('Error completing exercise:', err);
@@ -262,18 +261,16 @@ export default function ExerciseInProgressScreen() {
             style={[
               styles.completeButton,
               { backgroundColor: palette.primary },
-              completing && styles.buttonDisabled
-            ]}
-            onPress={handleCompleteExercise}
-            disabled={completing}
-          >
-            <MaterialIcons name="check-circle" size={24} color="#000" />
-            <Text style={styles.completeButtonText}>
-              {completing ? 'Saving...' : 'Complete Exercise'}
-            </Text>
-          </Pressable>
-
-          {/* All Instructions */}
+            completing && styles.buttonDisabled
+          ]}
+          onPress={handleCompleteExercise}
+          disabled={completing}
+        >
+          <MaterialIcons name="check-circle" size={24} color="#000" />
+          <Text style={styles.completeButtonText}>
+            {completing ? 'Saving...' : 'Finish Workout'}
+          </Text>
+        </Pressable>          {/* All Instructions */}
           {exercise.instructions && exercise.instructions.length > 0 && (
             <View style={[styles.instructionsCard, { backgroundColor: palette.surface }]}>
               <Text style={[styles.sectionTitle, { color: palette.text }]}>Instructions</Text>
