@@ -63,7 +63,7 @@ export default function TabLayout() {
               isSelected && styles.questLabelActive,
             ]}
           >
-            Go!
+            Go
           </Text>
         </View>
       </Pressable>
