@@ -104,68 +104,84 @@ export default function QuestDetailScreen() {
 
         <View style={styles.stats}>
           <View style={[styles.statBadge, { backgroundColor: palette.primary + "20" }]}>
-            <MaterialIcons name="star" size={16} color={palette.primary} />
+            <MaterialIcons name="star" size={18} color={palette.primary} />
             <Text style={[styles.statText, { color: palette.primary }]}>{totalXP} XP</Text>
           </View>
           <View style={[styles.statBadge, { backgroundColor: palette.primary + "20" }]}>
-            <MaterialIcons name="flash-on" size={16} color={palette.primary} />
+            <MaterialIcons name="flash-on" size={18} color={palette.primary} />
             <Text style={[styles.statText, { color: palette.primary }]}>{totalStamina} Stamina</Text>
           </View>
         </View>
       </View>
 
-      {/* Exercises List */}
-      <FlatList
-  data={exercises}
-  keyExtractor={(item) => item.id.toString()}
-  renderItem={({ item }) => (
-    <Pressable
-      style={[styles.exerciseCard, { backgroundColor: palette.surface }]}
-      onPress={() =>
-        router.push({
-          pathname: "/screens/QuestExerciseScreen",
-          params: {
-            exercise: JSON.stringify(item),
-            quest_id: quest.id,
-         },
-        })
-      }
-    >
-      {/* Left side: exercise info */}
-      <View style={styles.row}>
-        <MaterialIcons name="fitness-center" size={24} color={palette.primary} />
-        <View style={styles.exerciseInfo}>
-          <Text style={[styles.exerciseName, { color: palette.text }]}>{item.name}</Text>
-          <Text style={[styles.muscleText, { color: palette.mutedText }]}>
-            {item.primary_muscles?.join(", ")}
-          </Text>
+      {/* Progress Section */}
+      <View style={[styles.progressSection, { backgroundColor: palette.surface }]}>
+        <Text style={[styles.progressText, { color: palette.text }]}>
+          {completedCount}/{totalCount} exercises completed
+        </Text>
+        <View style={styles.progressBarContainer}>
+          <View 
+            style={[
+              styles.progressBar, 
+              { 
+                backgroundColor: palette.primary,
+                width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%`
+              }
+            ]} 
+          />
         </View>
       </View>
 
-      {/* Right side: checkbox */}
-      <View
-        onStartShouldSetResponder={(e) => {
-          // 👇 Prevent checkbox press from triggering card navigation
-          e.stopPropagation();
-          return false;
-        }}
-      >
-        <Pressable onPress={() => toggleComplete(item.id)}>
-          <MaterialIcons
-            name={completedExercises[item.id] ? "check-box" : "check-box-outline-blank"}
-            size={26}
-            color={completedExercises[item.id] ? palette.primary : palette.mutedText}
-          />
-        </Pressable>
-      </View>
-    </Pressable>
-  )}
-/>
+      {/* Exercises List */}
+      <FlatList
+        data={exercises}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.listContent}
+        renderItem={({ item }) => (
+          <Pressable
+            style={[styles.exerciseCard, { backgroundColor: palette.surface }]}
+            onPress={() =>
+              router.push({
+                pathname: "/screens/QuestExerciseScreen",
+                params: {
+                  exercise: JSON.stringify(item),
+                  quest_id: quest.id,
+               },
+              })
+            }
+          >
+            {/* Left side: exercise info */}
+            <View style={styles.row}>
+              <View style={[styles.iconContainer, { backgroundColor: palette.primary + "15" }]}>
+                <MaterialIcons name="fitness-center" size={20} color={palette.primary} />
+              </View>
+              <View style={styles.exerciseInfo}>
+                <Text style={[styles.exerciseName, { color: palette.text }]}>{item.name}</Text>
+                <Text style={[styles.muscleText, { color: palette.mutedText }]}>
+                  {item.primary_muscles?.join(", ")}
+                </Text>
+              </View>
+            </View>
 
-        <Text style={{ textAlign: "center", color: palette.text, marginVertical: 8 }}>
-        {completedCount}/{totalCount} exercises completed
-        </Text>
-
+            {/* Right side: checkbox */}
+            <View
+              onStartShouldSetResponder={(e) => {
+                // 👇 Prevent checkbox press from triggering card navigation
+                e.stopPropagation();
+                return false;
+              }}
+            >
+              <Pressable onPress={() => toggleComplete(item.id)}>
+                <MaterialIcons
+                  name={completedExercises[item.id] ? "check-box" : "check-box-outline-blank"}
+                  size={28}
+                  color={completedExercises[item.id] ? palette.primary : palette.mutedText}
+                />
+              </Pressable>
+            </View>
+          </Pressable>
+        )}
+      />
     </View>
   );
 }
@@ -173,8 +189,7 @@ export default function QuestDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 12,
-    gap: 12,
+    padding: 16,
   },
   center: {
     flex: 1,
@@ -183,39 +198,66 @@ const styles = StyleSheet.create({
   },
   header: {
     borderRadius: Radii.lg,
-    padding: 16,
-    gap: 8,
+    padding: 20,
+    gap: 10,
+    marginBottom: 16,
     ...Shadow.card,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
+    letterSpacing: 0.3,
   },
   desc: {
     fontSize: 14,
     lineHeight: 20,
+    opacity: 0.8,
   },
   stats: {
     flexDirection: "row",
     gap: 12,
-    marginTop: 8,
+    marginTop: 12,
   },
   statBadge: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: Radii.sm,
-    gap: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: Radii.md,
+    gap: 6,
   },
   statText: {
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  progressSection: {
+    borderRadius: Radii.lg,
+    padding: 16,
+    marginBottom: 16,
+    gap: 10,
+    ...Shadow.card,
+  },
+  progressText: {
+    fontSize: 14,
     fontWeight: "600",
+    textAlign: "center",
+  },
+  progressBarContainer: {
+    height: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  listContent: {
+    gap: 12,
   },
   exerciseCard: {
-    borderRadius: Radii.md,
-    padding: 12,
-    marginBottom: 10,
+    borderRadius: Radii.lg,
+    padding: 16,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -225,7 +267,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
-    gap: 10,
+    gap: 12,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: Radii.md,
+    justifyContent: "center",
+    alignItems: "center",
   },
   exerciseInfo: {
     flex: 1,
@@ -234,8 +283,10 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 16,
     fontWeight: "600",
+    letterSpacing: 0.2,
   },
   muscleText: {
     fontSize: 13,
+    opacity: 0.7,
   },
 });

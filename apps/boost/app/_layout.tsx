@@ -40,6 +40,13 @@ export default function RootLayout() {
 					<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 					<Stack.Screen name="onboarding/welcome" options={{ headerShown: false }} />
 					<Stack.Screen name="onboarding/login" options={{ headerShown: false, presentation: 'card' }} />
+					<Stack.Screen 
+						name="screens/QuestScreen" 
+						options={{ 
+							title: 'Quest',
+							headerBackTitle: 'Back'
+						}} 
+					/>
 				</Stack>
 			</ThemeProvider>
 			</RelationshipProvider>
