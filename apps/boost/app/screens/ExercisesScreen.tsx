@@ -222,19 +222,40 @@ export default function ExercisesScreen() {
         ) : (
           <>
             {/* Search Bar */}
-            <View style={styles.searchContainer}>
-              <MaterialIcons name="search" size={20} color={palette.mutedText} style={styles.searchIcon} />
-              <TextInput
-                style={[styles.searchInput, {
-                  backgroundColor: palette.surface,
-                  color: palette.text,
-                  borderColor: palette.borderColor,
-                }]}
-                placeholder="Search exercises..."
-                placeholderTextColor={palette.mutedText}
-                value={searchText}
-                onChangeText={setSearchText}
-              />
+            <View style={styles.headerContainer}>
+              <View style={styles.searchRow}>
+                <Pressable 
+                  style={styles.backButton}
+                  onPress={() => router.back()}
+                  android_ripple={{ color: palette.primary + '20', borderless: true, radius: 20 }}
+                >
+                  <MaterialIcons name="arrow-back" size={24} color={palette.text} />
+                </Pressable>
+                <View style={styles.searchInputContainer}>
+                  <MaterialIcons name="search" size={20} color={palette.mutedText} style={styles.searchIcon} />
+                  <TextInput
+                    style={[styles.searchInput, {
+                      backgroundColor: palette.surface,
+                      color: palette.text,
+                      borderColor: palette.borderColor,
+                      paddingRight: searchText.trim() !== '' ? 44 : 16,
+                    }]}
+                    placeholder="Search exercises..."
+                    placeholderTextColor={palette.mutedText}
+                    value={searchText}
+                    onChangeText={setSearchText}
+                  />
+                  {searchText.trim() !== '' && (
+                    <Pressable 
+                      style={styles.clearButton}
+                      onPress={() => setSearchText('')}
+                      android_ripple={{ color: palette.primary + '20', borderless: true, radius: 16 }}
+                    >
+                      <MaterialIcons name="close" size={20} color={palette.mutedText} />
+                    </Pressable>
+                  )}
+                </View>
+              </View>
             </View>
 
             {/* Filters Section */}
@@ -316,24 +337,51 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  searchContainer: {
+  headerContainer: {
     paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.md,
-    marginTop: Spacing.xs,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
+  },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  backButton: {
+    width: 40,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: Radii.md,
+  },
+  searchInputContainer: {
+    flex: 1,
     position: 'relative',
   },
   searchIcon: {
     position: 'absolute',
-    left: Spacing.lg + 16,
+    left: 14,
     top: 14,
     zIndex: 1,
   },
   searchInput: {
     borderRadius: Radii.lg,
-    paddingHorizontal: 48,
+    paddingLeft: 44,
+    paddingRight: 16,
     paddingVertical: 14,
     fontSize: 15,
     borderWidth: 1,
+  },
+  clearButton: {
+    position: 'absolute',
+    right: 8,
+    top: 8,
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+    zIndex: 1,
   },
   list: {
     gap: Spacing.md,
