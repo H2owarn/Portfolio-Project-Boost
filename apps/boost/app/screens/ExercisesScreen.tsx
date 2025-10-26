@@ -312,20 +312,6 @@ export default function ExercisesScreen() {
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
             />
-
-            {/* Floating Finish Workout Button */}
-            <Pressable
-              style={[styles.finishButton, {
-                backgroundColor: palette.primary,
-                shadowColor: palette.primary,
-              }]}
-              onPress={() => router.push('/screens/share')}
-            >
-              <MaterialIcons name="check-circle" size={24} color="#000" />
-              <Text style={styles.finishButtonText}>
-                Finish Workout
-              </Text>
-            </Pressable>
           </>
         )}
       </Screen>

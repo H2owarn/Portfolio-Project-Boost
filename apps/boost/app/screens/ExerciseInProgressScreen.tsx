@@ -261,16 +261,18 @@ export default function ExerciseInProgressScreen() {
             style={[
               styles.completeButton,
               { backgroundColor: palette.primary },
-            completing && styles.buttonDisabled
-          ]}
-          onPress={handleCompleteExercise}
-          disabled={completing}
-        >
-          <MaterialIcons name="check-circle" size={24} color="#000" />
-          <Text style={styles.completeButtonText}>
-            {completing ? 'Saving...' : 'Finish Workout'}
-          </Text>
-        </Pressable>          {/* All Instructions */}
+              completing && styles.buttonDisabled
+            ]}
+            onPress={handleCompleteExercise}
+            disabled={completing}
+          >
+            <MaterialIcons name="check-circle" size={24} color="#000" />
+            <Text style={styles.completeButtonText}>
+              {completing ? 'Saving...' : 'Finish Workout'}
+            </Text>
+          </Pressable>
+
+          {/* All Instructions */}
           {exercise.instructions && exercise.instructions.length > 0 && (
             <View style={[styles.instructionsCard, { backgroundColor: palette.surface }]}>
               <Text style={[styles.sectionTitle, { color: palette.text }]}>Instructions</Text>
