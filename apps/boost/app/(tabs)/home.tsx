@@ -217,7 +217,10 @@ export default function HomeScreen() {
         <Pressable
           style={[styles.quickStartBtn, { backgroundColor: palette.primary }]}
           android_ripple={{ color: palette.secondary + "20" }}
-          onPress={() => router.push("/(tabs)/quest")}
+          onPress={() => {
+            playPreloaded("click");
+            router.push("/(tabs)/quest")
+          }}
         >
           <Text style={[styles.quickStartText, { color: palette.secondary }]}>Quick Start</Text>
         </Pressable>

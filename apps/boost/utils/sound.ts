@@ -29,3 +29,5 @@ export async function preloadSounds() {
 export async function playPreloaded(name: keyof typeof sounds) {
   await sounds[name]?.replayAsync();
 }
+
+export type SoundName = 'click' | 'complete' | 'achieve' | 'enter';
