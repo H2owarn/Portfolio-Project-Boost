@@ -9,6 +9,7 @@ import { XpProvider } from '@/contexts/Xpcontext';
 import { StaminaProvider } from '@/contexts/Staminacontext';
 import { RelationshipProvider } from '@/contexts/FriendContext';
 import { StreakProvider } from '@/contexts/StreakContext';
+import { WorkoutSessionProvider } from '@/contexts/WorkoutSessionContext';
 
 export const unstable_settings = {
   initialRouteName: 'onboarding/login', // 👈 Start at login

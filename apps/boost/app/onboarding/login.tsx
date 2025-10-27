@@ -54,8 +54,8 @@ export default function LoginScreen() {
 
 
 
-	const [email, setEmail] = useState('test@example.com');
-	const [password, setPassword] = useState('1234');
+	const [email, setEmail] = useState('me@gibbu.dev');
+	const [password, setPassword] = useState('testing123');
 
 	return (
 	<Screen

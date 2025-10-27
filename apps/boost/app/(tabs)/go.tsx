@@ -73,8 +73,8 @@ export default function AvatarScreen() {
 				</ScrollView>
 			</View>
 
-			<View style={[styles.seemore, {marginTop: 20, backgroundColor: palette.surface}]}>
-				<Button title="See Recommended Exercises" onPress={handleContinue} />
+			<View style={[styles.seemore, {marginTop: 20, backgroundColor: palette.primary, }]}>
+				<Button title="Start a workout!" onPress={handleContinue} />
 			</View>
 		</View>
 	);

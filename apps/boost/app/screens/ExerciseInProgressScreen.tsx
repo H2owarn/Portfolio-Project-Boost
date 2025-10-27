@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { Screen } from '@/components/layout/screen';
 import { Colors, Radii, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 
 const { width } = Dimensions.get('window');
 
@@ -16,7 +17,6 @@ type Exercise = {
   instructions: string[];
   images: string[];
   xp_reward: number;
-  stamina_cost: number;
   category?: string;
   level?: string;
 };
@@ -24,6 +24,7 @@ type Exercise = {
 export default function ExerciseInProgressScreen() {
   const params = useLocalSearchParams();
   const palette = Colors[useColorScheme() ?? 'dark'];
+  const { currentSessionId } = useWorkoutSession();
 
   // Parse exercise data
   const exercise: Exercise = JSON.parse(params.exercise as string);
@@ -31,6 +32,7 @@ export default function ExerciseInProgressScreen() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [sets, setSets] = useState('0');
   const [reps, setReps] = useState('0');
+  const [weight, setWeight] = useState('0');
   const [completing, setCompleting] = useState(false);
   const [imageLoading, setImageLoading] = useState<{ [key: number]: boolean }>({});
   const [imagesPrefetched, setImagesPrefetched] = useState(false);
@@ -112,7 +114,9 @@ export default function ExerciseInProgressScreen() {
         exercise_id: exercise.id,
         sets: numSets,
         reps: numReps,
+        weight: numWeight,
         claimed: false, // ✅ mark as new/unclaimed
+        workout_session_id: currentSessionId,
       });
 
     if (insertErr) {
@@ -122,7 +126,7 @@ export default function ExerciseInProgressScreen() {
 
     // 6️⃣ Success message
     alert(
-      `✅ Exercise complete!\nYou used ${exercise.stamina_cost} stamina.\nEXP will be added after finishing your workout.`
+      `✅ Exercise complete!\n\nEXP will be added after finishing your workout.`
     );
 
     router.back();
@@ -183,6 +187,7 @@ export default function ExerciseInProgressScreen() {
               scrollEventThrottle={16}
             />
 
+
             {/* Pagination Dots */}
             {exercise.images.length > 1 && (
               <View style={styles.paginationDots}>
@@ -191,6 +196,8 @@ export default function ExerciseInProgressScreen() {
                   key={`dot-${index}`}
                   style={[
                     styles.dot,
+                    index === currentImageIndex
+                      ? { backgroundColor: palette.primary }
                     index === currentImageIndex
                       ? { backgroundColor: palette.primary }
                       : { backgroundColor: palette.mutedText + '50' }
@@ -233,12 +240,6 @@ export default function ExerciseInProgressScreen() {
                   +{exercise.xp_reward} XP
                 </Text>
               </View>
-              <View style={styles.rewardItem}>
-                <MaterialIcons name="flash-on" size={20} color={palette.primary} />
-                <Text style={[styles.rewardText, { color: palette.text }]}>
-                  -{exercise.stamina_cost} Stamina
-                </Text>
-              </View>
             </View>
           </View>
 
@@ -250,6 +251,7 @@ export default function ExerciseInProgressScreen() {
                 <TextInput
                   style={[
                     styles.input,
+                    {
                     {
                       backgroundColor: palette.background,
                       color: palette.text,
@@ -270,6 +272,7 @@ export default function ExerciseInProgressScreen() {
                   style={[
                     styles.input,
                     {
+                    {
                       backgroundColor: palette.background,
                       color: palette.text,
                       borderColor: palette.borderColor
@@ -283,6 +286,26 @@ export default function ExerciseInProgressScreen() {
                 />
               </View>
             </View>
+          </View>
+
+            {/* Weight Input */}
+          <View style={styles.inputGroup}>
+            <Text style={[styles.inputLabel, { color: palette.mutedText }]}>Weight (kg)</Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  backgroundColor: palette.background,
+                  color: palette.text,
+                  borderColor: palette.borderColor
+                }
+              ]}
+              value={weight}
+              onChangeText={setWeight}
+              keyboardType="decimal-pad"
+              placeholder="0"
+              placeholderTextColor={palette.mutedText}
+            />
           </View>
 
           {/* Complete Button */}
