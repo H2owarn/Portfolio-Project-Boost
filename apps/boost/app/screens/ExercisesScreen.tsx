@@ -384,10 +384,6 @@ export default function ExercisesScreen() {
                 await handleFinishWorkout();
                 router.push('/screens/share');
               }}
-              onPress={async () => {
-                await handleFinishWorkout();
-                router.push('/screens/share');
-              }}
             >
               <MaterialIcons name="check-circle" size={24} color="#000" />
               <Text style={{ fontSize: 16, fontWeight: '700', color: '#000' }}>

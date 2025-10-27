@@ -4,14 +4,12 @@ import { supabase } from '@/lib/supabase';
 type StaminaContextType = {
   stamina: number;
   spendStamina: (amount: number) => Promise<void>;
-  refreshStamina: () => Promise<void>;
   maxStamina: number;
 };
 
 const StaminaContext = createContext<StaminaContextType>({
   stamina: 0,
   spendStamina: async () => {},
-  refreshStamina: async () => {},
   maxStamina: 100,
 });
 
@@ -138,7 +136,7 @@ export const StaminaProvider = ({ children }: { children: React.ReactNode }) => 
     return () => clearInterval(tick);
   }, []);
 
-    const spendStamina = async (amount: number) => {
+  const spendStamina = async (amount: number) => {
     if (!sessionUser.current) throw new Error('Not logged in');
 
     const next = Math.max(stamina - amount, 0);
@@ -158,44 +156,11 @@ export const StaminaProvider = ({ children }: { children: React.ReactNode }) => 
     }
   };
 
-  // ✅ Add this function
-  const refreshStamina = async () => {
-    if (!sessionUser.current) return;
-    try {
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("stamina")
-        .eq("id", sessionUser.current)
-        .single();
-
-      if (error) {
-        console.warn("Error refreshing stamina:", error);
-        return;
-      }
-
-      if (profile) {
-        safeSet(setStamina, profile.stamina);
-        console.log("🔄 Refreshed stamina:", profile.stamina);
-      }
-    } catch (err) {
-      console.warn("Unexpected error refreshing stamina:", err);
-    }
-  };
-
   return (
-    <StaminaContext.Provider
-      value={{
-        stamina,
-        spendStamina,
-        refreshStamina, // ✅ now exists
-        maxStamina: MAX_STAMINA,
-      }}
-    >
+    <StaminaContext.Provider value={{ stamina, spendStamina, maxStamina: MAX_STAMINA }}>
       {children}
     </StaminaContext.Provider>
   );
-
 };
 
 export const useStamina = () => useContext(StaminaContext);
-

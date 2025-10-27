@@ -8,6 +8,7 @@ import { Screen } from '@/components/layout/screen';
 import { Colors, Radii, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
+import { useStamina } from '@/contexts/Staminacontext';
 
 const { width } = Dimensions.get('window');
 
@@ -17,6 +18,7 @@ type Exercise = {
   instructions: string[];
   images: string[];
   xp_reward: number;
+  stamina_cost?: number;
   category?: string;
   level?: string;
 };
@@ -26,6 +28,7 @@ export default function ExerciseInProgressScreen() {
   const palette = Colors[useColorScheme() ?? 'dark'];
   const { currentSessionId } = useWorkoutSession();
 
+  const { stamina, spendStamina } = useStamina();
   // Parse exercise data
   const exercise: Exercise = JSON.parse(params.exercise as string);
 
@@ -36,6 +39,7 @@ export default function ExerciseInProgressScreen() {
   const [completing, setCompleting] = useState(false);
   const [imageLoading, setImageLoading] = useState<{ [key: number]: boolean }>({});
   const [imagesPrefetched, setImagesPrefetched] = useState(false);
+
 
   const flatListRef = useRef<FlatList>(null);
 
@@ -72,39 +76,22 @@ export default function ExerciseInProgressScreen() {
     //  Validate input
     const numSets = parseInt(sets) || 0;
     const numReps = parseInt(reps) || 0;
+    const numWeight = parseInt(weight) || 0;
+
     if (numSets <= 0 || numReps <= 0) {
       alert('Please enter valid numbers for sets and reps.');
       return;
     }
 
-    // Fetch current stamina
-    const { data: profile, error: profErr } = await supabase
-      .from('profiles')
-      .select('stamina')
-      .eq('id', user.id)
-      .single();
+    const staminaCost = exercise.stamina_cost ?? 0;
 
-    if (profErr || !profile) {
-      alert('Could not fetch your profile.');
+    if (stamina < staminaCost) {
+      alert('❌ Not enough stamina to complete this exercise!');
       return;
     }
 
-    if (profile.stamina < exercise.stamina_cost) {
-      alert('Not enough stamina to complete this exercise!');
-      return;
-    }
-
-    // Deduct stamina only
-    const newStamina = profile.stamina - exercise.stamina_cost;
-    const { error: staminaErr } = await supabase
-      .from('profiles')
-      .update({ stamina: newStamina })
-      .eq('id', user.id);
-
-    if (staminaErr) {
-      alert('Failed to update stamina.');
-      return;
-    }
+    // Deduct stamina via context (this updates DB & UI)
+    await spendStamina(staminaCost);
 
     // Insert unclaimed completed exercise
     const { error: insertErr } = await supabase
@@ -187,7 +174,6 @@ export default function ExerciseInProgressScreen() {
               scrollEventThrottle={16}
             />
 
-
             {/* Pagination Dots */}
             {exercise.images.length > 1 && (
               <View style={styles.paginationDots}>
@@ -196,8 +182,6 @@ export default function ExerciseInProgressScreen() {
                   key={`dot-${index}`}
                   style={[
                     styles.dot,
-                    index === currentImageIndex
-                      ? { backgroundColor: palette.primary }
                     index === currentImageIndex
                       ? { backgroundColor: palette.primary }
                       : { backgroundColor: palette.mutedText + '50' }
@@ -252,7 +236,6 @@ export default function ExerciseInProgressScreen() {
                   style={[
                     styles.input,
                     {
-                    {
                       backgroundColor: palette.background,
                       color: palette.text,
                       borderColor: palette.borderColor
@@ -271,7 +254,6 @@ export default function ExerciseInProgressScreen() {
                 <TextInput
                   style={[
                     styles.input,
-                    {
                     {
                       backgroundColor: palette.background,
                       color: palette.text,
