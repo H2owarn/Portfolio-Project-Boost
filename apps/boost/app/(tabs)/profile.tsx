@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { supabase } from '@/lib/supabase';
-
+import { playPreloaded, playSound, preloadSounds } from "@/utils/sound";
 import { useAuth } from '@/hooks/use-auth';
 
 
@@ -64,7 +64,14 @@ export default function ProfileScreen() {
 					</View>
 					<View style={styles.buttonRow}>
 						<TouchableOpacity style={[styles.addButton, {backgroundColor: palette.secondary}]}
-						onPress={() => router.push('/screens/testfriend')}>
+						onPress={() => {
+							try {
+								playPreloaded('click');
+							} catch {
+								playSound(require('@/assets/sound/tap.wav'));
+							}
+							router.push('/screens/testfriend')}}
+						>
 							<Text style={[styles.addButtonText, {color: palette.primary}]}>+ Add Friends</Text>
 						</TouchableOpacity>
 						<TouchableOpacity style={[styles.shareButton, {backgroundColor: palette.secondary}]}
