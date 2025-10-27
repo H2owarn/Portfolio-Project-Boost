@@ -87,7 +87,7 @@ const [reps, setReps] = useState('10');
       }
 
       const { error: progressErr } = await supabase
-        .from("user_quest_exercises")
+        .from("completed_quest_exercises")
         .upsert({
           user_id: user.id,
           quest_id,
@@ -243,7 +243,7 @@ const [reps, setReps] = useState('10');
         >
           <MaterialIcons name="check-circle" size={24} color="#000" />
           <Text style={styles.completeText}>
-            {loading ? "Saving..." : "Complete Exercise"}
+            {loading ? "Saving..." : "Finish Workout"}
           </Text>
         </Pressable>
 
