@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Share, useColorScheme } from 
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
+import { playPreloaded, playSound } from "@/utils/sound";
 
 export default function ShareScreen() {
   const router = useRouter();
@@ -11,6 +12,13 @@ export default function ShareScreen() {
   const { loggedWorkout } = useLocalSearchParams();
 
   const handleShare = async () => {
+
+    try {
+      playPreloaded('click');
+    } catch {
+      playSound(require('@/assets/sound/tap.wav'));
+    }
+
     try {
       await Share.share({
         message: `💪 I just finished my workout: ${loggedWorkout || 'Check out my session!'}`,
@@ -29,7 +37,15 @@ export default function ShareScreen() {
         <Text style={styles.shareText}>Share Workout</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push('/(tabs)/home')}>
+      <TouchableOpacity style={styles.backButton} onPress={() => {
+        try {
+          playPreloaded('click');
+        } catch {
+          playSound(require('@/assets/sound/tap.wav'));
+        }
+        router.push('/(tabs)/home');
+      }}
+        >
         <Text style={styles.backText}>Back to Home</Text>
       </TouchableOpacity>
     </View>

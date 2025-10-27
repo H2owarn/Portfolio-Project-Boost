@@ -24,10 +24,11 @@ export async function preloadSounds() {
   sounds.complete = (await Audio.Sound.createAsync(require("../assets/sound/completed.wav"))).sound;
   sounds.achieve = (await Audio.Sound.createAsync(require("../assets/sound/achievement.wav"))).sound;
   sounds.enter = (await Audio.Sound.createAsync(require("../assets/sound/entering.wav"))).sound;
+  sounds.over = (await Audio.Sound.createAsync(require("../assets/sound/over.wav"))).sound;
 }
 
 export async function playPreloaded(name: keyof typeof sounds) {
   await sounds[name]?.replayAsync();
 }
 
-export type SoundName = 'click' | 'complete' | 'achieve' | 'enter';
+export type SoundName = 'click' | 'complete' | 'achieve' | 'enter' | 'over';

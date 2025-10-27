@@ -17,6 +17,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";
 import { Colors, Spacing, Radii } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { playPreloaded, playSound } from "@/utils/sound";
 
 const { width } = Dimensions.get("window");
 
@@ -86,6 +87,14 @@ const [reps, setReps] = useState('10');
       return;
     }
 
+    // add sound
+
+    try {
+      await playPreloaded("achieve")
+    } catch {
+      await playSound(require("@/assets/sound/achievement.wav"))
+    }
+
     // 🟩 Record this exercise completion
     const { error: insertErr } = await supabase
       .from("completed_quest_exercises")
@@ -106,7 +115,14 @@ const [reps, setReps] = useState('10');
 
     // 🟩 Go back to QuestScreen
     Alert.alert("✅ Exercise Complete!", `You finished ${data.name}!`, [
-      { text: "OK", onPress: () => router.back() },
+      { text: "OK", onPress: async () => {
+        try {
+          await playPreloaded("click");
+        } catch {
+          await playSound(require('@/assets/sound/tap.wav'));
+        }
+        router.back();
+      },},
     ]);
   } catch (err) {
     console.error("Error completing quest exercise:", err);

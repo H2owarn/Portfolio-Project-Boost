@@ -9,6 +9,7 @@ import { Colors, Radii, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 import { useStamina } from '@/contexts/Staminacontext';
+import { playPreloaded, playSound } from "@/utils/sound";
 
 const { width } = Dimensions.get('window');
 
@@ -79,6 +80,12 @@ export default function ExerciseInProgressScreen() {
     const numWeight = parseInt(weight) || 0;
 
     if (numSets <= 0 || numReps <= 0) {
+      try {
+        playPreloaded('over');
+      } catch {
+        playSound(require('@/assets/sound/over.wav'));
+      }
+
       alert('Please enter valid numbers for sets and reps.');
       return;
     }
@@ -86,6 +93,12 @@ export default function ExerciseInProgressScreen() {
     const staminaCost = exercise.stamina_cost ?? 0;
 
     if (stamina < staminaCost) {
+      try {
+        playPreloaded('over');
+      } catch {
+        playSound(require('@/assets/sound/over.wav'));
+      }
+
       alert('❌ Not enough stamina to complete this exercise!');
       return;
     }
@@ -107,11 +120,23 @@ export default function ExerciseInProgressScreen() {
       });
 
     if (insertErr) {
+      try {
+        playPreloaded('over');
+      } catch {
+        playSound(require('@/assets/sound/over.wav'));
+      }
+
       alert('Failed to save completed exercise.');
       return;
     }
 
-    // 6️⃣ Success message
+    try {
+      await playPreloaded('achieve');
+    } catch {
+      await playSound(require('@/assets/sound/achievement.wav'));
+    }
+
+    // Success message
     alert(
       `✅ Exercise complete!\n\nEXP will be added after finishing your workout.`
     );

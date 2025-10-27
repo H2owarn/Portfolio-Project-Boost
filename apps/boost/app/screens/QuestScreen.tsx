@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, Alert } from "react-native";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -7,6 +7,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useXp } from '@/contexts/Xpcontext';
 import { useStamina } from '@/contexts/Staminacontext';
+import { playPreloaded, playSound } from "@/utils/sound";
 
 export default function QuestDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -20,20 +21,15 @@ export default function QuestDetailScreen() {
   const completedCount = Object.values(completedExercises).filter(Boolean).length;
   const totalCount = exercises.length;
 
-  // ✅ Re-fetch when user comes back from QuestExerciseScreen
-  useFocusEffect(
-    React.useCallback(() => {
-      loadQuest();
-    }, [id])
-  );
+  // ✅ guard so completion runs only once (prevents double sound + double alert)
+  const completingQuestRef = useRef(false);
 
   // ✅ Fetch quest + exercise info
-  const loadQuest = async () => {
+  const loadQuest = useCallback(async () => {
     if (!id) return;
     setLoading(true);
 
     try {
-      // 1️⃣ Fetch quest
       const { data: questData, error: questErr } = await supabase
         .from("quests")
         .select("*")
@@ -42,7 +38,6 @@ export default function QuestDetailScreen() {
       if (questErr) throw questErr;
       setQuest(questData);
 
-      // 2️⃣ Fetch exercises for this quest
       if (questData.exercise_ids?.length > 0) {
         const { data: exerciseRows, error: exErr } = await supabase
           .from("exercises")
@@ -50,9 +45,10 @@ export default function QuestDetailScreen() {
           .in("id", questData.exercise_ids);
         if (exErr) throw exErr;
         setExercises(exerciseRows);
+      } else {
+        setExercises([]);
       }
 
-      // 3️⃣ Fetch progress
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: progress } = await supabase
@@ -62,11 +58,11 @@ export default function QuestDetailScreen() {
           .eq("quest_id", id);
 
         if (progress) {
-          const progressMap: Record<string, boolean> = {};
-          progress.forEach((p) => {
-            progressMap[p.exercise_id] = true;
-          });
-          setCompletedExercises(progressMap);
+          const map: Record<string, boolean> = {};
+          progress.forEach((p) => { map[p.exercise_id] = true; });
+          setCompletedExercises(map);
+        } else {
+          setCompletedExercises({});
         }
       }
     } catch (error) {
@@ -74,91 +70,91 @@ export default function QuestDetailScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
+  // ✅ Re-fetch when user comes back from QuestExerciseScreen
+  useFocusEffect(
+    React.useCallback(() => {
+      loadQuest();
+    }, [loadQuest])
+  );
+
+  // ✅ Single effect to decide completion (remove duplicates)
   useEffect(() => {
-  if (exercises.length > 0) {
+    if (!exercises.length) return;
     const allDone = exercises.every(e => completedExercises[e.id]);
-    if (allDone) handleQuestComplete();
-  }
-}, [completedExercises]);
-
-
-  // ✅ Reward quest XP if all exercises done
-  useEffect(() => {
-    if (totalCount > 0 && completedCount === totalCount) {
+    if (allDone && !completingQuestRef.current) {
       handleQuestComplete();
     }
-  }, [completedCount, totalCount]);
+  }, [exercises, completedExercises]);
 
   const handleQuestComplete = async () => {
-  if (!quest) return;
+    if (!quest) return;
+    if (completingQuestRef.current) return; // ✅ guard re-entry
+    completingQuestRef.current = true;
 
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return Alert.alert("Login required");
-
-    // Mark quest completed in user_quests
-    await supabase
-      .from("user_quests")
-      .update({
-        status: "completed",
-        completed_at: new Date().toISOString(),
-      })
-      .eq("user_id", user.id)
-      .eq("quest_id", quest.id);
-
-    // Record in completed_quests (history)
-    await supabase.from("completed_quests").insert({
-      user_id: user.id,
-      quest_id: quest.id,
-    });
-
-    //  Fetch user profile (for exp/stamina)
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("exp, stamina")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile) throw new Error("Profile not found");
-
-    //  reward system
-    await spendStamina(quest.stamina_cost ?? 0);
-    await addXp(quest.xp_reward ?? 0);
-
-    // Optional: trigger level recalculation
     try {
-    await supabase.rpc("calculate_level", { user_id: user.id });
-    } catch(error: any) {
-      console.log("Skipping level recalc (no RPC)");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        Alert.alert("Login required");
+        return;
+      }
+
+      await supabase
+        .from("user_quests")
+        .update({
+          status: "completed",
+          completed_at: new Date().toISOString(),
+        })
+        .eq("user_id", user.id)
+        .eq("quest_id", quest.id);
+
+      await supabase.from("completed_quests").insert({
+        user_id: user.id,
+        quest_id: quest.id,
+      });
+
+      await spendStamina(quest.stamina_cost ?? 0);
+      await addXp(quest.xp_reward ?? 0);
+
+      // 🎵 play success sound ONCE
+      try {
+        await playPreloaded("complete");
+      } catch {
+        await playSound(require("@/assets/sound/completed.wav"));
+      }
+
+      // Optional level recalc
+      try {
+        await supabase.rpc("calculate_level", { user_id: user.id });
+      } catch (error: any) {
+        console.log("Skipping level recalc (no RPC)");
+      }
+
+      Alert.alert(
+        "🎉 Quest Complete!",
+        `You earned ${quest.xp_reward ?? 0} XP and used ${quest.stamina_cost ?? 0} stamina.`,
+        [
+          {
+            text: "OK",
+            onPress: async () => {
+              try {
+                await playPreloaded("click");
+              } catch {
+                await playSound(require("@/assets/sound/tap.wav"));
+              }
+              router.replace("/(tabs)/quest");
+            },
+          },
+        ]
+      );
+    } catch (err) {
+      console.error("Quest completion error:", err);
+      Alert.alert("Error", "Could not complete quest.");
+      // If you want to allow re-try on error, you can reset guard here:
+      // completingQuestRef.current = false;
     }
-
-    Alert.alert(
-      "🎉 Quest Complete!",
-      `You earned ${quest.xp_reward ?? 0} XP and used ${quest.stamina_cost ?? 0} stamina.`,
-      [
-        {
-          text: "OK",
-          onPress: () => router.replace("/(tabs)/quest"),
-        },
-      ]
-    );
-
-
-  } catch (err) {
-    console.error("Quest completion error:", err);
-    Alert.alert("Error", "Could not complete quest.");
-  }
-};
-
-useEffect(() => {
-  if (exercises.length > 0) {
-    const allDone = exercises.every(e => completedExercises[e.id]);
-    if (allDone) handleQuestComplete();
-  }
-}, [completedExercises]);
-
+  };
 
   if (loading) {
     return (
@@ -176,6 +172,7 @@ useEffect(() => {
     );
   }
 
+
   return (
     <View style={[styles.container, { backgroundColor: palette.background }]}>
       <Text style={[styles.title, { color: palette.text }]}>{quest.name}</Text>
@@ -186,14 +183,20 @@ useEffect(() => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <Pressable
-            style={[styles.exerciseCard, { backgroundColor: palette.surface }]}
-            onPress={() =>
-              router.push({
-                pathname: "/screens/QuestExerciseScreen",
-                params: { exercise: JSON.stringify(item), quest_id: quest.id },
-              })
-            }
-          >
+              style={[styles.exerciseCard, { backgroundColor: palette.surface }]}
+              onPress={async () => {
+                try {
+                  await playPreloaded('click');
+                } catch {
+                  await playSound(require('@/assets/sound/tap.wav')); // fallback
+                }
+
+                router.push({
+                  pathname: '/screens/QuestExerciseScreen',
+                  params: { exercise: JSON.stringify(item), quest_id: quest.id },
+                });
+              }}
+            >
             <View style={styles.row}>
               <MaterialIcons name="fitness-center" size={24} color={palette.primary} />
               <View style={{ marginLeft: 8 }}>
@@ -205,7 +208,13 @@ useEffect(() => {
             </View>
 
           <Pressable
-            onPress={() => {
+            onPress={async () => {
+              try {
+                await playPreloaded("click");
+              } catch {
+                await playSound(require('@/assets/sound/tap.wav'));
+              }
+
               setCompletedExercises((prev) => ({
                 ...prev,
                 [item.id]: !prev[item.id], // toggle checkbox

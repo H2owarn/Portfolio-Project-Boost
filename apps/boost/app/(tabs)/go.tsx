@@ -71,7 +71,13 @@ export default function AvatarScreen() {
 										key={index}
 										activeOpacity={0.7}
 										style={{ position: 'absolute', top, left, zIndex: z }}
-										onPress={() => handleMusclePress(uniqueId, page)}
+										onPress={ async () => {
+											try {
+												await playPreloaded("click");
+											} catch {
+												await playSound(require("@/assets/sound/tap.wav"));
+											}
+											handleMusclePress(uniqueId, page)}}
 									>
 										<Component width={width} height={height} fill={isSelected ? '#37d137' : '#fcfcfc91'} />
 									</TouchableOpacity>
