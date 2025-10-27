@@ -12,6 +12,8 @@ import { Colors, Font, Radii, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { playPreloaded, playSound } from '@/utils/sound';
+
 
 export default function LoginScreen() {
 	const palette = Colors[useColorScheme() ?? 'dark'];
@@ -22,6 +24,12 @@ export default function LoginScreen() {
 	const submit = async (email: string, password: string) => {
   if (submitted) return;
   setSubmitted(true);
+
+  try {
+	await playPreloaded('click');
+  } catch {
+	await playSound(require('@/assets/sound/tap.wav'));
+  }
 
   const { type, data } = await login({ email, password });
   setSubmitted(false);

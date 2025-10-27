@@ -7,6 +7,7 @@ import AvatarBody from '@/components/avatar_parts/AvatarBody';
 import { musclesBack } from '@/components/avatar_parts/musclesBack';
 import { musclesFront } from '@/components/avatar_parts/musclesFront';
 import { color } from 'bun';
+import { playPreloaded, playSound } from "@/utils/sound";
 
 const { width: screenWidth } = Dimensions.get('window');
 const musclesPages = [musclesFront, musclesBack];
@@ -32,12 +33,20 @@ export default function AvatarScreen() {
 	{
 		/* Routing for next page*/
 	}
-	const handleContinue = () => {
+	const handleContinue = async () => {
+		try {
+			// Play a sound before navigating
+			await playPreloaded('enter'); // or 'click', 'complete', etc.
+		} catch {
+			// fallback if not preloaded
+			await playSound(require('@/assets/sound/entering.wav'));
+		}
+
 		router.push({
 			pathname: '/screens/ExercisesScreen',
-			params: { selectedMuscles: JSON.stringify(selectedMuscles) }
+			params: { selectedMuscles: JSON.stringify(selectedMuscles) },
 		});
-	};
+		};
 
 	return (
 		<View style={[styles.container, {backgroundColor: palette.background}]}>

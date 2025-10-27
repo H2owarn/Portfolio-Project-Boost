@@ -14,6 +14,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { color } from "bun";
+import { playPreloaded, preloadSounds } from "@/utils/sound";
 
 
 export default function QuestScreen() {
@@ -24,6 +25,7 @@ export default function QuestScreen() {
 
   // Load profile
   useEffect(() => {
+    preloadSounds();
     const loadProfile = async () => {
       const { data: { user }, error: userErr } = await supabase.auth.getUser();
       if (userErr) {
@@ -217,22 +219,16 @@ export default function QuestScreen() {
               styles.startButton,
               , { backgroundColor: palette.primary + "90" }]}
             android_ripple={{ color: palette.secondary + "20" }}
-            onPress={() =>
+            onPress={() => {
+              playPreloaded("click");
+
               !isLocked && userStamina >= (quest.stamina_cost ?? 0)
                 ? router.push({
                     pathname: '/screens/QuestScreen',
                     params: { id: quest.id.toString() }, // 👈 pass quest ID
                   })
-                : console.log("Quest Locked or Not Enough Stamina")
-            }
-            onPress={() =>
-              !isLocked && userStamina >= (quest.stamina_cost ?? 0)
-                ? router.push({
-                    pathname: '/screens/QuestScreen',
-                    params: { id: quest.id.toString() }, // 👈 pass quest ID
-                  })
-                : console.log("Quest Locked or Not Enough Stamina")
-            }
+                : console.log("Quest Locked or Not Enough Stamina");
+                }}
           >
             <Text style={[styles.startButtonText, { color: palette.text }]}>
               {isLocked
