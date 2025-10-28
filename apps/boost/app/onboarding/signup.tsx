@@ -26,26 +26,48 @@ export default function SignUpScreen() {
 	const [weight, setWeight] = useState('100');
 
 	const submit = async (body: SignUpBody) => {
-		// Prevent from sending multiple requests.
 		if (submitted) return;
-
 		setSubmitted(true);
-		const { type, data } = await register(body);
-		setSubmitted(false);
 
-		if (type === 'error') {
+		try {
+			const { type, data } = await register(body);
+			setSubmitted(false);
+
+			if (type === 'error') {
+			// Check if it's a weak password error
+			if (
+				typeof data?.message === 'string' &&
+				data.message.includes('Password should be at least 8 characters')
+			) {
+				setErrors({
+				code: 'weak_password',
+				message: 'Password should be at least 8 characters.',
+				});
+				return;
+			}
+
 			console.error(data);
 			return;
-		}
+			}
 
-		if (type === 'validation') {
-			console.log(data);
+			if (type === 'validation') {
 			if (data) setErrors(data);
 			return;
-		}
+			}
 
-		router.replace('/(tabs)/home');
-	};
+
+			router.replace('/(tabs)/home');
+		} catch (error: any) {
+			console.error('Signup failed:', error);
+			setErrors({
+			code: 'weak_password',
+			message: 'Password should be at least 8 characters.',
+			});
+		} finally {
+			setSubmitted(false);
+		}
+		};
+
 
 	return (
 		<Screen scrollable contentStyle={styles.container} style={{ backgroundColor: palette.surface }}>
@@ -71,6 +93,10 @@ export default function SignUpScreen() {
 					{errors?.code === 'user_already_exists' && (
 						<Alert type="error" message="An account with that email already exists." />
 					)}
+					{errors?.code === 'weak_password' && (
+					<Alert type="error" message="Password should be at least 8 characters." />
+					)}
+
 
 					<BoostInput
 						placeholder="Email"
