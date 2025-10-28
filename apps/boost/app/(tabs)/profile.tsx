@@ -145,12 +145,23 @@ export default function ProfileScreen() {
 						>
 							<Text style={[styles.addButtonText, {color: palette.primary}]}>+ Add Friends</Text>
 						</TouchableOpacity>
+
 						<TouchableOpacity style={[styles.shareButton, {backgroundColor: palette.secondary}]}
-						onPress={() => router.push('/screens/streaktest')}>
+						onPress={async () => {
+							try {
+							await playPreloaded('click');
+							} catch {
+							await playSound(require('@/assets/sound/tap.wav'));
+							}
+							router.push('/screens/streaktest')}}
+							>
 							<Ionicons name="share-outline" size={20} color="white" />
 						</TouchableOpacity>
+
 					</View>
-				</View>
+
+
+			</View>
 
 				{/* Statistics */}
 				<Text style={[styles.sectionTitle, { color: palette.text }]}>Overview</Text>
@@ -202,6 +213,7 @@ export default function ProfileScreen() {
 					</View>
 				</ScrollView>
 			</ScrollView>
+
 		</View>
 	);
 }
@@ -262,7 +274,8 @@ const styles = StyleSheet.create({
 	},
 	buttonRow: {
 		flexDirection: 'row',
-		marginTop: 12
+		marginTop: 12,
+		gap:6,
 	},
 	addButton: {
 		backgroundColor: '#2563eb',
@@ -289,6 +302,7 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.3,
 		shadowRadius: 6,
 		elevation: 6,
+
 	},
 	sectionTitle: {
 		fontSize: 18,
@@ -329,5 +343,6 @@ const styles = StyleSheet.create({
 		paddingVertical: 8,
 		paddingHorizontal: 4,
 		gap: 12
-	}
+	},
+
 });
