@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Button, Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Button, Dimensions, ScrollView, StyleSheet, TouchableOpacity, View, Alert } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, Font, Radii, Spacing } from '@/constants/theme';
 import AvatarBody from '@/components/avatar_parts/AvatarBody';
@@ -34,11 +34,21 @@ export default function AvatarScreen() {
 		/* Routing for next page*/
 	}
 	const handleContinue = async () => {
+ 		 //Check if any muscles were selected
+	const hasMuscles = Object.values(selectedMuscles).some(arr => arr.length > 0);
+		if (!hasMuscles) {
+			// 🎵 Optional warning sound
+			playPreloaded('over').catch(() =>
+			playSound(require('@/assets/sound/over.wav'))
+			);
+			Alert.alert("No muscles selected", "Please choose at least one muscle before continuing.");
+			return;
+		}
+
+		// Normal flow: play sound and navigate
 		try {
-			// Play a sound before navigating
-			await playPreloaded('enter'); // or 'click', 'complete', etc.
+			await playPreloaded('enter');
 		} catch {
-			// fallback if not preloaded
 			await playSound(require('@/assets/sound/entering.wav'));
 		}
 
@@ -47,6 +57,7 @@ export default function AvatarScreen() {
 			params: { selectedMuscles: JSON.stringify(selectedMuscles) },
 		});
 		};
+
 
 	return (
 		<View style={[styles.container, {backgroundColor: palette.background}]}>
