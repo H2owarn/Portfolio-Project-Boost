@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { supabase } from '@/lib/supabase';
-import { playPreloaded, playSound, preloadSounds } from "@/utils/sound";
+import { playPreloaded, playSound } from "@/utils/sound";
 import { useAuth } from '@/hooks/use-auth';
 
 
@@ -14,6 +14,10 @@ export default function ProfileScreen() {
 	const palette = Colors[useColorScheme() ?? 'dark'];
 	const router = useRouter();
 	const [badgeCount, setBadgeCount] = useState<number>(0);
+	const [xp, setXp] = useState<number>(profile?.exp ?? 0);
+	const [level, setLevel] = useState<number>(profile?.level ?? 1);
+	const [rank, setRank] = useState<string>(profile?.rank_divisions?.name ?? '?');
+	const [streak, setStreak] = useState<number>(profile?.streak ?? 0);
 
 	useEffect(() => {
 	const fetchBadgeCount = async () => {
@@ -42,6 +46,73 @@ export default function ProfileScreen() {
    if (!profile) {
 		return <Redirect href="/onboarding/login" />;
 	}
+
+	useEffect(() => {
+	if (!profile?.id) return;
+
+	// initial load
+	const fetchProfile = async () => {
+		const { data, error } = await supabase
+		.from("profiles")
+		.select("exp, level, streak, rank_division_id")
+		.eq("id", profile.id)
+		.single();
+
+		if (!error && data) {
+		setXp(data.exp ?? 0);
+		setLevel(data.level ?? 1);
+		setStreak(data.streak ?? 0);
+
+		// fetch rank name from related table
+		const { data: rankData } = await supabase
+			.from("rank_divisions")
+			.select("name")
+			.eq("id", data.rank_division_id)
+			.single();
+		setRank(rankData?.name ?? "?");
+		}
+	};
+
+	fetchProfile();
+
+		// ✅ subscribe to realtime changes
+		const channel = supabase
+			.channel("profiles_realtime")
+			.on(
+			"postgres_changes",
+			{
+				event: "UPDATE",
+				schema: "public",
+				table: "profiles",
+				filter: `id=eq.${profile.id}`,
+			},
+			async (payload) => {
+				const newData = payload.new;
+				if (!newData) return;
+
+				setXp(newData.exp ?? 0);
+				setLevel(newData.level ?? 1);
+				setStreak(newData.streak ?? 0);
+
+				// re-fetch rank name only if id changed
+				if (newData.rank_division_id) {
+				const { data: rankData } = await supabase
+					.from("rank_divisions")
+					.select("name")
+					.eq("id", newData.rank_division_id)
+					.single();
+				setRank(rankData?.name ?? "?");
+				}
+			}
+			)
+			.subscribe();
+
+		return () => {
+			supabase.removeChannel(channel);
+		};
+		}, [profile?.id]);
+
+
 
   const joined = useMemo(() => {
 		if (!profile?.created_at) return '';
@@ -86,17 +157,17 @@ export default function ProfileScreen() {
 				<View style={styles.statsGrid}>
 					<StatCard
 					icon="local-fire-department"
-					value={profile.streak}
+					value={streak}
 					label="Streak"
 					/>
 					<StatCard
 					icon="star"
-					value={profile.exp}
+					value={xp}
 					label="Total XP"
 					/>
 					<StatCard
 					icon="shield"
-					value={profile.rank_divisions?.name?? "?"} label="Current league"
+					value={rank} label="Current league"
 					/>
 					<StatCard
 					icon="workspace-premium"
