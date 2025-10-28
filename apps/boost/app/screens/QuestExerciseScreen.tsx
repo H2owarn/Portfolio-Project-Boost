@@ -106,14 +106,26 @@ const [reps, setReps] = useState('10');
         completed_at: new Date().toISOString(),
       });
 
-    if (insertErr) {
-      console.error("Insert progress error:", insertErr);
-      Alert.alert("Error", "Could not record progress.");
-      setLoading(false);
-      return;
+    if (!insertErr) {
+      // If quest was active, mark it in_progress
+      const { data: questRow } = await supabase
+        .from("user_quests")
+        .select("status")
+        .eq("user_id", user.id)
+        .eq("quest_id", quest_id)
+        .single();
+
+      if (questRow?.status === "active") {
+        await supabase
+          .from("user_quests")
+          .update({ status: "in_progress" })
+          .eq("user_id", user.id)
+          .eq("quest_id", quest_id);
+      }
     }
 
-    // 🟩 Go back to QuestScreen
+
+    // Go back to QuestScreen
     Alert.alert("✅ Exercise Complete!", `You finished ${data.name}!`, [
       { text: "OK", onPress: async () => {
         try {

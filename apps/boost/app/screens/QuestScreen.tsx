@@ -124,6 +124,7 @@ export default function QuestDetailScreen() {
         await playSound(require("@/assets/sound/completed.wav"));
       }
 
+
       // Optional level recalc
       try {
         await supabase.rpc("calculate_level", { user_id: user.id });
