@@ -1,13 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {View, Text, StyleSheet, FlatList, ScrollView, Dimensions, TouchableOpacity, ActivityIndicator, } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
+const { width } = Dimensions.get("window");
+
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [rivals, setRivals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activePage, setActivePage] = useState(0);
   const palette = Colors[useColorScheme() ?? "dark"];
+  const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     const loadLeaderboard = async () => {
@@ -26,136 +31,269 @@ export default function LeaderboardPage() {
       setLoading(false);
     };
 
+    const loadRivals = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: rivalRelations, error: rivalErr } = await supabase
+        .from("relationships")
+        .select("user_1_id, user_2_id")
+        .eq("type", "rival")
+        .eq("status", "ACCEPTED")
+        .or(`user_1_id.eq.${user.id},user_2_id.eq.${user.id}`);
+
+      if (rivalErr) {
+        console.error("Rival fetch error:", rivalErr);
+        return;
+      }
+
+      const rivalIds = rivalRelations.map((r) =>
+        r.user_1_id === user.id ? r.user_2_id : r.user_1_id
+      );
+
+      if (rivalIds.length === 0) return;
+
+      const { data: rivalProfiles, error: profileErr } = await supabase
+        .from("profiles")
+        .select("id, name, exp_week")
+        .in("id", [user.id, ...rivalIds]);
+
+      if (profileErr) {
+        console.error("Profile fetch error:", profileErr);
+        return;
+      }
+
+      const myExp = rivalProfiles.find((p) => p.id === user.id)?.exp_week ?? 0;
+      const rivalsCompared = rivalProfiles
+        .filter((p) => p.id !== user.id)
+        .map((p) => ({
+          ...p,
+          diff: p.exp_week - myExp,
+        }));
+
+      setRivals(rivalsCompared);
+    };
+
     loadLeaderboard();
+    loadRivals();
   }, []);
 
+  const handleTabPress = (index: number) => {
+    setActivePage(index);
+    flatListRef.current?.scrollToIndex({ index, animated: true });
+  };
+
+  const onScrollEnd = (e: any) => {
+    const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
+    setActivePage(newIndex);
+  };
+
   if (loading) {
-    return <Text style={{ color: "#fff" }}>Loading leaderboard…</Text>;
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#fff" />
+        <Text style={{ color: "#fff", marginTop: 8 }}>Loading leaderboard…</Text>
+      </View>
+    );
   }
 
   const top3 = leaderboard.slice(0, 3);
   const others = leaderboard.slice(3);
 
-  return (
-    <ScrollView style={[styles.container, { backgroundColor: palette.background }]}>
-      <View style={[styles.card, { backgroundColor: palette.surface }]}>
-        <Text style={[styles.header, { color: palette.text }]}>Leaderboard</Text>
+  const pages = [
+    { key: "leaderboard", content: renderLeaderboard() },
+    { key: "rivals", content: renderRivals() },
+  ];
 
-        {/* Top 3 podium */}
-        {top3.length === 3 && (
-          <View style={styles.podiumRow}>
-            {/* 2nd place */}
-            <View style={[styles.podiumWrapper, { height: 100 }]}>
-              <View style={[styles.badgeBottom, { borderTopColor: palette.secondary }]} />
-              <View style={[styles.badgeContent, { backgroundColor: palette.secondary }]}></View>
-              <View style={styles.avatar} />
-              <Text
-                style={[
-                  styles.rankCircle,
-                  styles.rankCircle1,
-                  { backgroundColor: palette.primary },
-                ]}
-              >
-                2
-              </Text>
-              <Text
-                style={[
-                  styles.podiumName23,
-                  styles.podiumName,
-                  { color: 'white' },
-                ]}
-              >
-                {top3[1].name}
-              </Text>
-              <Text style={[styles.podiumScore, { color: 'white' }]}>
-                {top3[1].exp}
-              </Text>
-            </View>
+  function renderLeaderboard() {
+    return (
+      <ScrollView
+        style={[styles.page, { backgroundColor: palette.background }]}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.card, { backgroundColor: palette.surface }]}>
+          <Text style={[styles.header, { color: palette.text }]}>Leaderboard</Text>
 
-            {/* 1st place */}
-            <View style={[styles.podiumWrapper, { height: 130 }]}>
-              <View style={[styles.badgeBottom, { borderTopColor: palette.secondary }]} />
-              <View
-                style={[
-                  styles.badgeContent,
-                  { bottom: -20 },
-                  { backgroundColor: palette.secondary },
-                ]}
-              ></View>
-              <View style={[styles.avatar, styles.avatar1]}>
-                <Text style={styles.crown}>👑</Text>
+          {/* Podium */}
+          {top3.length === 3 && (
+            <View style={styles.podiumRow}>
+              {/* 2nd place */}
+              <View style={[styles.podiumWrapper, { height: 100 }]}>
+                <View style={[styles.badgeBottom, { borderTopColor: palette.secondary }]} />
+                <View style={[styles.badgeContent, { backgroundColor: palette.secondary }]} />
+                <View style={styles.avatar} />
+                <Text style={[styles.rankCircle, styles.rankCircle1, { backgroundColor: palette.primary }]}>2</Text>
+                <Text style={[styles.podiumName23, styles.podiumName, { color: "white" }]}>{top3[1].name}</Text>
+                <Text style={[styles.podiumScore, { color: "white" }]}>{top3[1].exp}</Text>
               </View>
-              <Text style={[styles.rankCircle, { backgroundColor: palette.primary }]}>1</Text>
-              <Text
-                style={[
-                  styles.podiumName1,
-                  styles.podiumName,
-                  { color: 'white' },
-                ]}
-              >
-                {top3[0].name}
-              </Text>
-              <Text
-                style={[
-                  styles.podiumScore,
-                  styles.podiumScore1,
-                  { color: 'white' },
-                ]}
-              >
-                {top3[0].exp}
-              </Text>
-            </View>
 
-            {/* 3rd place */}
-            <View style={[styles.podiumWrapper, { height: 100 }]}>
-              <View style={[styles.badgeBottom, { borderTopColor: palette.secondary }]} />
-              <View style={[styles.badgeContent, { backgroundColor: palette.secondary }]}></View>
-              <View style={styles.avatar} />
-              <Text
-                style={[
-                  styles.rankCircle,
-                  styles.rankCircle1,
-                  { backgroundColor: palette.primary },
-                ]}
-              >
-                3
-              </Text>
-              <Text
-                style={[
-                  styles.podiumName23,
-                  styles.podiumName,
-                  { color: 'white' },
-                ]}
-              >
-                {top3[2].name}
-              </Text>
-              <Text style={[styles.podiumScore, { color: 'white' }]}>
-                {top3[2].exp}
-              </Text>
-            </View>
-          </View>
-        )}
+              {/* 1st place */}
+              <View style={[styles.podiumWrapper, { height: 130 }]}>
+                <View style={[styles.badgeBottom, { borderTopColor: palette.secondary }]} />
+                <View style={[styles.badgeContent, { bottom: -20, backgroundColor: palette.secondary }]} />
+                <View style={[styles.avatar, styles.avatar1]}>
+                  <Text style={styles.crown}>👑</Text>
+                </View>
+                <Text style={[styles.rankCircle, { backgroundColor: palette.primary }]}>1</Text>
+                <Text style={[styles.podiumName1, styles.podiumName, { color: "white" }]}>{top3[0].name}</Text>
+                <Text style={[styles.podiumScore, styles.podiumScore1, { color: "white" }]}>{top3[0].exp}</Text>
+              </View>
 
-        {/* Other leaderboard entries */}
-        {others.map((player) => (
-          <View
-            key={player.id}
-            style={[styles.listItem, { backgroundColor: palette.secondary }]}
+              {/* 3rd place */}
+              <View style={[styles.podiumWrapper, { height: 100 }]}>
+                <View style={[styles.badgeBottom, { borderTopColor: palette.secondary }]} />
+                <View style={[styles.badgeContent, { backgroundColor: palette.secondary }]} />
+                <View style={styles.avatar} />
+                <Text style={[styles.rankCircle, styles.rankCircle1, { backgroundColor: palette.primary }]}>3</Text>
+                <Text style={[styles.podiumName23, styles.podiumName, { color: "white" }]}>{top3[2].name}</Text>
+                <Text style={[styles.podiumScore, { color: "white" }]}>{top3[2].exp}</Text>
+              </View>
+            </View>
+          )}
+
+          {/* Remaining players */}
+          {others.slice(0, 20).map((player, i) => (
+            <View key={player.id} style={[styles.listItem, { backgroundColor: palette.secondary }]}>
+              <View style={styles.rowLeft}>
+                <View style={styles.smallAvatar} />
+                <Text style={[styles.listName, { color: palette.text }]}>{i + 4}. {player.name}</Text>
+              </View>
+              <Text style={[styles.listScore, { color: palette.text }]}>{player.exp}</Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    );
+  }
+
+  function renderRivals() {
+    return (
+      <ScrollView
+        style={[styles.page, { backgroundColor: palette.background }]}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.card, { backgroundColor: palette.surface }]}>
+          <Text style={[styles.header, { color: palette.text }]}>Rival Standings</Text>
+
+          {rivals.length === 0 ? (
+            <Text style={{ color: palette.mutedText, textAlign: "center" }}>
+              No active rivals yet
+            </Text>
+          ) : (
+            rivals.map((r, index) => {
+              const ahead = r.diff > 0;
+              const rank = index + 1;
+              const rankColor =
+                rank === 1 ? "#FFD700" : rank === 2 ? "#C0C0C0" : "#CD7F32";
+
+              return (
+                <View
+                  key={r.id}
+                  style={[
+                    styles.rivalCard,
+                    {
+                      backgroundColor: palette.secondary,
+                      borderLeftColor: ahead ? "tomato" : "lime",
+                      borderLeftWidth: 4,
+                      shadowColor: ahead ? "red" : "lime",
+                      shadowOpacity: 0.3,
+                    },
+                  ]}
+                >
+                  <View style={styles.rivalInfo}>
+                    <Text style={[styles.rivalRank, { color: rankColor }]}>#{rank}</Text>
+                    <Text style={[styles.rivalName, { color: palette.text }]}>{r.name}</Text>
+                  </View>
+
+                  <View style={styles.rivalStats}>
+                    <Text
+                      style={[
+                        styles.rivalText,
+                        { color: ahead ? "tomato" : "lime", textAlign: "right" },
+                      ]}
+                    >
+                      {ahead
+                        ? ` Behind by ${r.diff} XP`
+                        : ` Ahead by ${Math.abs(r.diff)} XP`}
+                    </Text>
+
+                    {/* XP Difference Bar */}
+                    <View style={styles.barContainer}>
+                      <View
+                        style={[
+                          styles.barFill,
+                          {
+                            width: `${Math.min(Math.abs(r.diff), 100)}%`,
+                            backgroundColor: ahead ? "tomato" : "lime",
+                          },
+                        ]}
+                      />
+                    </View>
+                  </View>
+                </View>
+              );
+            })
+          )}
+        </View>
+      </ScrollView>
+    );
+  }
+
+  return (
+    <View style={{ flex: 1 }}>
+      {/*  Tab Bar */}
+      <View style={[styles.tabBar, { backgroundColor: palette.surface }]}>
+        {["Leaderboard", "Rivals"].map((label, i) => (
+          <TouchableOpacity
+            key={label}
+            onPress={() => handleTabPress(i)}
+            style={[
+              styles.tabButton,
+              activePage === i && { borderBottomColor: palette.primary, borderBottomWidth: 3 },
+            ]}
           >
-            <View style={styles.rowLeft}>
-              <View style={styles.smallAvatar} />
-              <Text style={[styles.listName, { color: palette.text }]}>{player.name}</Text>
-            </View>
-            <Text style={[styles.listScore, { color: palette.text }]}>{player.exp}</Text>
-          </View>
+            <Text
+              style={[
+                styles.tabText,
+                { color: activePage === i ? palette.primary : palette.text },
+              ]}
+            >
+              {label}
+            </Text>
+          </TouchableOpacity>
         ))}
       </View>
-    </ScrollView>
+
+      {/*  Swipe Pages */}
+      <FlatList
+        ref={flatListRef}
+        data={pages}
+        keyExtractor={(item) => item.key}
+        renderItem={({ item }) => item.content}
+        horizontal
+        pagingEnabled
+        onMomentumScrollEnd={onScrollEnd}
+        showsHorizontalScrollIndicator={false}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    padding: 16,
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
+  page: {
+    width,
     flex: 1,
     padding: 16,
   },
@@ -174,7 +312,19 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 90,
+    marginBottom: 60,
+  },
+  tabBar: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 10,
+  },
+  tabButton: {
+    paddingBottom: 6,
+  },
+  tabText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
   podiumRow: {
     flexDirection: "row",
@@ -285,5 +435,57 @@ const styles = StyleSheet.create({
   listScore: {
     fontSize: 14,
     fontWeight: "bold",
+  },
+  rivalSection: {
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 40,
+  },
+  rivalHeader: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  rivalCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  rivalName: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  rivalText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  rivalInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  rivalRank: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  rivalStats: {
+    flex: 1,
+    alignItems: "flex-end",
+  },
+  barContainer: {
+    height: 6,
+    width: 100,
+    backgroundColor: "#333",
+    borderRadius: 4,
+    marginTop: 4,
+    overflow: "hidden",
+  },
+  barFill: {
+    height: "100%",
+    borderRadius: 4,
   },
 });

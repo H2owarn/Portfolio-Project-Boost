@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import * as Progress from "react-native-progress";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { Colors, Radii, Shadow } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { checkAndAwardBadges } from "@/utils/awardBadges";
+import { getBadgeImage } from "@/utils/getbadgeimage";
+import { LineChart, BarChart, Grid, XAxis, YAxis } from "react-native-svg-charts";
+import * as shape from "d3-shape";
 
 
 type Profile = {
@@ -35,93 +39,109 @@ const FALLBACK_FRIEND_AVATAR = "https://via.placeholder.com/60";
 export default function HomeScreen() {
   const palette = Colors[useColorScheme() ?? "dark"];
   const router = useRouter();
-
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [users, setUsers] = useState<Profile[]>([]);
   const [quests, setQuests] = useState<UserQuestRow[]>([]);
   const [levelInfo, setLevelInfo] = useState<LevelRow | null>(null);
+  const [badges, setBadges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rank, setRank] = useState<string>("IRON");
 
   useEffect(() => {
-  let mounted = true;
+    let mounted = true;
 
-  (async () => {
-    // 1) Auth user
-    const { data: { user }, error: userErr } = await supabase.auth.getUser();
-    if (userErr) console.error("User error:", userErr);
-    if (!user) {
-      if (mounted) setLoading(false);
-      return;
-    }
+    (async () => {
+      // 1️ Auth user
+      const { data: { user }, error: userErr } = await supabase.auth.getUser();
+      if (userErr) console.error("User error:", userErr);
+      if (!user) {
+        if (mounted) setLoading(false);
+        return;
+      }
 
-    // 2) Profile
-    const { data: profileData, error: profileErr } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    if (profileErr) console.error("Profile fetch error:", profileErr);
-
-    // 2.2) Level info (based on profile.level)
-
-    let fetchedLevelInfo: LevelRow | null = null;
-
-    if (profileData) {
-      const { data: levelData, error: levelErr } = await supabase
-        .from("levels")
-        .select("min_exp, max_exp")
-        .eq("level_number", profileData.level)
-        .maybeSingle<LevelRow>();
-
-      if (levelErr) console.error("Level fetch error:", levelErr);
-      fetchedLevelInfo = levelData ?? null;
-    }
-
-    // 3) Recommended rivals
-    const { data: usersData, error: usersErr } = await supabase
-      .from("profiles")
-      .select("id, name, level, exp")
-      .neq("id", user.id)
-      .order("level", { ascending: false })
-      .limit(2)
-
-    if (usersErr) console.error("Users fetch error:", usersErr);
-
-    // 4) Active quests
-    const { data: questsData, error: questsErr } = await supabase
-      .from("user_quests")
-      .select(`
-        quest_id,
-        quests ( id, name, description )
-      `)
-      .eq("user_id", user.id)
-      .eq("status", "active");
-
-    if (questsErr) console.error("Quests fetch error:", questsErr);
-
-    const normalizedQuests = (questsData ?? []).map((q: any) => ({
-      quest_id: q.quest_id,
-      quest: q.quests?? null,
-    }));
-
-    // ✅ Set all state once
-    if (mounted) {
-      setProfile(profileData ?? null);
-      setLevelInfo(fetchedLevelInfo);
-      setUsers(usersData ?? []);
-      setQuests(normalizedQuests as UserQuestRow[]);
-      setLoading(false);
-    }
-  })();
+      //  Check for badges
+      await checkAndAwardBadges(user.id);
 
 
-  return () => {
-    mounted = false;
-  };
-}, []);
+      // 2️ Fetch profile
+      const { data: profileData, error: profileErr } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
 
- // ---- EXP calculation here ----
+      if (profileErr) console.error("Profile fetch error:", profileErr);
+
+      // 3️ Fetch level info
+      let fetchedLevelInfo: LevelRow | null = null;
+
+      if (profileData) {
+        const { data: levelData, error: levelErr } = await supabase
+          .from("levels")
+          .select("min_exp, max_exp")
+          .eq("level_number", profileData.level)
+          .maybeSingle<LevelRow>();
+
+        if (levelErr) console.error("Level fetch error:", levelErr);
+        fetchedLevelInfo = levelData ?? null;
+      }
+
+      // 4️ Active quests
+      const { data: questsData, error: questsErr } = await supabase
+        .from("user_quests")
+        .select(`
+          quest_id,
+          quests ( id, name, description )
+        `)
+        .eq("user_id", user.id)
+        .eq("status", "active");
+
+      if (questsErr) console.error("Quests fetch error:", questsErr);
+
+      const normalizedQuests = (questsData ?? []).map((q: any) => ({
+        quest_id: q.quest_id,
+        quest: q.quests ?? null,
+      }));
+
+      // 5️ Fetch earned badges
+      const { data: earnedBadges, error: badgesErr } = await supabase
+        .from("user_badges")
+        .select(`
+          badge_id,
+          badges ( name, description, asset_key )
+        `)
+        .eq("user_id", user.id);
+
+      if (badgesErr) console.error("Badge fetch error:", badgesErr);
+
+      const badgeCount = earnedBadges?.length ?? 0;
+
+      const { data: rankRow, error: rankErr } = await supabase
+        .from("rank_divisions")
+        .select("name")
+        .lte("min_badges", badgeCount)
+        .gte("max_badges", badgeCount)
+        .maybeSingle();
+
+      if (rankErr) console.error("Rank fetch error:", rankErr);
+
+      setRank(rankRow?.name ?? "UNRANKED");
+
+      if (mounted) {
+        setProfile(profileData ?? null);
+        setLevelInfo(fetchedLevelInfo);
+        setQuests(normalizedQuests as UserQuestRow[]);
+        setBadges(earnedBadges ?? []);
+        setLoading(false);
+      }
+
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // ---- EXP calculation ----
   const currentExp = profile?.exp ?? 0;
   const minExp = levelInfo?.min_exp ?? 0;
   const maxExp = levelInfo?.max_exp ?? null;
@@ -130,12 +150,11 @@ export default function HomeScreen() {
       ? (currentExp - minExp) / ((maxExp ?? currentExp) - minExp)
       : 0;
 
-
   if (loading) {
     return (
-      <View style={[styles.container, { paddingTop: 45, backgroundColor: palette.background }]}>
-        <Text style={{ color: palette.text }}>Loading…</Text>
-      </View>
+     <View style={styles.loadingContainer}>
+                 <ActivityIndicator size="large" color={palette.primary} />
+               </View>
     );
   }
 
@@ -146,14 +165,11 @@ export default function HomeScreen() {
     >
       {/* Header / Profile */}
       <View style={[styles.header, { backgroundColor: palette.surface }]}>
-        <Image
-          source={{ uri: FALLBACK_FRIEND_AVATAR  }}
-          style={styles.avatar}
-        />
+        <Image source={{ uri: FALLBACK_FRIEND_AVATAR }} style={styles.avatar} />
         <View style={styles.headerCopy}>
           <Text style={[styles.userName, { color: palette.text }]}>{profile?.name ?? "—"}</Text>
           <Text style={[styles.userLevel, { color: palette.mutedText }]}>
-            Level {profile?.level ?? 1}
+            Rank: {rank} · Level {profile?.level ?? 1}
           </Text>
 
           <Progress.Bar
@@ -170,7 +186,6 @@ export default function HomeScreen() {
           <Text style={[styles.xpText, { color: palette.mutedText }]}>
             {currentExp}/{maxExp ?? "∞"} XP
           </Text>
-
         </View>
       </View>
 
@@ -186,14 +201,15 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        {/* If you want to show up to 3 active quests here */}
         <View style={styles.questGrid}>
           {(quests.slice(0, 3)).map((q) => (
-            <View key={q.quest_id} style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
+            <View
+              key={q.quest_id}
+              style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}
+            >
               <Text style={styles.questEmoji}>{q.quest?.name?.slice(0, 2) ?? "🌟"}</Text>
             </View>
           ))}
-          {/* If none yet, show placeholders */}
           {quests.length === 0 && (
             <>
               <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
@@ -218,46 +234,197 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      {/* Friends */}
+      {/* Charts section */}
+      <View style={[styles.section, { backgroundColor: palette.surface }]}>
+        <Text style={[styles.sectionTitle, { color: palette.text, marginBottom: 8 }]}>
+          Progress Charts
+        </Text>
+
+        {/* Quick Metrics Row */}
+        {loading ? (
+          <Text style={{ color: palette.mutedText }}>Loading stats...</Text>
+        ) : (
+          <ChartsSection palette={palette} />
+        )}
+      </View>
+
+      {/* Badges Section */}
       <View style={[styles.section, { backgroundColor: palette.surface }]}>
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: palette.text }]}>Recommended Rivals</Text>
-          <Pressable
-            onPress={() => console.log("See all friends")}
-            android_ripple={{ color: palette.primary + "20" }}
-          >
-          </Pressable>
+          <Text style={[styles.sectionTitle, { color: palette.text }]}>Your Badges</Text>
         </View>
 
-          <View style={styles.recommendContainer}>
-      {users.map((u) => (
-        <View
-          key={u.id}
-          style={[
-            styles.recommendCard,
-            { backgroundColor: palette.surfaceElevated ?? palette.surface },
-          ]}
-        >
-          <Image
-            source={{ uri: FALLBACK_FRIEND_AVATAR }}
-            style={styles.recommendAvatar}
-          />
-          <View style={styles.recommendInfo}>
-            <Text style={[styles.recommendName, { color: palette.text }]}>
-              {u.name ?? "—"}
-            </Text>
-            <Text style={[styles.recommendLevel, { color: palette.mutedText }]}>
-              Level {u.level}
-            </Text>
-          </View>
-          <Text style={[styles.arrow, { color: palette.primary }]}>➡️</Text>
+        <View style={styles.badgeGrid}>
+          {badges.length > 0 ? (
+            badges.map((b) => (
+              <View
+                key={b.badge_id}
+                style={[styles.badgeCard, { backgroundColor: palette.surfaceElevated ?? palette.surface }]}
+              >
+                <Image
+                  source={
+                    getBadgeImage(b.badges.asset_key)
+                  }
+                  style={[styles.badgeImage, {backgroundColor: palette.background}]}
+                />
+                <Text style={[styles.badgeName, { color: palette.text }]}>{b.badges.name}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={{ color: palette.mutedText }}>No badges yet — keep training!</Text>
+          )}
         </View>
-      ))}
-    </View>
-    </View>
+      </View>
     </ScrollView>
   );
 }
+
+function ChartsSection({ palette }: { palette: any }) {
+  const [loading, setLoading] = useState(true);
+  const [weeklyData, setWeeklyData] = useState<{ label: string; count: number }[]>([]);
+  const [volumeData, setVolumeData] = useState<{ date: string; volume: number }[]>([]);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      /** Fetch Workout Sessions for Weekly Chart **/
+      const { data: sessions, error: sessionErr } = await supabase
+        .from("workout_sessions")
+        .select("created_at")
+        .eq("user_id", user.id);
+
+      if (sessionErr) {
+        console.error("Workout session fetch error:", sessionErr);
+        setLoading(false);
+        return;
+      }
+
+      const weeklyCount: Record<string, number> = {};
+      sessions.forEach((s) => {
+        const d = new Date(s.created_at);
+        const weekKey = `${d.getFullYear()}-W${Math.ceil(d.getDate() / 7)}`;
+        weeklyCount[weekKey] = (weeklyCount[weekKey] || 0) + 1;
+      });
+
+      const weekly = Object.entries(weeklyCount).map(([label, count]) => ({ label, count }));
+      setWeeklyData(weekly.sort((a, b) => a.label.localeCompare(b.label)));
+
+      /** Fetch Completed Exercises for Volume Chart **/
+      const { data: completed, error: compErr } = await supabase
+        .from("completed_exercises")
+        .select("weight, reps, sets, created_at")
+        .eq("user_id", user.id);
+
+      if (compErr) {
+        console.error("Volume fetch error:", compErr);
+        setLoading(false);
+        return;
+      }
+
+      const volumeMap: Record<string, number> = {};
+      completed.forEach((ex) => {
+        const dateKey = new Date(ex.created_at).toISOString().split("T")[0];
+        const vol = (ex.weight || 0) * (ex.reps || 0) * (ex.sets || 1);
+        volumeMap[dateKey] = (volumeMap[dateKey] || 0) + vol;
+      });
+
+      const volume = Object.entries(volumeMap).map(([date, volume]) => ({ date, volume }));
+      setVolumeData(volume.sort((a, b) => a.date.localeCompare(b.date)));
+
+      setLoading(false);
+    };
+
+    fetchMetrics();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ alignItems: "center", marginVertical: 20 }}>
+        <Text style={{ color: palette.mutedText }}>Loading charts…</Text>
+      </View>
+    );
+  }
+
+  if (!weeklyData.length && !volumeData.length) {
+    return (
+      <Text style={{ color: palette.mutedText, textAlign: "center" }}>
+        No workout data yet — complete your first session 💪
+      </Text>
+    );
+  }
+
+  /** Aggregate summary numbers **/
+  const totalWorkouts = weeklyData.reduce((a, b) => a + b.count, 0);
+  const totalVolume = volumeData.reduce((a, b) => a + b.volume, 0);
+
+  return (
+    <View style={{ gap: 24 }}>
+      {/*  Quick Stats Row */}
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View style={{ alignItems: "center", flex: 1 }}>
+          <Text style={{ color: palette.text, fontSize: 22, fontWeight: "700" }}>
+            {totalWorkouts}
+          </Text>
+          <Text style={{ color: palette.mutedText }}>Total Workouts</Text>
+        </View>
+        <View style={{ alignItems: "center", flex: 1 }}>
+          <Text style={{ color: palette.text, fontSize: 22, fontWeight: "700" }}>
+            {Math.round(totalVolume)} kg
+          </Text>
+          <Text style={{ color: palette.mutedText }}>Total Volume</Text>
+        </View>
+      </View>
+
+      {/* Total Training Volume Chart */}
+      <View>
+        <Text style={{ color: palette.text, fontSize: 16, fontWeight: "600", marginBottom: 8 }}>
+          Total Training Volume
+        </Text>
+        {volumeData.length === 0 ? (
+          <Text style={{ color: palette.mutedText, textAlign: "center" }}>
+            No volume data yet
+          </Text>
+        ) : (
+          <View style={{ height: 220, flexDirection: "row" }}>
+            <YAxis
+              data={volumeData.map((v) => v.volume)}
+              contentInset={{ top: 20, bottom: 20 }}
+              svg={{ fill: palette.mutedText, fontSize: 10 }}
+            />
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <LineChart
+                style={{ flex: 1 }}
+                data={volumeData.map((v) => v.volume)}
+                svg={{ stroke: palette.primary, strokeWidth: 3 }}
+                contentInset={{ top: 20, bottom: 20 }}
+                curve={shape.curveNatural}
+              >
+                <Grid />
+              </LineChart>
+              <XAxis
+                style={{ marginHorizontal: -10, height: 20 }}
+                data={volumeData}
+                formatLabel={(v, i) =>
+                  new Date(volumeData[i].date).toLocaleDateString("en-AU", {
+                    day: "numeric",
+                    month: "short",
+                  })
+                }
+                contentInset={{ left: 20, right: 20 }}
+                svg={{ fontSize: 10, fill: palette.text }}
+              />
+            </View>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+}
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -281,13 +448,12 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#000000ff",
+    backgroundColor: "#000",
   },
   progressBar: { marginTop: 6 },
   userName: { fontSize: 20, fontWeight: "bold" },
   userLevel: { fontSize: 14, fontWeight: "600" },
   xpText: { fontSize: 12 },
-
   questSection: {
     borderRadius: Radii.lg,
     padding: 20,
@@ -307,7 +473,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: { fontSize: 18, fontWeight: "700" },
   seeAll: { fontSize: 14, fontWeight: "600" },
-
   questGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -322,41 +487,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   questEmoji: { fontSize: 28 },
-
   quickStartBtn: { borderRadius: Radii.md, paddingVertical: 14, alignItems: "center" },
   quickStartText: { fontWeight: "700", letterSpacing: 0.4 },
-
-  recommendCard: {
+  badgeGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 16,
+    marginTop: 12,
+  },
+  badgeCard: {
     alignItems: "center",
+    width: 80,
+    gap: 6,
     borderRadius: Radii.md,
-    padding: 12,
-    gap: 12,
+    padding: 8,
+    ...Shadow.card,
   },
-  recommendAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#111",
+  badgeImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
   },
-
-  recommendContainer: {
-  gap: 12,
-  marginTop: 8,
+  badgeName: {
+    fontSize: 12,
+    fontWeight: "600",
+    textAlign: "center",
   },
-
-  recommendInfo: {
+  loadingContainer: {
     flex: 1,
-    gap: 4
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  recommendName: {
-    fontSize: 16,
-    fontWeight: "600"
-  },
-  recommendLevel: {
-    fontSize: 13
-  },
-  arrow: {
-    fontSize: 18
-    },
 });

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import dayjs from 'dayjs';
 
@@ -21,47 +21,47 @@ const StreakContext = createContext<StreakContextType>({
 export const StreakProvider = ({ children }: { children: React.ReactNode }) => {
   const [streak, setStreak] = useState(0);
 
-  useEffect(() => {
-    const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+  const mountedRef = useRef(true);
+  const loadingUserRef = useRef<string | null>(null);
 
-      if (session?.user) {
-        await refreshStreak();
-      }
-
-      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session?.user) refreshStreak();
-        else setStreak(0);
-      });
-
-      return () => listener.subscription.unsubscribe();
-    };
-
-    init();
-  }, []);
-
-  /** Fetch streak and last_active from Supabase */
-  const refreshStreak = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('streak, last_active')
-      .eq('id', user.id)
-      .single();
-
-    if (error) {
-      console.error('Error fetching streak:', error.message);
-      return;
-    }
-
-    setStreak(data?.streak ?? 0);
+  const safeSet = <T,>(setter: (v: T) => void, v: T) => {
+    if (mountedRef.current) setter(v);
   };
 
-  /** Update streak based on date logic */
+  const refreshStreak = async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (!user) return;
+
+    // de-dupe parallel loads
+    if (loadingUserRef.current === user.id) return;
+    loadingUserRef.current = user.id;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('streak, last_active')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.warn('refreshStreak: select error', error);
+        safeSet(setStreak, 0);
+        return;
+      }
+
+      safeSet(setStreak, data?.streak ?? 0);
+    } catch (e) {
+      console.warn('refreshStreak: unexpected', e);
+      safeSet(setStreak, 0);
+    } finally {
+      loadingUserRef.current = null;
+    }
+  };
+
   const updateStreak = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
     if (!user) return;
 
     const today = dayjs().startOf('day');
@@ -70,28 +70,25 @@ export const StreakProvider = ({ children }: { children: React.ReactNode }) => {
       .from('profiles')
       .select('streak, last_active')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
-      console.error('Error fetching streak data:', error?.message);
+    if (error) {
+      console.warn('updateStreak: select error', error);
       return;
     }
 
-    let newStreak = data.streak ?? 0;
-    const lastActive = data.last_active ? dayjs(data.last_active).startOf('day') : null;
+    const currentStreak = data?.streak ?? 0;
+    const lastActive = data?.last_active ? dayjs(data.last_active).startOf('day') : null;
+
+    let newStreak = currentStreak;
 
     if (!lastActive) {
       newStreak = 1;
     } else {
       const dayDiff = today.diff(lastActive, 'day');
-
-      if (dayDiff === 1) {
-        newStreak += 1;
-      } else if (dayDiff > 1) {
-        newStreak = 1;
-      } else if (dayDiff === 0) {
-        return;
-      }
+      if (dayDiff === 1) newStreak += 1;
+      else if (dayDiff > 1) newStreak = 1;
+      else if (dayDiff === 0) return; // already done today
     }
 
     const { error: updateErr } = await supabase
@@ -103,16 +100,17 @@ export const StreakProvider = ({ children }: { children: React.ReactNode }) => {
       .eq('id', user.id);
 
     if (updateErr) {
-      console.error('Error updating streak:', updateErr.message);
+      console.warn('updateStreak: update error', updateErr);
       return;
     }
 
-    setStreak(newStreak);
+    safeSet(setStreak, newStreak);
     console.log(`🔥 Updated streak: ${newStreak}`);
   };
 
   const resetStreak = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
     if (!user) return;
 
     const { error } = await supabase
@@ -121,16 +119,17 @@ export const StreakProvider = ({ children }: { children: React.ReactNode }) => {
       .eq('id', user.id);
 
     if (error) {
-      console.error('Error resetting streak:', error);
+      console.warn('resetStreak: update error', error);
       return;
     }
 
-    setStreak(0);
+    safeSet(setStreak, 0);
     console.log('❄️ Streak reset to 0');
   };
 
   const setStreakValue = async (value: number) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
     if (!user) return;
 
     const { error } = await supabase
@@ -139,23 +138,42 @@ export const StreakProvider = ({ children }: { children: React.ReactNode }) => {
       .eq('id', user.id);
 
     if (error) {
-      console.error('Error setting streak manually:', error.message);
+      console.warn('setStreakValue: update error', error);
       return;
     }
 
-    setStreak(value);
+    safeSet(setStreak, value);
     console.log(`✅ Streak manually set to: ${value}`);
   };
 
+  useEffect(() => {
+    mountedRef.current = true;
+
+    let unsubscribe: (() => void) | undefined;
+
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
+      if (session?.user) await refreshStreak();
+
+      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (!mountedRef.current) return;
+        if (session?.user) refreshStreak();
+        else safeSet(setStreak, 0);
+      });
+
+      unsubscribe = () => listener?.subscription?.unsubscribe();
+    })();
+
+    return () => {
+      mountedRef.current = false;
+      try { unsubscribe?.(); } catch {}
+    };
+  }, []);
+
   return (
     <StreakContext.Provider
-      value={{
-        streak,
-        refreshStreak,
-        updateStreak,
-        resetStreak,
-        setStreakValue,
-      }}
+      value={{ streak, refreshStreak, updateStreak, resetStreak, setStreakValue }}
     >
       {children}
     </StreakContext.Provider>

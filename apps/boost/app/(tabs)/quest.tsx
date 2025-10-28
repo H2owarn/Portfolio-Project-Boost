@@ -13,6 +13,7 @@ import { Colors, Shadow, Radii, Spacing, Font} from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { color } from "bun";
 
 
 export default function QuestScreen() {
@@ -143,7 +144,9 @@ export default function QuestScreen() {
   }, [profile]);
 
   if (loading) {
-    return <Text style={{ color: "#fff" }}>Loading quests…</Text>;
+    return <View style={styles.loadingContainer}>
+                     <ActivityIndicator size="large" color={palette.primary} />
+                   </View>
   }
 
   const userLevel = profile?.level ?? 1;
@@ -208,7 +211,7 @@ export default function QuestScreen() {
         </View>
 
         <View style={styles.cardFooter}>
-          <Text style={styles.stamina}>
+          <Text style={[styles.stamina, {color: palette.primary}]}>
             Stamina Cost: <MaterialIcons name="bolt" size={12} color={palette.primary} /> {quest.stamina_cost ?? 0}
           </Text>
           <Pressable
@@ -374,6 +377,10 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 8,
   },
-
+  loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
 
 });

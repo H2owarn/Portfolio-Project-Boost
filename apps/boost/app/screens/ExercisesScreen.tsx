@@ -9,6 +9,7 @@ import { Screen } from '@/components/layout/screen';
 import { Colors, Radii, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useXp } from '@/contexts/Xpcontext';
+import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
 
 type Exercise = {
   id: number;
@@ -20,7 +21,6 @@ type Exercise = {
   category?: string;
   images?: string[];
   xp_reward?: number;
-  stamina_cost?: number;
 };
 
 export default function ExercisesScreen() {
@@ -29,6 +29,7 @@ export default function ExercisesScreen() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
+  const { startWorkout, endWorkout, currentSessionId } = useWorkoutSession();
 
   const { addXp } = useXp();
 
@@ -52,6 +53,10 @@ export default function ExercisesScreen() {
     console.warn('Failed to parse selectedMuscles:', err);
     selectedMuscles = {};
   }
+
+  useEffect(() => {
+    if (!currentSessionId) startWorkout(); // start automatically when screen loads
+  }, []);
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -179,12 +184,6 @@ export default function ExercisesScreen() {
               <Text style={[styles.specText, { color: palette.primary }]}>{item.xp_reward} XP</Text>
             </View>
           )}
-          {item.stamina_cost && (
-            <View style={[styles.specBadge, { backgroundColor: palette.primary + '10' }]}>
-              <MaterialIcons name="bolt" size={12} color={palette.primary} />
-              <Text style={[styles.specText, { color: palette.primary }]}>{item.stamina_cost}</Text>
-            </View>
-          )}
           {item.level && (
             <View style={[styles.specBadge, { backgroundColor: palette.primary + '10' }]}>
               <MaterialIcons name="signal-cellular-alt" size={12} color={palette.primary} />
@@ -255,12 +254,15 @@ export default function ExercisesScreen() {
       .from("completed_exercises")
       .update({ claimed: true })
       .in("id", completedIds);
+    
+    await endWorkout();
 
   } catch (err) {
     console.error("Error finishing workout:", err);
     Alert.alert("❌ Error", "Could not finish workout.");
   }
-
+  
+  
 
 
 };

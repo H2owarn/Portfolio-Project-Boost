@@ -1,17 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  Pressable,
-  FlatList,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-  TextInput,
-} from "react-native";
+import {View, Text, StyleSheet, Image, Dimensions, Pressable, FlatList, ScrollView, ActivityIndicator, Alert, TextInput, } from "react-native";
 import { useLocalSearchParams, router, Stack } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";

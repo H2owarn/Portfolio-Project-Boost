@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 type XpContextType = {
@@ -26,84 +26,112 @@ export const XpProvider = ({ children }: { children: React.ReactNode }) => {
   const [minExp, setMinExp] = useState(0);
   const [maxExp, setMaxExp] = useState(0);
 
-  useEffect(() => {
-    let mounted = true;
+  const mountedRef = useRef(true);
+  const loadingUserRef = useRef<string | null>(null); // prevent overlapping loads for same user
 
-    const loadXpData = async (userId: string) => {
-      try {
-        const { data: profile, error: profileErr } = await supabase
-          .from('profiles')
-          .select('exp, exp_week, level')
-          .eq('id', userId)
-          .single();
+  const safeSetState = <T,>(setter: (v: T) => void, value: T) => {
+    if (mountedRef.current) setter(value);
+  };
 
-        if (profileErr) {
-          console.error('Error loading profile XP:', profileErr);
-          return;
-        }
+  const loadXpData = async (userId: string) => {
+    // Avoid overlapping fetches for the same user
+    if (loadingUserRef.current === userId) return;
+    loadingUserRef.current = userId;
 
-        if (!profile) return;
+    try {
+      const { data: profile, error: profileErr } = await supabase
+        .from('profiles')
+        .select('exp, exp_week, level')
+        .eq('id', userId)
+        .maybeSingle();
 
-        if (mounted) {
-          setXp(profile.exp ?? 0);
-          setXpWeek(profile.exp_week ?? 0);
-          setLevel(profile.level ?? 0);
-        }
-
-        const { data: levelData, error: levelErr } = await supabase
-          .from('levels')
-          .select('min_exp, max_exp')
-          .eq('level_number', profile.level)
-          .single();
-
-        if (levelErr) {
-          console.error('Error loading level data:', levelErr);
-          return;
-        }
-
-        if (levelData && mounted) {
-          setMinExp(levelData.min_exp);
-          setMaxExp(levelData.max_exp ?? 0);
-        }
-      } catch (err) {
-        console.error('Error in loadXpData:', err);
+      if (profileErr) {
+        console.warn('loadXpData: profile error', profileErr);
       }
-    };
 
-    const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const exp = profile?.exp ?? 0;
+      const expWeek = profile?.exp_week ?? 0;
+      const lvl = profile?.level ?? 0;
 
+      safeSetState(setXp, exp);
+      safeSetState(setXpWeek, expWeek);
+      safeSetState(setLevel, lvl);
+
+      const { data: levelData, error: levelErr } = await supabase
+        .from('levels')
+        .select('min_exp, max_exp')
+        .eq('level_number', lvl)
+        .maybeSingle();
+
+      if (levelErr) {
+        console.warn('loadXpData: level error', levelErr);
+      }
+
+      safeSetState(setMinExp, levelData?.min_exp ?? 0);
+      safeSetState(setMaxExp, levelData?.max_exp ?? 0);
+    } catch (err) {
+      console.warn('loadXpData: unexpected error', err);
+    } finally {
+      loadingUserRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    mountedRef.current = true;
+
+    let unsub: (() => void) | undefined;
+
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
       if (session?.user) {
         await loadXpData(session.user.id);
       }
 
       const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session?.user) loadXpData(session.user.id);
+        if (!mountedRef.current) return;
+
+        if (session?.user) {
+          loadXpData(session.user.id);
+        } else {
+          safeSetState(setXp, 0);
+          safeSetState(setXpWeek, 0);
+          safeSetState(setLevel, 0);
+          safeSetState(setMinExp, 0);
+          safeSetState(setMaxExp, 0);
+        }
       });
 
-      return () => {
-        listener?.subscription.unsubscribe();
-        mounted = false;
-      };
-    };
+      unsub = () => listener?.subscription?.unsubscribe();
+    })();
 
-    init();
+    return () => {
+      mountedRef.current = false;
+      try {
+        unsub?.();
+      } catch {}
+    };
   }, []);
 
   const addXp = async (amount: number) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
     if (!user) throw new Error('Not logged in');
 
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('exp, exp_week, level')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
-    if (error || !profile) throw error || new Error('Profile not found');
+    if (error) throw error;
 
-    const newXp = (profile.exp || 0) + amount;
-    const newXpWeek = (profile.exp_week || 0) + amount;
+    const currentExp = profile?.exp ?? 0;
+    const currentWeek = profile?.exp_week ?? 0;
+    const currentLevel = profile?.level ?? 0;
+
+    const newXp = currentExp + amount;
+    const newXpWeek = currentWeek + amount;
 
     const { error: updateError } = await supabase
       .from('profiles')
@@ -118,15 +146,15 @@ export const XpProvider = ({ children }: { children: React.ReactNode }) => {
       .lte('min_exp', newXp)
       .order('level_number', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
-    const newLevel = levelData?.level_number ?? profile.level ?? 0;
+    const newLevel = levelData?.level_number ?? currentLevel;
 
-    setXp(newXp);
-    setXpWeek(newXpWeek);
-    setLevel(newLevel);
-    setMinExp(levelData?.min_exp ?? 0);
-    setMaxExp(levelData?.max_exp ?? 0);
+    safeSetState(setXp, newXp);
+    safeSetState(setXpWeek, newXpWeek);
+    safeSetState(setLevel, newLevel);
+    safeSetState(setMinExp, levelData?.min_exp ?? 0);
+    safeSetState(setMaxExp, levelData?.max_exp ?? 0);
 
     console.log(`+${amount} XP — Total: ${newXp}, Weekly: ${newXpWeek}`);
   };

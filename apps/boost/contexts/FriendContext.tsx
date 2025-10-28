@@ -24,7 +24,7 @@ interface RelationshipContextType {
   friends: ProfileMini[];
   rivals: ProfileMini[];
   requests: Relationship[];
-  sendRequest: (targetId: string, type?: RelationshipType) => Promise<void>;
+  sendRequest: (targetId: string, type?: RelationshipType) => Promise<boolean>;
   acceptRequest: (requestId: string) => Promise<void>;
   removeRelationship: (targetId: string, type?: RelationshipType) => Promise<void>;
   fetchRelationships: () => Promise<void>;
@@ -112,8 +112,16 @@ export const RelationshipProvider = ({ children }: ProviderProps): React.ReactNo
     const getOtherUser = (rel: any) =>
       rel.user_1_id === userId ? rel.user_2 : rel.user_1;
 
-    const friendsWithNames = data.filter(isFriend).map(getOtherUser);
-    const rivalsWithNames = data.filter(isRival).map(getOtherUser);
+    const friendsWithNames = data
+      .filter(isFriend)
+      .map(getOtherUser)
+
+      .filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+
+    const rivalsWithNames = data
+      .filter(isRival)
+      .map(getOtherUser)
+      .filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
 
     setFriends(friendsWithNames);
     setRivals(rivalsWithNames);
@@ -154,27 +162,55 @@ export const RelationshipProvider = ({ children }: ProviderProps): React.ReactNo
 
   };
 
-  const sendRequest = async (targetId: string, type: RelationshipType = 'friend') => {
-    if (!userId) {
-      console.warn('User ID not ready. Cannot send request.');
-      return;
-    }
+  const sendRequest = async (
+  targetId: string,
+  type: RelationshipType = 'friend'
+): Promise<boolean> => {
+  if (!userId) {
+    console.warn('User ID not ready. Cannot send request.');
+    return false;
+  }
 
-    const { data, error } = await supabase.from('relationships').insert({
-      user_1_id: userId,
-      user_2_id: targetId,
-      status: 'PENDING',
-      type,
-      request_at: new Date().toISOString(),
-    });
+  // Check for existing relationship
+  const { data: existing, error: existingError } = await supabase
+    .from('relationships')
+    .select('id, user_1_id, user_2_id, status')
+    .or(`user_1_id.eq.${userId},user_2_id.eq.${userId}`);
 
-    if (error) {
-      console.error('Insert error:', error.message, error.details);
-    } else {
-      console.log('Insert success:', data);
-      await fetchPendingRequests();
-    }
-  };
+  if (existingError) {
+    console.error('Existing check error:', existingError.message);
+    return false;
+  }
+
+  const duplicate = existing?.find(
+    (r) =>
+      (r.user_1_id === userId && r.user_2_id === targetId) ||
+      (r.user_1_id === targetId && r.user_2_id === userId)
+  );
+
+  if (duplicate && ['PENDING', 'ACCEPTED'].includes(duplicate.status)) {
+    console.warn('Request or relationship already exists:', duplicate);
+    return false;
+  }
+
+  // Otherwise, insert a new request
+  const { data, error } = await supabase.from('relationships').insert({
+    user_1_id: userId,
+    user_2_id: targetId,
+    status: 'PENDING',
+    type,
+    request_at: new Date().toISOString(),
+  });
+
+  if (error) {
+    console.error('Insert error:', error.message, error.details);
+    return false;
+  }
+
+  await fetchPendingRequests();
+  return true;
+};
+
 
 
   const acceptRequest = async (requestId: string) => {
