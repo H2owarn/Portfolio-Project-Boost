@@ -5,6 +5,8 @@ import { View, Pressable, Text, Dimensions } from "react-native";
 import Onboarding from "react-native-onboarding-swiper";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { supabase } from "@/lib/supabase";
+
 
 const { width, height } = Dimensions.get("window");
 
@@ -34,16 +36,24 @@ export default function OnboardingScreen() {
     p.play();
   });
 
-  const finishTutorial = async () => {
-    if (finished) return;
-    setFinished(true);
-    try {
-      if (dontShow) await AsyncStorage.setItem("hideTutorial", "true");
-      router.replace("/(tabs)/home");
-    } catch (error) {
-      console.error("Error finishing tutorial:", error);
+ const finishTutorial = async () => {
+  if (finished) return;
+  setFinished(true);
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user && dontShow) {
+      await supabase
+        .from('profiles')
+        .update({ hide_tutorial: true })
+        .eq('id', user.id);
     }
-  };
+
+    router.replace('/(tabs)/home');
+  } catch (error) {
+    console.error('Error finishing tutorial:', error);
+  }
+};
+
 
   return (
     <View style={{ flex: 1 }}>
