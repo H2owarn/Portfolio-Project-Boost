@@ -1,6 +1,6 @@
 // app/screens/ExerciseInProgressScreen.tsx
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, TextInput, Pressable, ScrollView, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions, TextInput, Pressable, ScrollView, FlatList, Alert } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
@@ -63,7 +63,7 @@ export default function ExerciseInProgressScreen() {
     prefetchImages();
   }, [exercise.images]);
 
- const handleCompleteExercise = async () => {
+const handleCompleteExercise = async () => {
   setCompleting(true);
 
   try {
@@ -74,18 +74,17 @@ export default function ExerciseInProgressScreen() {
       return;
     }
 
-    //  Validate input
+    // Validate input
     const numSets = parseInt(sets) || 0;
     const numReps = parseInt(reps) || 0;
     const numWeight = parseInt(weight) || 0;
 
     if (numSets <= 0 || numReps <= 0) {
       try {
-        playPreloaded('over');
+        await playPreloaded('over');
       } catch {
-        playSound(require('@/assets/sound/over.wav'));
+        await playSound(require('@/assets/sound/over.wav'));
       }
-
       alert('Please enter valid numbers for sets and reps.');
       return;
     }
@@ -94,11 +93,10 @@ export default function ExerciseInProgressScreen() {
 
     if (stamina < staminaCost) {
       try {
-        playPreloaded('over');
+        await playPreloaded('over');
       } catch {
-        playSound(require('@/assets/sound/over.wav'));
+        await playSound(require('@/assets/sound/over.wav'));
       }
-
       alert('❌ Not enough stamina to complete this exercise!');
       return;
     }
@@ -106,8 +104,8 @@ export default function ExerciseInProgressScreen() {
     // Deduct stamina via context (this updates DB & UI)
     await spendStamina(staminaCost);
 
-    // Insert unclaimed completed exercise
-    const { error: insertErr } = await supabase
+    // ✅ Try inserting completed exercise
+    const { data: insertData, error: insertErr } = await supabase
       .from('completed_exercises')
       .insert({
         user_id: user.id,
@@ -115,20 +113,18 @@ export default function ExerciseInProgressScreen() {
         sets: numSets,
         reps: numReps,
         weight: numWeight,
-        claimed: false, // ✅ mark as new/unclaimed
-        workout_session_id: currentSessionId,
-      });
+        claimed: false,
+        workout_session_id: currentSessionId ?? null,
+      })
+      .select();
 
     if (insertErr) {
-      try {
-        playPreloaded('over');
-      } catch {
-        playSound(require('@/assets/sound/over.wav'));
-      }
-
-      alert('Failed to save completed exercise.');
+      console.error("❌ Failed to insert completed_exercises:", JSON.stringify(insertErr, null, 2));
+      Alert.alert("Insert error", JSON.stringify(insertErr, null, 2));
       return;
     }
+
+    console.log("✅ Insert success:", insertData);
 
     try {
       await playPreloaded('achieve');
@@ -136,12 +132,9 @@ export default function ExerciseInProgressScreen() {
       await playSound(require('@/assets/sound/achievement.wav'));
     }
 
-    // Success message
-    alert(
-      `✅ Exercise complete!\n\nEXP will be added after finishing your workout.`
-    );
-
+    alert(`✅ Exercise complete!\n\nEXP will be added after finishing your workout.`);
     router.back();
+
   } catch (err) {
     console.error('Error completing exercise:', err);
     alert('An error occurred. Please try again.');
@@ -149,6 +142,7 @@ export default function ExerciseInProgressScreen() {
     setCompleting(false);
   }
 };
+
 
 
   const renderImage = ({ item, index }: { item: string; index: number }) => {
