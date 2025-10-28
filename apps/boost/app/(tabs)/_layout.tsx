@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   questButtonActive: {
-    borderColor: 'rgba(31, 41, 55, 0.35)',
+    borderColor: 'rgba(27, 36, 49, 0.35)',
   },
   questIcon: {
     marginBottom: 2,
