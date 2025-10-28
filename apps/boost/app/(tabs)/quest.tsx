@@ -111,8 +111,33 @@ export default function QuestScreen() {
           assigned_at: new Date().toISOString(),
         }));
 
-        await supabase.from("user_quests").insert(insertPayload);
+    for (const q of insertPayload) {
+      const { data: existing, error: selectErr } = await supabase
+        .from("user_quests")
+        .select("user_id, quest_id, status")
+        .eq("user_id", q.user_id)
+        .eq("quest_id", q.quest_id)
+        .maybeSingle();
+
+      if (selectErr) {
+        console.error("Select error:", selectErr);
+        continue;
       }
+
+      if (!existing) {
+        // Only insert if not exists
+        const { error: insertErr } = await supabase
+          .from("user_quests")
+          .insert(q);
+
+        if (insertErr) console.error("Insert error:", insertErr);
+      } else {
+        console.log(`Skipping duplicate quest ${q.quest_id} (already exists)`);
+      }
+    }
+
+
+    }
 
       // fetch exercise names
       const allExerciseIds = questsList.flatMap((q) => q.exercise_ids || []);
