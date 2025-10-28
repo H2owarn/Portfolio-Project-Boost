@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import * as Progress from "react-native-progress";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
@@ -152,9 +152,9 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { paddingTop: 45, backgroundColor: palette.background }]}>
-        <Text style={{ color: palette.text }}>Loading…</Text>
-      </View>
+     <View style={styles.loadingContainer}>
+                 <ActivityIndicator size="large" color={palette.primary} />
+               </View>
     );
   }
 
@@ -265,7 +265,7 @@ export default function HomeScreen() {
                   source={
                     getBadgeImage(b.badges.asset_key)
                   }
-                  style={styles.badgeImage}
+                  style={[styles.badgeImage, {backgroundColor: palette.background}]}
                 />
                 <Text style={[styles.badgeName, { color: palette.text }]}>{b.badges.name}</Text>
               </View>
@@ -508,11 +508,15 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: "#111",
   },
   badgeName: {
     fontSize: 12,
     fontWeight: "600",
     textAlign: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

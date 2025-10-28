@@ -52,20 +52,35 @@ export default function FriendTestScreen() {
   };
 
   const handleSendFriend = async () => {
-    const id = await findUserIdByName(searchName);
-    if (id) {
-      await sendRequest(id, 'friend');
-      Alert.alert('Friend request sent!');
-    }
-  };
+  const id = await findUserIdByName(searchName);
+  if (!id) {
+    Alert.alert('User not found', 'No user exists with that name.');
+    return;
+  }
+
+  const success = await sendRequest(id, 'friend');
+
+  if (success) {
+    Alert.alert('Friend request sent!');
+  } else {
+    Alert.alert('Already added', 'You already have a pending or accepted request with this user.');
+  }
+};
+
 
   const handleSendRival = async () => {
-    const id = await findUserIdByName(searchName);
-    if (id) {
-      await sendRequest(id, 'rival');
-      Alert.alert('Rival request sent!');
-    }
-  };
+  const id = await findUserIdByName(searchName);
+  if (!id) return;
+
+  const success = await sendRequest(id, 'rival');
+
+  if (success) {
+    Alert.alert('Rival request sent!');
+  } else {
+    Alert.alert('Already added', 'You already have a request or relationship with this user.');
+  }
+};
+
 
   const handleRemoveFriend = async () => {
     const id = await findUserIdByName(searchName);

@@ -144,7 +144,9 @@ export default function QuestScreen() {
   }, [profile]);
 
   if (loading) {
-    return <Text style={{ color: "#fff" }}>Loading quests…</Text>;
+    return <View style={styles.loadingContainer}>
+                     <ActivityIndicator size="large" color={palette.primary} />
+                   </View>
   }
 
   const userLevel = profile?.level ?? 1;
@@ -375,6 +377,10 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 8,
   },
-
+  loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
 
 });
