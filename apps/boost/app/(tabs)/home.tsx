@@ -88,16 +88,15 @@ export default function HomeScreen() {
       }
 
       // Active quests
-      const { data: questsData, error: questsErr } = await supabase
-        .from("user_quests")
-        .select(`
-          quest_id,
-          quests ( id, name, description )
-        `)
-        .eq("user_id", user.id)
-        .eq("status", ["active", "in_progress"]);
+    const { data: questsData, error } = await supabase
+      .from("user_quests")
+      .select(`
+        quest_id,
+        status,
+        quests ( id, name, description )
+      `)
+      .eq("user_id", user.id);
 
-      if (questsErr) console.error("Quests fetch error:", questsErr);
 
       const normalizedQuests = (questsData ?? []).map((q: any) => ({
         quest_id: q.quest_id,
@@ -213,12 +212,9 @@ export default function HomeScreen() {
           <View style={styles.questGrid}>
             {(() => {
               // sort by in-progress first
-              const inProgress = quests.filter((q) => q.status === "in_progress");
-              const active = quests.filter((q) => q.status === "active");
-              const displayQuests = (inProgress.length > 0 ? inProgress : active).slice(0, 3);
-
-              console.log("🔥 In-progress quests:", inProgress);
-              console.log("⚡ Active quests:", active);
+              const inProgress = quests.filter(q => q.status === "in_progress");
+              const active = quests.filter(q => q.status === "active");
+              const displayQuests = [...inProgress, ...active].slice(0, 3);
 
               if (displayQuests.length === 0) {
                 return (
