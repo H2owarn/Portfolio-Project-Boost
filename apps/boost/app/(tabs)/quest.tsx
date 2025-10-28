@@ -14,6 +14,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { color } from "bun";
+import { playPreloaded, preloadSounds } from "@/utils/sound";
 
 
 export default function QuestScreen() {
@@ -24,6 +25,7 @@ export default function QuestScreen() {
 
   // Load profile
   useEffect(() => {
+    preloadSounds();
     const loadProfile = async () => {
       const { data: { user }, error: userErr } = await supabase.auth.getUser();
       if (userErr) {
@@ -109,8 +111,33 @@ export default function QuestScreen() {
           assigned_at: new Date().toISOString(),
         }));
 
-        await supabase.from("user_quests").insert(insertPayload);
+    for (const q of insertPayload) {
+      const { data: existing, error: selectErr } = await supabase
+        .from("user_quests")
+        .select("user_id, quest_id, status")
+        .eq("user_id", q.user_id)
+        .eq("quest_id", q.quest_id)
+        .maybeSingle();
+
+      if (selectErr) {
+        console.error("Select error:", selectErr);
+        continue;
       }
+
+      if (!existing) {
+        // Only insert if not exists
+        const { error: insertErr } = await supabase
+          .from("user_quests")
+          .insert(q);
+
+        if (insertErr) console.error("Insert error:", insertErr);
+      } else {
+        console.log(`Skipping duplicate quest ${q.quest_id} (already exists)`);
+      }
+    }
+
+
+    }
 
       // fetch exercise names
       const allExerciseIds = questsList.flatMap((q) => q.exercise_ids || []);
@@ -219,14 +246,16 @@ export default function QuestScreen() {
               styles.startButton,
               , { backgroundColor: palette.primary + "90" }]}
             android_ripple={{ color: palette.secondary + "20" }}
-            onPress={() =>
+            onPress={() => {
+              playPreloaded("click");
+
               !isLocked && userStamina >= (quest.stamina_cost ?? 0)
                 ? router.push({
                     pathname: '/screens/QuestScreen',
                     params: { id: quest.id.toString() }, // 👈 pass quest ID
                   })
-                : console.log("Quest Locked or Not Enough Stamina")
-            }
+                : console.log("Quest Locked or Not Enough Stamina");
+                }}
           >
             <Text style={[styles.startButtonText, { color: palette.text }]}>
               {isLocked

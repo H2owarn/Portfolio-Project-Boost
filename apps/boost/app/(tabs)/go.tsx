@@ -1,12 +1,13 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Button, Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Button, Dimensions, ScrollView, StyleSheet, TouchableOpacity, View, Alert } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, Font, Radii, Spacing } from '@/constants/theme';
 import AvatarBody from '@/components/avatar_parts/AvatarBody';
 import { musclesBack } from '@/components/avatar_parts/musclesBack';
 import { musclesFront } from '@/components/avatar_parts/musclesFront';
 import { color } from 'bun';
+import { playPreloaded, playSound } from "@/utils/sound";
 
 const { width: screenWidth } = Dimensions.get('window');
 const musclesPages = [musclesFront, musclesBack];
@@ -32,12 +33,31 @@ export default function AvatarScreen() {
 	{
 		/* Routing for next page*/
 	}
-	const handleContinue = () => {
+	const handleContinue = async () => {
+ 		 //Check if any muscles were selected
+	const hasMuscles = Object.values(selectedMuscles).some(arr => arr.length > 0);
+		if (!hasMuscles) {
+			// 🎵 Optional warning sound
+			playPreloaded('over').catch(() =>
+			playSound(require('@/assets/sound/over.wav'))
+			);
+			Alert.alert("No muscles selected", "Please choose at least one muscle before continuing.");
+			return;
+		}
+
+		// Normal flow: play sound and navigate
+		try {
+			await playPreloaded('enter');
+		} catch {
+			await playSound(require('@/assets/sound/entering.wav'));
+		}
+
 		router.push({
 			pathname: '/screens/ExercisesScreen',
-			params: { selectedMuscles: JSON.stringify(selectedMuscles) }
+			params: { selectedMuscles: JSON.stringify(selectedMuscles) },
 		});
-	};
+		};
+
 
 	return (
 		<View style={[styles.container, {backgroundColor: palette.background}]}>
@@ -62,7 +82,13 @@ export default function AvatarScreen() {
 										key={index}
 										activeOpacity={0.7}
 										style={{ position: 'absolute', top, left, zIndex: z }}
-										onPress={() => handleMusclePress(uniqueId, page)}
+										onPress={ async () => {
+											try {
+												await playPreloaded("click");
+											} catch {
+												await playSound(require("@/assets/sound/tap.wav"));
+											}
+											handleMusclePress(uniqueId, page)}}
 									>
 										<Component width={width} height={height} fill={isSelected ? '#37d137' : '#fcfcfc91'} />
 									</TouchableOpacity>
@@ -74,7 +100,10 @@ export default function AvatarScreen() {
 			</View>
 
 			<View style={[styles.seemore, {marginTop: 20, backgroundColor: palette.primary, }]}>
-				<Button title="Start a workout!" onPress={handleContinue} />
+				<Button title="Start a workout!"
+				onPress={handleContinue}
+				color={palette.background}
+				/>
 			</View>
 		</View>
 	);
@@ -96,11 +125,13 @@ const styles = StyleSheet.create({
 	musclesWrapper: {
 		position: 'absolute',
 		top: 0,
-		left: 0
+		left: 0,
+
 	},
 	seemore: {
 		padding: Spacing.sm,
 		borderRadius: Radii.md,
 		gap: Spacing.sm,
+		justifyContent: 'center',
 	}
 });

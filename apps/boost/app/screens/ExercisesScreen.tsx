@@ -10,6 +10,7 @@ import { Colors, Radii, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useXp } from '@/contexts/Xpcontext';
 import { useWorkoutSession } from '@/contexts/WorkoutSessionContext';
+import { playPreloaded, playSound } from "@/utils/sound";
 
 type Exercise = {
   id: number;
@@ -140,7 +141,14 @@ export default function ExercisesScreen() {
           borderColor: palette.borderColor
         }
       ]}
-      onPress={onPress}
+      onPress={async () => {
+        onPress();
+        try {
+          await playPreloaded('click');
+        } catch {
+          await playSound(require('@/assets/sound/tap.wav'));
+        }
+      }}
     >
       <Text
         style={[
@@ -158,6 +166,7 @@ export default function ExercisesScreen() {
       style={[styles.exerciseCard, { backgroundColor: palette.surface }]}
       android_ripple={{ color: palette.primary + '20' }}
       onPress={() => {
+        playPreloaded("click");
         router.push({
           pathname: '/screens/ExerciseInProgressScreen' as any,
           params: { exercise: JSON.stringify(item) }
@@ -221,6 +230,12 @@ export default function ExercisesScreen() {
 
     if (completedErr) throw completedErr;
     if (!completed?.length) {
+      try {
+        await playPreloaded('over');
+      } catch {
+        await playSound(require('@/assets/sound/over.wav'));
+      }
+
       Alert.alert("No completed exercises", "Do some exercises first!");
       return;
     }
@@ -240,10 +255,24 @@ export default function ExercisesScreen() {
     //  Add XP in one go
     await addXp(totalXp);
 
+    // play success sound
+    try {
+      await playPreloaded("complete");
+    } catch {
+      await playSound(require("@/assets/sound/completed.wav"));
+    }
+
     Alert.alert(
       "🎉 Workout Complete!",
       `You earned a total of +${totalXp} XP!`,
-      [{ text: "OK", onPress: () => router.push('/home') }]
+      [{ text: "OK", onPress: async () => {
+          try {
+            await playPreloaded("click");
+          } catch {
+            await playSound(require('@/assets/sound/tap.wav'));
+          }
+        return;
+  },},]
     );
 
 
@@ -254,15 +283,14 @@ export default function ExercisesScreen() {
       .from("completed_exercises")
       .update({ claimed: true })
       .in("id", completedIds);
-    
     await endWorkout();
 
   } catch (err) {
     console.error("Error finishing workout:", err);
     Alert.alert("❌ Error", "Could not finish workout.");
   }
-  
-  
+
+
 
 
 };

@@ -1,10 +1,23 @@
 import React, { useState, useRef, useEffect } from "react";
-import {View, Text, StyleSheet, Image, Dimensions, Pressable, FlatList, ScrollView, ActivityIndicator, Alert, TextInput, } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+  Pressable,
+  FlatList,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+  TextInput,
+} from "react-native";
 import { useLocalSearchParams, router, Stack } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";
 import { Colors, Spacing, Radii } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { playPreloaded, playSound } from "@/utils/sound";
 
 const { width } = Dimensions.get("window");
 
@@ -74,6 +87,14 @@ const [reps, setReps] = useState('10');
       return;
     }
 
+    // add sound
+
+    try {
+      await playPreloaded("achieve")
+    } catch {
+      await playSound(require("@/assets/sound/achievement.wav"))
+    }
+
     // 🟩 Record this exercise completion
     const { error: insertErr } = await supabase
       .from("completed_quest_exercises")
@@ -85,16 +106,35 @@ const [reps, setReps] = useState('10');
         completed_at: new Date().toISOString(),
       });
 
-    if (insertErr) {
-      console.error("Insert progress error:", insertErr);
-      Alert.alert("Error", "Could not record progress.");
-      setLoading(false);
-      return;
+    if (!insertErr) {
+      // If quest was active, mark it in_progress
+      const { data: questRow } = await supabase
+        .from("user_quests")
+        .select("status")
+        .eq("user_id", user.id)
+        .eq("quest_id", quest_id)
+        .single();
+
+      if (questRow?.status === "active") {
+        await supabase
+          .from("user_quests")
+          .update({ status: "in_progress" })
+          .eq("user_id", user.id)
+          .eq("quest_id", quest_id);
+      }
     }
 
-    // 🟩 Go back to QuestScreen
+
+    // Go back to QuestScreen
     Alert.alert("✅ Exercise Complete!", `You finished ${data.name}!`, [
-      { text: "OK", onPress: () => router.back() },
+      { text: "OK", onPress: async () => {
+        try {
+          await playPreloaded("click");
+        } catch {
+          await playSound(require('@/assets/sound/tap.wav'));
+        }
+        router.back();
+      },},
     ]);
   } catch (err) {
     console.error("Error completing quest exercise:", err);

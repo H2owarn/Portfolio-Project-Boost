@@ -1,7 +1,11 @@
 import React, { useEffect } from 'react';
-import { View, Text, Button, StyleSheet, useColorScheme } from 'react-native';
+import { View, Text, Button, StyleSheet, useColorScheme, TouchableOpacity } from 'react-native';
 import { useStreak } from '@/contexts/StreakContext';
 import { Colors } from '@/constants/theme';
+import { supabase } from '@/lib/supabase';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { playPreloaded, playSound } from '@/utils/sound';
 
 export default function StreakTestScreen() {
   const palette = Colors[useColorScheme() ?? 'dark'];
@@ -10,6 +14,17 @@ export default function StreakTestScreen() {
   useEffect(() => {
     refreshStreak();
   }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await playPreloaded('click');
+    } catch {
+      await playSound(require('@/assets/sound/tap.wav'));
+    }
+
+    await supabase.auth.signOut();
+    router.replace('/onboarding/login');
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: palette.background }]}>
@@ -31,6 +46,14 @@ export default function StreakTestScreen() {
 
       <View style={{ marginTop: 30 }}>
         <Button title="Set Streak = 5 (Test)" onPress={() => setStreakValue(5)} />
+      </View>
+
+      {/* 👇 Subtle sign-out at the bottom */}
+      <View style={styles.signOutContainer}>
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+          <Ionicons name="log-out-outline" size={18} color={palette.mutedText} />
+          <Text style={[styles.signOutText, { color: palette.mutedText }]}>Sign out</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -68,5 +91,24 @@ const styles = StyleSheet.create({
   buttonGroup: {
     gap: 10,
     width: '70%',
+  },
+  signOutContainer: {
+    marginTop: 50,
+    alignItems: 'center',
+    width: '80%',
+  },
+  signOutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: 'transparent',
+    opacity: 0.8,
+  },
+  signOutText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

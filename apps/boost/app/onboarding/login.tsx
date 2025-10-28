@@ -2,6 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { BoostButton } from '@/components/boost-button';
 import { BoostInput } from '@/components/boost-input';
@@ -11,51 +12,81 @@ import { Alert } from '@/components/ui/alert';
 import { Colors, Font, Radii, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '@/lib/supabase';
+import { playPreloaded, playSound } from '@/utils/sound';
 
 export default function LoginScreen() {
-	const palette = Colors[useColorScheme() ?? 'dark'];
-	const { login } = useAuth();
-	const [errors, setErrors] = useState<Record<string, any> | null>(null);
-	const [submitted, setSubmitted] = useState(false);
+  const palette = Colors[useColorScheme() ?? 'dark'];
+  const { login } = useAuth();
+  const [errors, setErrors] = useState<Record<string, any> | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [email, setEmail] = useState('me@gibbu.dev');
+  const [password, setPassword] = useState('testing123');
 
-	const submit = async (email: string, password: string) => {
-  if (submitted) return;
-  setSubmitted(true);
+  const submit = async (email: string, password: string) => {
+    if (submitted) return;
+    setSubmitted(true);
 
-  const { type, data } = await login({ email, password });
-  setSubmitted(false);
-
-  if (type === 'error') {
-    console.error(data);
-    return;
-  }
-
-  if (type === 'validation') {
-    if (data) setErrors(data);
-    return;
-  }
-
-  // Wait a moment to make sure auth context updates
-  setTimeout(async () => {
     try {
-      const hideTutorial = await AsyncStorage.getItem('hideTutorial');
-      if (hideTutorial === 'true') {
-        router.replace('/(tabs)/home');
-      } else {
-        router.replace('/onboarding'); // show tutorial once
-      }
-    } catch (error) {
-      console.error('Error checking tutorial flag:', error);
-      router.replace('/onboarding');
+      await playPreloaded('click');
+    } catch {
+      await playSound(require('@/assets/sound/tap.wav'));
     }
-  }, 300); // small delay ensures useAuth() has updated
-};
 
+    const { type, data } = await login({ email, password });
+    setSubmitted(false);
 
+    if (type === 'error') {
+      console.error(data);
+      return;
+    }
 
-	const [email, setEmail] = useState('me@gibbu.dev');
-	const [password, setPassword] = useState('testing123');
+    if (type === 'validation') {
+      if (data) setErrors(data);
+      return;
+    }
+
+    // Wait a moment to make sure auth context updates
+    setTimeout(async () => {
+      try {
+        //  Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          router.replace('/onboarding/login');
+          return;
+        }
+
+        // Fetch user’s tutorial preference
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('hide_tutorial')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.warn('Error fetching hide_tutorial flag:', error);
+          router.replace('/onboarding');
+          return;
+        }
+
+        // Route based on user’s setting
+        if (profile?.hide_tutorial) {
+          router.replace('/(tabs)/home');
+        } else {
+          router.replace('/onboarding');
+        }
+
+        // Optional: cache locally for offline use
+        await AsyncStorage.setItem(
+          'hideTutorial',
+          profile?.hide_tutorial ? 'true' : 'false'
+        );
+      } catch (error) {
+        console.error('Error checking tutorial flag:', error);
+        router.replace('/onboarding');
+      }
+    }, 300);
+  };
 
 	return (
 	<Screen

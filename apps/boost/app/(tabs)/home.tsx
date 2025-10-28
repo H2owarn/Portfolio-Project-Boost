@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator, Alert } from "react-native";
 import * as Progress from "react-native-progress";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { Colors, Radii, Shadow } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { playPreloaded, preloadSounds, playSound } from "@/utils/sound";
 import { checkAndAwardBadges } from "@/utils/awardBadges";
 import { getBadgeImage } from "@/utils/getbadgeimage";
 import { LineChart, BarChart, Grid, XAxis, YAxis } from "react-native-svg-charts";
@@ -26,6 +27,7 @@ type LevelRow = {
 
 type UserQuestRow = {
   quest_id: number;
+  status: string;
   quest: {
     id: number;
     name: string;
@@ -47,10 +49,11 @@ export default function HomeScreen() {
   const [rank, setRank] = useState<string>("IRON");
 
   useEffect(() => {
-    let mounted = true;
+  preloadSounds();
+  let mounted = true;
 
     (async () => {
-      // 1️ Auth user
+      // Auth user
       const { data: { user }, error: userErr } = await supabase.auth.getUser();
       if (userErr) console.error("User error:", userErr);
       if (!user) {
@@ -58,11 +61,10 @@ export default function HomeScreen() {
         return;
       }
 
-      //  Check for badges
+      // Check for badges
       await checkAndAwardBadges(user.id);
 
-
-      // 2️ Fetch profile
+      // Fetch profile
       const { data: profileData, error: profileErr } = await supabase
         .from("profiles")
         .select("*")
@@ -71,7 +73,7 @@ export default function HomeScreen() {
 
       if (profileErr) console.error("Profile fetch error:", profileErr);
 
-      // 3️ Fetch level info
+      // Fetch level info
       let fetchedLevelInfo: LevelRow | null = null;
 
       if (profileData) {
@@ -85,24 +87,24 @@ export default function HomeScreen() {
         fetchedLevelInfo = levelData ?? null;
       }
 
-      // 4️ Active quests
-      const { data: questsData, error: questsErr } = await supabase
-        .from("user_quests")
-        .select(`
-          quest_id,
-          quests ( id, name, description )
-        `)
-        .eq("user_id", user.id)
-        .eq("status", "active");
+      // Active quests
+    const { data: questsData, error } = await supabase
+      .from("user_quests")
+      .select(`
+        quest_id,
+        status,
+        quests ( id, name, description )
+      `)
+      .eq("user_id", user.id);
 
-      if (questsErr) console.error("Quests fetch error:", questsErr);
 
       const normalizedQuests = (questsData ?? []).map((q: any) => ({
         quest_id: q.quest_id,
+        status: q.status,
         quest: q.quests ?? null,
       }));
 
-      // 5️ Fetch earned badges
+      // Fetch earned badges
       const { data: earnedBadges, error: badgesErr } = await supabase
         .from("user_badges")
         .select(`
@@ -150,6 +152,8 @@ export default function HomeScreen() {
       ? (currentExp - minExp) / ((maxExp ?? currentExp) - minExp)
       : 0;
 
+
+
   if (loading) {
     return (
      <View style={styles.loadingContainer}>
@@ -190,48 +194,124 @@ export default function HomeScreen() {
       </View>
 
       {/* Quest Board */}
-      <View style={[styles.questSection, { backgroundColor: palette.surface }]}>
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: palette.text }]}>Quest Board</Text>
-          <Pressable
-            onPress={() => router.push("/(tabs)/quest")}
-            android_ripple={{ color: palette.primary + "20" }}
-          >
-            <Text style={[styles.seeAll, { color: palette.primary }]}>See All</Text>
-          </Pressable>
-        </View>
+        <View style={[styles.questSection, { backgroundColor: palette.surface }]}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: palette.text }]}>Quest Board</Text>
 
-        <View style={styles.questGrid}>
-          {(quests.slice(0, 3)).map((q) => (
-            <View
-              key={q.quest_id}
-              style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}
+            <Pressable
+              onPress={() => {
+                playPreloaded("click");
+                router.push("/(tabs)/quest");
+              }}
+              android_ripple={{ color: palette.primary + "20" }}
             >
-              <Text style={styles.questEmoji}>{q.quest?.name?.slice(0, 2) ?? "🌟"}</Text>
-            </View>
-          ))}
-          {quests.length === 0 && (
-            <>
-              <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
-                <Text style={styles.questEmoji}>👑</Text>
-              </View>
-              <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
-                <Text style={styles.questEmoji}>🦴</Text>
-              </View>
-              <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
-                <Text style={styles.questEmoji}>💎</Text>
-              </View>
-            </>
-          )}
-        </View>
+              <Text style={[styles.seeAll, { color: palette.primary }]}>See All</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.questGrid}>
+            {(() => {
+              // sort by in-progress first
+              const inProgress = quests.filter(q => q.status === "in_progress");
+              const active = quests.filter(q => q.status === "active");
+              const displayQuests = [...inProgress, ...active].slice(0, 3);
+
+              if (displayQuests.length === 0) {
+                return (
+                  <>
+                    <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
+                      <Text style={styles.questEmoji}>👑</Text>
+                    </View>
+                    <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
+                      <Text style={styles.questEmoji}>🦴</Text>
+                    </View>
+                    <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
+                      <Text style={styles.questEmoji}>💎</Text>
+                    </View>
+                  </>
+                );
+              }
+
+              return displayQuests.map((q) => (
+                <Pressable
+                  key={q.quest_id}
+                  style={[
+                    styles.hexagon,
+                    {
+                      backgroundColor:
+                        q.status === "in_progress"
+                          ? palette.primary + "30"
+                          : palette.primary + "15",
+                    },
+                  ]}
+                  onPress={async () => {
+                    try {
+                      await playPreloaded("click");
+                    } catch {
+                      await playSound(require("@/assets/sound/tap.wav"));
+                    }
+                    router.push(`/screens/QuestScreen?id=${q.quest_id}`);
+                  }}
+                >
+                  <Text style={styles.questEmoji}>{q.quest?.name?.slice(0, 2) ?? "🌟"}</Text>
+                </Pressable>
+              ));
+            })()}
+          </View>
+
 
         <Pressable
           style={[styles.quickStartBtn, { backgroundColor: palette.primary }]}
           android_ripple={{ color: palette.secondary + "20" }}
-          onPress={() => router.push("/(tabs)/quest")}
+          onPress={async () => {
+            try {
+              await playPreloaded("click");
+            } catch {
+              await playSound(require("@/assets/sound/tap.wav"));
+            }
+
+            // 1. Get the logged-in user
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+              Alert.alert("Login required", "Please sign in to start a quest.");
+              return;
+            }
+
+            // 2. Fetch user's active quests
+            const { data: activeQuests, error } = await supabase
+              .from("user_quests")
+              .select(`
+                quest_id,
+                quests (
+                  id,
+                  name,
+                  description
+                )
+              `)
+              .eq("user_id", user.id)
+              .eq("status", "active");
+
+            if (error || !activeQuests?.length) {
+              Alert.alert(
+                "No active quests found",
+                "You don't have any assigned quests right now."
+              );
+              return;
+            }
+
+            // 3. Pick a random quest
+            const randomQuest =
+              activeQuests[Math.floor(Math.random() * activeQuests.length)];
+
+            //4. Navigate to that quest detail page
+            router.push(`/screens/QuestScreen?id=${randomQuest.quest_id}`);
+          }}
         >
-          <Text style={[styles.quickStartText, { color: palette.secondary }]}>Quick Start</Text>
+          <Text style={[styles.quickStartText, { color: palette.secondary }]}>
+            Quick Start
+          </Text>
         </Pressable>
+
       </View>
 
       {/* Charts section */}
@@ -252,11 +332,21 @@ export default function HomeScreen() {
       <View style={[styles.section, { backgroundColor: palette.surface }]}>
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: palette.text }]}>Your Badges</Text>
+          <Pressable
+            onPress={ () => {
+              playPreloaded("click");
+              router.push("/(tabs)/quest");
+            }}
+            android_ripple={{ color: palette.primary + "20" }}
+          >
+            <Text style={[styles.seeAll, { color: palette.primary }]}>See All</Text>
+          </Pressable>
         </View>
 
         <View style={styles.badgeGrid}>
           {badges.length > 0 ? (
-            badges.map((b) => (
+
+            badges.slice(0, 3).map((b) => (
               <View
                 key={b.badge_id}
                 style={[styles.badgeCard, { backgroundColor: palette.surfaceElevated ?? palette.surface }]}
@@ -269,11 +359,13 @@ export default function HomeScreen() {
                 />
                 <Text style={[styles.badgeName, { color: palette.text }]}>{b.badges.name}</Text>
               </View>
+
             ))
           ) : (
             <Text style={{ color: palette.mutedText }}>No badges yet — keep training!</Text>
           )}
         </View>
+
       </View>
     </ScrollView>
   );

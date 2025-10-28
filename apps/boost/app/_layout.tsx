@@ -19,36 +19,35 @@ export default function RootLayout() {
   const colorScheme = useColorScheme() ?? 'dark';
   const palette = Colors[colorScheme];
 
-	return (
-		<AuthedUserProvider>
-			<StreakProvider>
-			<WorkoutSessionProvider>
-			<XpProvider>
-			<StaminaProvider>
-			<RelationshipProvider>
-			<ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-				<StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-				<Stack
-					screenOptions={{
-						headerStyle: { backgroundColor: palette.background },
-						headerTintColor: palette.text,
-						headerShadowVisible: false,
-						headerTitleStyle: { fontWeight: '600' },
-						contentStyle: { backgroundColor: palette.background }
-					}}
-				>
-					<Stack.Screen name="testxpscreen" options={{ headerShown: false }} />
-					<Stack.Screen name="index" options={{ headerShown: false }} />
-					<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-					<Stack.Screen name="onboarding/welcome" options={{ headerShown: false }} />
-					<Stack.Screen name="onboarding/login" options={{ headerShown: false, presentation: 'card' }} />
-				</Stack>
-			</ThemeProvider>
-			</RelationshipProvider>
-			</StaminaProvider>
-			</XpProvider>
-			</WorkoutSessionProvider>
-			</StreakProvider>
-		</AuthedUserProvider>
-	);
+  return (
+    <AuthedUserProvider>
+      <StreakProvider>
+        <XpProvider>
+          <StaminaProvider>
+            <RelationshipProvider>
+              <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+                <Stack
+                  screenOptions={{
+                    headerStyle: { backgroundColor: palette.background },
+                    headerTintColor: palette.text,
+                    headerShadowVisible: false,
+                    headerTitleStyle: { fontWeight: '600' },
+                    contentStyle: { backgroundColor: palette.background },
+                  }}
+                >
+                  <Stack.Screen name="onboarding/login" options={{ headerShown: false }} />
+                  <Stack.Screen name="onboarding/index" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)/home" options={{ headerShown: false }} />
+                  <Stack.Screen name="testxpscreen" options={{ headerShown: false }} />
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                </Stack>
+              </ThemeProvider>
+            </RelationshipProvider>
+          </StaminaProvider>
+        </XpProvider>
+      </StreakProvider>
+    </AuthedUserProvider>
+  );
 }

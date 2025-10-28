@@ -158,11 +158,9 @@ export const StaminaProvider = ({ children }: { children: React.ReactNode }) => 
 
   return (
     <StaminaContext.Provider value={{ stamina, spendStamina, maxStamina: MAX_STAMINA }}>
-
       {children}
     </StaminaContext.Provider>
   );
 };
 
 export const useStamina = () => useContext(StaminaContext);
-
