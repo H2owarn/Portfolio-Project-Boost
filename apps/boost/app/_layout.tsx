@@ -21,8 +21,8 @@ export default function RootLayout() {
 
 	return (
 		<AuthedUserProvider>
-			<WorkoutSessionProvider>
 			<StreakProvider>
+			<WorkoutSessionProvider>
 			<XpProvider>
 			<StaminaProvider>
 			<RelationshipProvider>
@@ -47,8 +47,8 @@ export default function RootLayout() {
 			</RelationshipProvider>
 			</StaminaProvider>
 			</XpProvider>
-			</StreakProvider>
 			</WorkoutSessionProvider>
+			</StreakProvider>
 		</AuthedUserProvider>
 	);
 }

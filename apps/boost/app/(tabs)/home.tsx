@@ -7,6 +7,9 @@ import { Colors, Radii, Shadow } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { checkAndAwardBadges } from "@/utils/awardBadges";
 import { getBadgeImage } from "@/utils/getbadgeimage";
+import { LineChart, BarChart, Grid, XAxis, YAxis } from "react-native-svg-charts";
+import * as shape from "d3-shape";
+
 
 type Profile = {
   id: string;
@@ -32,21 +35,22 @@ type UserQuestRow = {
 
 const FALLBACK_FRIEND_AVATAR = "https://via.placeholder.com/60";
 
+
 export default function HomeScreen() {
   const palette = Colors[useColorScheme() ?? "dark"];
   const router = useRouter();
-
   const [profile, setProfile] = useState<Profile | null>(null);
   const [quests, setQuests] = useState<UserQuestRow[]>([]);
   const [levelInfo, setLevelInfo] = useState<LevelRow | null>(null);
   const [badges, setBadges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rank, setRank] = useState<string>("IRON");
 
   useEffect(() => {
     let mounted = true;
 
     (async () => {
-      // 1️⃣ Auth user
+      // 1️ Auth user
       const { data: { user }, error: userErr } = await supabase.auth.getUser();
       if (userErr) console.error("User error:", userErr);
       if (!user) {
@@ -54,10 +58,11 @@ export default function HomeScreen() {
         return;
       }
 
-      // 🏅 Check for badges
+      //  Check for badges
       await checkAndAwardBadges(user.id);
 
-      // 2️⃣ Fetch profile
+
+      // 2️ Fetch profile
       const { data: profileData, error: profileErr } = await supabase
         .from("profiles")
         .select("*")
@@ -66,7 +71,7 @@ export default function HomeScreen() {
 
       if (profileErr) console.error("Profile fetch error:", profileErr);
 
-      // 3️⃣ Fetch level info
+      // 3️ Fetch level info
       let fetchedLevelInfo: LevelRow | null = null;
 
       if (profileData) {
@@ -80,7 +85,7 @@ export default function HomeScreen() {
         fetchedLevelInfo = levelData ?? null;
       }
 
-      // 4️⃣ Active quests
+      // 4️ Active quests
       const { data: questsData, error: questsErr } = await supabase
         .from("user_quests")
         .select(`
@@ -97,7 +102,7 @@ export default function HomeScreen() {
         quest: q.quests ?? null,
       }));
 
-      // 5️⃣ Fetch earned badges
+      // 5️ Fetch earned badges
       const { data: earnedBadges, error: badgesErr } = await supabase
         .from("user_badges")
         .select(`
@@ -107,6 +112,19 @@ export default function HomeScreen() {
         .eq("user_id", user.id);
 
       if (badgesErr) console.error("Badge fetch error:", badgesErr);
+
+      const badgeCount = earnedBadges?.length ?? 0;
+
+      const { data: rankRow, error: rankErr } = await supabase
+        .from("rank_divisions")
+        .select("name")
+        .lte("min_badges", badgeCount)
+        .gte("max_badges", badgeCount)
+        .maybeSingle();
+
+      if (rankErr) console.error("Rank fetch error:", rankErr);
+
+      setRank(rankRow?.name ?? "UNRANKED");
 
       if (mounted) {
         setProfile(profileData ?? null);
@@ -151,7 +169,7 @@ export default function HomeScreen() {
         <View style={styles.headerCopy}>
           <Text style={[styles.userName, { color: palette.text }]}>{profile?.name ?? "—"}</Text>
           <Text style={[styles.userLevel, { color: palette.mutedText }]}>
-            Level {profile?.level ?? 1}
+            Rank: {rank} · Level {profile?.level ?? 1}
           </Text>
 
           <Progress.Bar
@@ -216,7 +234,21 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      {/* 🏅 Badges Section */}
+      {/* Charts section */}
+      <View style={[styles.section, { backgroundColor: palette.surface }]}>
+        <Text style={[styles.sectionTitle, { color: palette.text, marginBottom: 8 }]}>
+          Progress Charts
+        </Text>
+
+        {/* Quick Metrics Row */}
+        {loading ? (
+          <Text style={{ color: palette.mutedText }}>Loading stats...</Text>
+        ) : (
+          <ChartsSection palette={palette} />
+        )}
+      </View>
+
+      {/* Badges Section */}
       <View style={[styles.section, { backgroundColor: palette.surface }]}>
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: palette.text }]}>Your Badges</Text>
@@ -246,6 +278,153 @@ export default function HomeScreen() {
     </ScrollView>
   );
 }
+
+function ChartsSection({ palette }: { palette: any }) {
+  const [loading, setLoading] = useState(true);
+  const [weeklyData, setWeeklyData] = useState<{ label: string; count: number }[]>([]);
+  const [volumeData, setVolumeData] = useState<{ date: string; volume: number }[]>([]);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      /** Fetch Workout Sessions for Weekly Chart **/
+      const { data: sessions, error: sessionErr } = await supabase
+        .from("workout_sessions")
+        .select("created_at")
+        .eq("user_id", user.id);
+
+      if (sessionErr) {
+        console.error("Workout session fetch error:", sessionErr);
+        setLoading(false);
+        return;
+      }
+
+      const weeklyCount: Record<string, number> = {};
+      sessions.forEach((s) => {
+        const d = new Date(s.created_at);
+        const weekKey = `${d.getFullYear()}-W${Math.ceil(d.getDate() / 7)}`;
+        weeklyCount[weekKey] = (weeklyCount[weekKey] || 0) + 1;
+      });
+
+      const weekly = Object.entries(weeklyCount).map(([label, count]) => ({ label, count }));
+      setWeeklyData(weekly.sort((a, b) => a.label.localeCompare(b.label)));
+
+      /** Fetch Completed Exercises for Volume Chart **/
+      const { data: completed, error: compErr } = await supabase
+        .from("completed_exercises")
+        .select("weight, reps, sets, created_at")
+        .eq("user_id", user.id);
+
+      if (compErr) {
+        console.error("Volume fetch error:", compErr);
+        setLoading(false);
+        return;
+      }
+
+      const volumeMap: Record<string, number> = {};
+      completed.forEach((ex) => {
+        const dateKey = new Date(ex.created_at).toISOString().split("T")[0];
+        const vol = (ex.weight || 0) * (ex.reps || 0) * (ex.sets || 1);
+        volumeMap[dateKey] = (volumeMap[dateKey] || 0) + vol;
+      });
+
+      const volume = Object.entries(volumeMap).map(([date, volume]) => ({ date, volume }));
+      setVolumeData(volume.sort((a, b) => a.date.localeCompare(b.date)));
+
+      setLoading(false);
+    };
+
+    fetchMetrics();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ alignItems: "center", marginVertical: 20 }}>
+        <Text style={{ color: palette.mutedText }}>Loading charts…</Text>
+      </View>
+    );
+  }
+
+  if (!weeklyData.length && !volumeData.length) {
+    return (
+      <Text style={{ color: palette.mutedText, textAlign: "center" }}>
+        No workout data yet — complete your first session 💪
+      </Text>
+    );
+  }
+
+  /** Aggregate summary numbers **/
+  const totalWorkouts = weeklyData.reduce((a, b) => a + b.count, 0);
+  const totalVolume = volumeData.reduce((a, b) => a + b.volume, 0);
+
+  return (
+    <View style={{ gap: 24 }}>
+      {/*  Quick Stats Row */}
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View style={{ alignItems: "center", flex: 1 }}>
+          <Text style={{ color: palette.text, fontSize: 22, fontWeight: "700" }}>
+            {totalWorkouts}
+          </Text>
+          <Text style={{ color: palette.mutedText }}>Total Workouts</Text>
+        </View>
+        <View style={{ alignItems: "center", flex: 1 }}>
+          <Text style={{ color: palette.text, fontSize: 22, fontWeight: "700" }}>
+            {Math.round(totalVolume)} kg
+          </Text>
+          <Text style={{ color: palette.mutedText }}>Total Volume</Text>
+        </View>
+      </View>
+
+      {/* Total Training Volume Chart */}
+      <View>
+        <Text style={{ color: palette.text, fontSize: 16, fontWeight: "600", marginBottom: 8 }}>
+          Total Training Volume
+        </Text>
+        {volumeData.length === 0 ? (
+          <Text style={{ color: palette.mutedText, textAlign: "center" }}>
+            No volume data yet
+          </Text>
+        ) : (
+          <View style={{ height: 220, flexDirection: "row" }}>
+            <YAxis
+              data={volumeData.map((v) => v.volume)}
+              contentInset={{ top: 20, bottom: 20 }}
+              svg={{ fill: palette.mutedText, fontSize: 10 }}
+            />
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <LineChart
+                style={{ flex: 1 }}
+                data={volumeData.map((v) => v.volume)}
+                svg={{ stroke: palette.primary, strokeWidth: 3 }}
+                contentInset={{ top: 20, bottom: 20 }}
+                curve={shape.curveNatural}
+              >
+                <Grid />
+              </LineChart>
+              <XAxis
+                style={{ marginHorizontal: -10, height: 20 }}
+                data={volumeData}
+                formatLabel={(v, i) =>
+                  new Date(volumeData[i].date).toLocaleDateString("en-AU", {
+                    day: "numeric",
+                    month: "short",
+                  })
+                }
+                contentInset={{ left: 20, right: 20 }}
+                svg={{ fontSize: 10, fill: palette.text }}
+              />
+            </View>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+}
+
+
 
 const styles = StyleSheet.create({
   container: {

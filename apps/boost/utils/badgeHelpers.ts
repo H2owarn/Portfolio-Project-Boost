@@ -21,7 +21,7 @@ export async function awardBadge(userId: string, badgeName: string) {
 
   const { error: insertErr } = await supabase
     .from('user_badges')
-    .insert({
+    .upsert({
       user_id: userId,
       badge_id: badge.id,
     });

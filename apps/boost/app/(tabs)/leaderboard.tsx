@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, Dimensions, ActivityIndicator } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {View, Text, StyleSheet, FlatList, ScrollView, Dimensions, TouchableOpacity, ActivityIndicator, } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -10,7 +10,9 @@ export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [rivals, setRivals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activePage, setActivePage] = useState(0);
   const palette = Colors[useColorScheme() ?? "dark"];
+  const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     const loadLeaderboard = async () => {
@@ -76,6 +78,16 @@ export default function LeaderboardPage() {
     loadRivals();
   }, []);
 
+  const handleTabPress = (index: number) => {
+    setActivePage(index);
+    flatListRef.current?.scrollToIndex({ index, animated: true });
+  };
+
+  const onScrollEnd = (e: any) => {
+    const newIndex = Math.round(e.nativeEvent.contentOffset.x / width);
+    setActivePage(newIndex);
+  };
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -89,17 +101,21 @@ export default function LeaderboardPage() {
   const others = leaderboard.slice(3);
 
   const pages = [
-    { key: "rivals", content: renderRivals() },
     { key: "leaderboard", content: renderLeaderboard() },
+    { key: "rivals", content: renderRivals() },
   ];
 
   function renderLeaderboard() {
     return (
-      <View style={[styles.page, { backgroundColor: palette.background }]}>
+      <ScrollView
+        style={[styles.page, { backgroundColor: palette.background }]}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={[styles.card, { backgroundColor: palette.surface }]}>
           <Text style={[styles.header, { color: palette.text }]}>Leaderboard</Text>
 
-          {/* Top 3 podium */}
+          {/* Podium */}
           {top3.length === 3 && (
             <View style={styles.podiumRow}>
               {/* 2nd place */}
@@ -137,104 +153,131 @@ export default function LeaderboardPage() {
           )}
 
           {/* Remaining players */}
-          {others.slice(0, 20).map((player) => (
+          {others.slice(0, 20).map((player, i) => (
             <View key={player.id} style={[styles.listItem, { backgroundColor: palette.secondary }]}>
               <View style={styles.rowLeft}>
                 <View style={styles.smallAvatar} />
-                <Text style={[styles.listName, { color: palette.text }]}>{player.name}</Text>
+                <Text style={[styles.listName, { color: palette.text }]}>{i + 4}. {player.name}</Text>
               </View>
               <Text style={[styles.listScore, { color: palette.text }]}>{player.exp}</Text>
             </View>
           ))}
         </View>
-      </View>
+      </ScrollView>
     );
   }
 
   function renderRivals() {
-  return (
-    <View style={[styles.page, { backgroundColor: palette.background }]}>
-      <View style={[styles.card, { backgroundColor: palette.surface }]}>
-        <Text style={[styles.header, { color: palette.text }]}>Rival Standings</Text>
+    return (
+      <ScrollView
+        style={[styles.page, { backgroundColor: palette.background }]}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.card, { backgroundColor: palette.surface }]}>
+          <Text style={[styles.header, { color: palette.text }]}>Rival Standings</Text>
 
-        {rivals.length === 0 ? (
-          <Text style={{ color: palette.mutedText, textAlign: "center" }}>
-            No active rivals yet
-          </Text>
-        ) : (
-          rivals.map((r, index) => {
-            const ahead = r.diff > 0;
-            const rank = index + 1;
-            const rankColor =
-              rank === 1
-                ? "#FFD700" // gold
-                : rank === 2
-                ? "#C0C0C0" // silver
-                : "#CD7F32"; // bronze
+          {rivals.length === 0 ? (
+            <Text style={{ color: palette.mutedText, textAlign: "center" }}>
+              No active rivals yet
+            </Text>
+          ) : (
+            rivals.map((r, index) => {
+              const ahead = r.diff > 0;
+              const rank = index + 1;
+              const rankColor =
+                rank === 1 ? "#FFD700" : rank === 2 ? "#C0C0C0" : "#CD7F32";
 
-            return (
-              <View
-                key={r.id}
-                style={[
-                  styles.rivalCard,
-                  {
-                    backgroundColor: palette.secondary,
-                    borderLeftColor: ahead ? "tomato" : "lime",
-                    borderLeftWidth: 4,
-                    shadowColor: ahead ? "red" : "lime",
-                    shadowOpacity: 0.3,
-                  },
-                ]}
-              >
-                <View style={styles.rivalInfo}>
-                  <Text style={[styles.rivalRank, { color: rankColor }]}>#{rank}</Text>
-                  <Text style={[styles.rivalName, { color: palette.text }]}>{r.name}</Text>
-                </View>
+              return (
+                <View
+                  key={r.id}
+                  style={[
+                    styles.rivalCard,
+                    {
+                      backgroundColor: palette.secondary,
+                      borderLeftColor: ahead ? "tomato" : "lime",
+                      borderLeftWidth: 4,
+                      shadowColor: ahead ? "red" : "lime",
+                      shadowOpacity: 0.3,
+                    },
+                  ]}
+                >
+                  <View style={styles.rivalInfo}>
+                    <Text style={[styles.rivalRank, { color: rankColor }]}>#{rank}</Text>
+                    <Text style={[styles.rivalName, { color: palette.text }]}>{r.name}</Text>
+                  </View>
 
-                <View style={styles.rivalStats}>
-                  <Text
-                    style={[
-                      styles.rivalText,
-                      { color: ahead ? "tomato" : palette.text, textAlign: "right" },
-                    ]}
-                  >
-                    {ahead
-                      ? `😤 Ahead by ${r.diff} XP`
-                      : `🏆 You’re ahead by ${Math.abs(r.diff)} XP`}
-                  </Text>
-
-                  {/* XP Difference Bar */}
-                  <View style={styles.barContainer}>
-                    <View
+                  <View style={styles.rivalStats}>
+                    <Text
                       style={[
-                        styles.barFill,
-                        {
-                          width: `${Math.min(Math.abs(r.diff) / 100 * 100, 100)}%`,
-                          backgroundColor: ahead ? "tomato" : "yellow",
-                        },
+                        styles.rivalText,
+                        { color: ahead ? "tomato" : "lime", textAlign: "right" },
                       ]}
-                    />
+                    >
+                      {ahead
+                        ? ` Behind by ${r.diff} XP`
+                        : ` Ahead by ${Math.abs(r.diff)} XP`}
+                    </Text>
+
+                    {/* XP Difference Bar */}
+                    <View style={styles.barContainer}>
+                      <View
+                        style={[
+                          styles.barFill,
+                          {
+                            width: `${Math.min(Math.abs(r.diff), 100)}%`,
+                            backgroundColor: ahead ? "tomato" : "lime",
+                          },
+                        ]}
+                      />
+                    </View>
                   </View>
                 </View>
-              </View>
-            );
-          })
-        )}
-      </View>
-    </View>
-  );
-}
-
+              );
+            })
+          )}
+        </View>
+      </ScrollView>
+    );
+  }
 
   return (
-    <FlatList
-      data={pages}
-      keyExtractor={(item) => item.key}
-      renderItem={({ item }) => item.content}
-      horizontal
-      pagingEnabled
-      showsHorizontalScrollIndicator={false}
-    />
+    <View style={{ flex: 1 }}>
+      {/*  Tab Bar */}
+      <View style={[styles.tabBar, { backgroundColor: palette.surface }]}>
+        {["Leaderboard", "Rivals"].map((label, i) => (
+          <TouchableOpacity
+            key={label}
+            onPress={() => handleTabPress(i)}
+            style={[
+              styles.tabButton,
+              activePage === i && { borderBottomColor: palette.primary, borderBottomWidth: 3 },
+            ]}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                { color: activePage === i ? palette.primary : palette.text },
+              ]}
+            >
+              {label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/*  Swipe Pages */}
+      <FlatList
+        ref={flatListRef}
+        data={pages}
+        keyExtractor={(item) => item.key}
+        renderItem={({ item }) => item.content}
+        horizontal
+        pagingEnabled
+        onMomentumScrollEnd={onScrollEnd}
+        showsHorizontalScrollIndicator={false}
+      />
+    </View>
   );
 }
 
@@ -269,7 +312,19 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 90,
+    marginBottom: 60,
+  },
+  tabBar: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 10,
+  },
+  tabButton: {
+    paddingBottom: 6,
+  },
+  tabText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
   podiumRow: {
     flexDirection: "row",

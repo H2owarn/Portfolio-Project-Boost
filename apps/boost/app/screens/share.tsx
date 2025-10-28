@@ -29,7 +29,7 @@ export default function ShareScreen() {
         <Text style={styles.shareText}>Share Workout</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push('/screens/testxpscreen')}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.push('/(tabs)/home')}>
         <Text style={styles.backText}>Back to Home</Text>
       </TouchableOpacity>
     </View>

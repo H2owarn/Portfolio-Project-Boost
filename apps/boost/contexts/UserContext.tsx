@@ -83,7 +83,7 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 				stamina,
 				rank_division_id,
 				weight,
-				rank_divisions ( id, name )
+				rank_divisions ( id, name)
 			`
 			)
 			.eq('id', login.data.user.id)

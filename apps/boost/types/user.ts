@@ -1,25 +1,25 @@
 export type { User } from '@supabase/supabase-js';
 
 export type RankDivision =
-	| 'IRON_1'
+	| 'IRON'
 	| 'IRON_2'
 	| 'IRON_3'
-	| 'SILVER_1'
+	| 'SILVER'
 	| 'SILVER_2'
 	| 'SILVER_3'
-	| 'GOLD_1'
+	| 'GOLD'
 	| 'GOLD_2'
 	| 'GOLD_3'
-	| 'PLAT_1'
+	| 'PLAT'
 	| 'PLAT_2'
 	| 'PLAT_3'
-	| 'DIAMOND_1'
+	| 'DIAMOND'
 	| 'DIAMOND_2'
 	| 'DIAMOND_3'
-	| 'MASTER_1'
+	| 'MASTER'
 	| 'MASTER_2'
 	| 'MASTER_3'
-	| 'OLYMPUS';
+	| 'OLYMPIAN';
 
 export interface Profile {
 	id: string;

@@ -24,7 +24,7 @@ export default function HeaderBar() {
             <MaterialIcons name="local-fire-department" size={20} color="orange" />
             <Text style={[styles.statValue, { color: palette.text }]}>{streak}</Text>
           </View>
-          <Text style={styles.statLabel}>Streak</Text>
+          <Text style={[styles.statLabel, {color: palette.text}]}>Streak</Text>
         </View>
 
         {/* XP Bar */}
@@ -36,7 +36,7 @@ export default function HeaderBar() {
               <Text style={styles.barText}>{xp}/{maxExp}</Text>
             </View>
           </View>
-          <Text style={styles.statLabel}>XP</Text>
+          <Text style={[styles.statLabel, {color: palette.text}]}>XP</Text>
         </View>
 
         {/* Stamina */}
@@ -48,7 +48,7 @@ export default function HeaderBar() {
               <Text style={styles.barText}>{currentStamina}/{maxStamina}</Text>
             </View>
           </View>
-          <Text style={styles.statLabel}>Stamina</Text>
+          <Text style={[styles.statLabel, {color: palette.text}]}>Stamina</Text>
         </View>
       </View>
     </View>
@@ -76,11 +76,10 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 16,
     fontWeight: '600',
-    color: 'white',
   },
   statLabel: {
     fontSize: 12,
-    color: '#555',
+    marginLeft: 20,
   },
   staminaBarContainer: {
     width: 60,
