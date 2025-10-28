@@ -5,10 +5,15 @@
 	],
 	"devDependencies": {
 		"@trivago/prettier-plugin-sort-imports": "^5.2.2",
-		"@types/bun": "latest"
+		"@types/bun": "latest",
+		"@types/d3-shape": "^3.1.7",
+		"@types/react-native-svg-charts": "^5.0.16"
 	},
 	"dependencies": {
-		"dayjs": "^1.11.18",
 		"expo-av": "~16.0.7"
+		"d3-shape": "^3.2.0",
+		"dayjs": "^1.11.18",
+		"react-native-svg": "^15.14.0",
+		"react-native-svg-charts": "^5.4.0"
 	}
 }

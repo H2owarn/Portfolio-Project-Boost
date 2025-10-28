@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { StreakProvider, useStreak } from './StreakContext';
 
 type WorkoutSessionContextType = {
   currentSessionId: string | null;
@@ -15,6 +16,7 @@ const WorkoutSessionContext = createContext<WorkoutSessionContextType>({
 
 export const WorkoutSessionProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const { updateStreak } = useStreak();
 
   const startWorkout = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -41,6 +43,8 @@ export const WorkoutSessionProvider = ({ children }: { children: React.ReactNode
         });
 
         if (error) throw error;
+
+        await updateStreak();
 
         setCurrentSessionId(null);
     } catch (err) {

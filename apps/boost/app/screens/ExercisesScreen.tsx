@@ -283,7 +283,6 @@ export default function ExercisesScreen() {
       .from("completed_exercises")
       .update({ claimed: true })
       .in("id", completedIds);
-
     await endWorkout();
 
   } catch (err) {

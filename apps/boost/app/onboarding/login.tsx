@@ -49,14 +49,14 @@ export default function LoginScreen() {
     // Wait a moment to make sure auth context updates
     setTimeout(async () => {
       try {
-        // ✅ Get current user
+        //  Get current user
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           router.replace('/onboarding/login');
           return;
         }
 
-        // ✅ Fetch user’s tutorial preference
+        // Fetch user’s tutorial preference
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('hide_tutorial')
@@ -69,14 +69,14 @@ export default function LoginScreen() {
           return;
         }
 
-        // ✅ Route based on user’s setting
+        // Route based on user’s setting
         if (profile?.hide_tutorial) {
           router.replace('/(tabs)/home');
         } else {
           router.replace('/onboarding');
         }
 
-        // 🧩 Optional: cache locally for offline use
+        // Optional: cache locally for offline use
         await AsyncStorage.setItem(
           'hideTutorial',
           profile?.hide_tutorial ? 'true' : 'false'
