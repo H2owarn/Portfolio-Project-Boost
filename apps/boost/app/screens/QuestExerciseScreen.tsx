@@ -186,6 +186,26 @@ const [reps, setReps] = useState('10');
           </View>
         )}
 
+        {/* Exercise Level and Category Tags */}
+        <View style={styles.tagsRow}>
+          {data.level && (
+            <View style={[styles.tag, { backgroundColor: palette.surfaceElevated }]}>
+              <MaterialIcons name="signal-cellular-alt" size={16} color={palette.primary} />
+              <Text style={[styles.tagText, { color: palette.primary }]}>
+                {data.level.charAt(0).toUpperCase() + data.level.slice(1)}
+              </Text>
+            </View>
+          )}
+          {data.category && (
+            <View style={[styles.tag, { backgroundColor: palette.surfaceElevated }]}>
+              <MaterialIcons name="fitness-center" size={16} color={palette.primary} />
+              <Text style={[styles.tagText, { color: palette.primary }]}>
+                {data.category.charAt(0).toUpperCase() + data.category.slice(1)}
+              </Text>
+            </View>
+          )}
+        </View>
+
         {/* Sets & Reps Input */}
         <View style={[styles.inputCard, { backgroundColor: palette.surface }]}>
         <Text style={[styles.sectionTitle, { color: palette.text }]}>Your Workout</Text>
@@ -284,6 +304,25 @@ const styles = StyleSheet.create({
   questName: { fontSize: 22, fontWeight: "bold" },
   questType: { fontSize: 14, marginTop: 4, textTransform: "uppercase", letterSpacing: 1 },
   questReward: { flexDirection: "row", alignItems: "center", marginTop: 6, gap: 6 },
+  tagsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.md,
+  },
+  tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  tagText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
   carouselSection: { width, height: width * 0.75, backgroundColor: "#000", position: "relative" },
   imageContainer: { width, height: width * 0.75, justifyContent: "center", alignItems: "center" },
   exerciseImage: { width: "100%", height: "100%" },
