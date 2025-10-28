@@ -4,14 +4,12 @@ import { supabase } from '@/lib/supabase';
 type StaminaContextType = {
   stamina: number;
   spendStamina: (amount: number) => Promise<void>;
-  refreshStamina: () => Promise<void>;
   maxStamina: number;
 };
 
 const StaminaContext = createContext<StaminaContextType>({
   stamina: 0,
   spendStamina: async () => {},
-  refreshStamina: async () => {},
   maxStamina: 100,
 });
 
@@ -159,7 +157,7 @@ export const StaminaProvider = ({ children }: { children: React.ReactNode }) => 
   };
 
   return (
-    <StaminaContext.Provider value={{ stamina, spendStamina, refreshStamina, maxStamina: MAX_STAMINA }}>
+    <StaminaContext.Provider value={{ stamina, spendStamina, maxStamina: MAX_STAMINA }}>
 
       {children}
     </StaminaContext.Provider>
