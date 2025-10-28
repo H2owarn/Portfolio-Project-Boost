@@ -100,7 +100,10 @@ export default function AvatarScreen() {
 			</View>
 
 			<View style={[styles.seemore, {marginTop: 20, backgroundColor: palette.primary, }]}>
-				<Button title="Start a workout!" onPress={handleContinue} />
+				<Button title="Start a workout!"
+				onPress={handleContinue}
+				color={palette.background}
+				/>
 			</View>
 		</View>
 	);
@@ -122,11 +125,13 @@ const styles = StyleSheet.create({
 	musclesWrapper: {
 		position: 'absolute',
 		top: 0,
-		left: 0
+		left: 0,
+
 	},
 	seemore: {
 		padding: Spacing.sm,
 		borderRadius: Radii.md,
 		gap: Spacing.sm,
+		justifyContent: 'center',
 	}
 });
