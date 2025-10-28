@@ -71,23 +71,25 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 		setSession(login.data.session);
 
 		const { data: profileData, error: profileErr } = await supabase
-			.from('profiles')
-			.select(
-				`
-				id,
-				name,
-				exp,
-				level,
-				created_at,
-				streak,
-				stamina,
-				rank_division_id,
-				weight,
-				rank_divisions ( id, name )
-			`
+		.from('profiles')
+		.select(`
+			id,
+			name,
+			exp,
+			level,
+			created_at,
+			streak,
+			stamina,
+			weight,
+			rank_division_id,
+			rank_divisions!profiles_rank_division_id_fkey (
+			id,
+			name
 			)
-			.eq('id', login.data.user.id)
-			.single();
+		`)
+		.eq('id', login.data.user.id)
+		.single();
+
 
 		if (profileErr) {
 			return { type: 'error', data: profileErr };
@@ -157,7 +159,7 @@ export const AuthedUserProvider = ({ children }: { children: ReactNode }) => {
 			};
 
 		// Create default profile
-		const profile = await supabase.from('profiles').insert<Partial<Profile>>({
+		const profile = await supabase.from('profiles').insert({
 			name,
 			weight
 		});

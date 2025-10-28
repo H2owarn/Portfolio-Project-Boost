@@ -7,6 +7,8 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { supabase } from '@/lib/supabase';
 import { playPreloaded, playSound } from "@/utils/sound";
 import { useAuth } from '@/hooks/use-auth';
+import { useRelationships } from '@/contexts/FriendContext';
+
 
 
 export default function ProfileScreen() {
@@ -18,6 +20,9 @@ export default function ProfileScreen() {
 	const [level, setLevel] = useState<number>(profile?.level ?? 1);
 	const [rank, setRank] = useState<string>(profile?.rank_divisions?.name ?? '?');
 	const [streak, setStreak] = useState<number>(profile?.streak ?? 0);
+	const { requests, fetchPendingRequests } = useRelationships();
+
+
 
 	useEffect(() => {
 	const fetchBadgeCount = async () => {
@@ -112,6 +117,11 @@ export default function ProfileScreen() {
 		};
 		}, [profile?.id]);
 
+	useEffect(() => {
+		fetchPendingRequests();
+	}, []);
+
+	const hasRequests = requests && requests.length > 0;
 
 
   const joined = useMemo(() => {
@@ -119,6 +129,8 @@ export default function ProfileScreen() {
 		const d = new Date(profile.created_at);
 		return d.toLocaleString(undefined, { month: 'long', year: 'numeric' });
 	}, [profile?.created_at]);
+
+
 
 	return (
 		<View style={[styles.container, {backgroundColor: palette.background}]}>
@@ -134,17 +146,30 @@ export default function ProfileScreen() {
 						<Text style={styles.linkText}>0 Friends</Text>
 					</View>
 					<View style={styles.buttonRow}>
-						<TouchableOpacity style={[styles.addButton, {backgroundColor: palette.secondary}]}
-						onPress={() => {
-							try {
-								playPreloaded('click');
-							} catch {
-								playSound(require('@/assets/sound/tap.wav'));
-							}
-							router.push('/screens/testfriend')}}
-						>
-							<Text style={[styles.addButtonText, {color: palette.primary}]}>+ Add Friends</Text>
-						</TouchableOpacity>
+						<View style={{ position: 'relative' }}>
+							<TouchableOpacity
+								style={[styles.addButton, { backgroundColor: palette.secondary }]}
+								onPress={async () => {
+								try {
+									await playPreloaded('click');
+								} catch {
+									await playSound(require('@/assets/sound/tap.wav'));
+								}
+								router.push('/screens/testfriend');
+								}}
+							>
+								<Text style={[styles.addButtonText, { color: palette.primary }]}>+ Add Friends</Text>
+							</TouchableOpacity>
+
+							{/* Notification badge */}
+							{hasRequests && (
+								<View style={styles.badge}>
+								<Text style={styles.badgeText}>
+									{requests.length > 9 ? '9+' : requests.length}
+								</Text>
+								</View>
+							)}
+							</View>
 
 						<TouchableOpacity style={[styles.shareButton, {backgroundColor: palette.secondary}]}
 						onPress={async () => {
@@ -344,5 +369,23 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 4,
 		gap: 12
 	},
+	badge: {
+	position: 'absolute',
+	top: -6,
+	right: -6,
+	backgroundColor: '#ef4444',
+	borderRadius: 10,
+	minWidth: 18,
+	minHeight: 18,
+	alignItems: 'center',
+	justifyContent: 'center',
+	paddingHorizontal: 4,
+	},
+	badgeText: {
+	color: 'white',
+	fontSize: 11,
+	fontWeight: 'bold',
+	},
+
 
 });

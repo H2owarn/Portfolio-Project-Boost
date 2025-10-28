@@ -9,6 +9,7 @@ export default function FriendTestScreen() {
   const [foundUserId, setFoundUserId] = useState<string | null>(null);
   const palette = Colors[useColorScheme() ?? 'dark'];
 
+
   const {
     friends,
     rivals,
