@@ -336,7 +336,7 @@ export default function HomeScreen() {
               const randomQuest =
                 allQuests[Math.floor(Math.random() * allQuests.length)];
 
-              //4. Navigate to that quest detail page
+              // 4. Navigate to that quest detail page
               router.push(`/screens/QuestScreen?id=${randomQuest.id}`);
             }}
           />
