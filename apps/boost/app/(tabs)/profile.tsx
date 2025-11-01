@@ -123,7 +123,7 @@ export default function ProfileScreen() {
   useEffect(() => {
     fetchRelationships();
     fetchPendingRequests();
-  }, [fetchRelationships, fetchPendingRequests]);
+  }, []);
 
   // ✅ Auth check
   if (!authChecked) return <Text>Loading...</Text>;
