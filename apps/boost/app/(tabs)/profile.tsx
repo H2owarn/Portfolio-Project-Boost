@@ -222,8 +222,10 @@ export default function ProfileScreen() {
 					label="Badges"
 					/>
 				</TouchableOpacity>
-			</View>				{/* Friends Section */}
-				<Text style={[styles.sectionTitle, {color: palette.text }]}>Friends</Text>
+			</View>
+
+			{/* Friends Section */}
+			<Text style={[styles.sectionTitle, {color: palette.text }]}>Friends</Text>
 				<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rivalsRow}>
 					{/* Repeat for each rival */}
 					<View style={styles.rivalAvatarContainer}>
