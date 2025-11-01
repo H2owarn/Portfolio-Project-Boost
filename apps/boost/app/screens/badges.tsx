@@ -8,8 +8,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";
 import { Colors, Radii, Shadow } from "@/constants/theme";
@@ -121,15 +123,22 @@ export default function BadgesScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: palette.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: palette.background }]}>
+      <Stack.Screen 
+        options={{
+          title: "Your Badges",
+          headerShown: false,
+        }} 
+      />
+      <StatusBar barStyle="light-content" backgroundColor={palette.background} />
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: palette.borderColor }]}>
+      <View style={[styles.header, { backgroundColor: palette.background }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={handleBack}
           activeOpacity={0.7}
         >
-          <Ionicons name="arrow-back" size={28} color={palette.text} />
+          <Ionicons name="arrow-back" size={28} color={palette.primary} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: palette.text }]}>Your Badges</Text>
         <View style={styles.backButton} />
@@ -314,7 +323,7 @@ export default function BadgesScreen() {
           </View>
         </TouchableOpacity>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -335,10 +344,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 16,
   },
   backButton: {
     width: 40,
@@ -347,14 +355,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "700",
     letterSpacing: 0.5,
   },
   statsCard: {
     flexDirection: "row",
     marginHorizontal: 20,
-    marginTop: 20,
+    marginTop: 12,
     marginBottom: 16,
     borderRadius: Radii.lg,
     padding: 20,
