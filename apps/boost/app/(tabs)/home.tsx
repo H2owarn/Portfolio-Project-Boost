@@ -335,7 +335,7 @@ export default function HomeScreen() {
           <Pressable
             onPress={ () => {
               playPreloaded("click");
-              router.push("/(tabs)/quest");
+              router.push("/screens/badges" as any);
             }}
             android_ripple={{ color: palette.primary + "20" }}
           >

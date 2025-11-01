@@ -188,31 +188,41 @@ export default function ProfileScreen() {
 
 			</View>
 
-				{/* Statistics */}
-				<Text style={[styles.sectionTitle, { color: palette.text }]}>Overview</Text>
-				<View style={styles.statsGrid}>
-					<StatCard
-					icon="local-fire-department"
-					value={streak}
-					label="Streak"
-					/>
-					<StatCard
-					icon="star"
-					value={xp}
-					label="Total XP"
-					/>
-					<StatCard
-					icon="shield"
-					value={rank} label="Current league"
-					/>
+			{/* Statistics */}
+			<Text style={[styles.sectionTitle, { color: palette.text }]}>Overview</Text>
+			<View style={styles.statsGrid}>
+				<StatCard
+				icon="local-fire-department"
+				value={streak}
+				label="Streak"
+				/>
+				<StatCard
+				icon="star"
+				value={xp}
+				label="Total XP"
+				/>
+				<StatCard
+				icon="shield"
+				value={rank} label="Current league"
+				/>
+				<TouchableOpacity
+					onPress={async () => {
+						try {
+							await playPreloaded('click');
+						} catch {
+							await playSound(require('@/assets/sound/tap.wav'));
+						}
+						router.push('/screens/badges' as any);
+					}}
+					style={{ marginBottom: 16, width: '48%' }}
+				>
 					<StatCard
 					icon="workspace-premium"
 					value={badgeCount}
 					label="Badges"
 					/>
-				</View>
-
-				{/* Friends Section */}
+				</TouchableOpacity>
+			</View>				{/* Friends Section */}
 				<Text style={[styles.sectionTitle, {color: palette.text }]}>Friends</Text>
 				<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rivalsRow}>
 					{/* Repeat for each rival */}
