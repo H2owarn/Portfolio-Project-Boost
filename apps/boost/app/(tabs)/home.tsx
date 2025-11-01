@@ -590,7 +590,7 @@ const styles = StyleSheet.create({
   },
   badgeCard: {
     alignItems: "center",
-    width: 80,
+    width: 95,
     gap: 6,
     borderRadius: Radii.md,
     padding: 8,
@@ -602,9 +602,10 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
   badgeName: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
     textAlign: "center",
+    lineHeight: 14,
   },
   loadingContainer: {
     flex: 1,
