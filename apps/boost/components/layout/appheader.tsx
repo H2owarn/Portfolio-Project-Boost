@@ -1,6 +1,7 @@
 import React, { useEffect, useState }  from 'react';
 import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 import { useXp } from '@/contexts/Xpcontext';
 import { useStamina } from '@/contexts/Staminacontext';
@@ -8,6 +9,7 @@ import { useStreak } from '@/contexts/StreakContext';
 
 export default function HeaderBar() {
   const palette = Colors[useColorScheme() ?? 'dark'];
+  const insets = useSafeAreaInsets();
   const { xp, level, minExp, maxExp } = useXp();
   const { stamina: currentStamina, maxStamina } = useStamina();
   const { streak } = useStreak();
@@ -18,39 +20,39 @@ export default function HeaderBar() {
 
 
   return (
-    <View style={[styles.header, { backgroundColor: palette.surface }]}>
+    <View style={[styles.header, { backgroundColor: palette.surface, paddingTop: insets.top + 12 }]}>
       <View style={styles.statsRow}>
         {/* Streak */}
         <View style={styles.statItem}>
           <View style={styles.iconValueRow}>
-            <MaterialIcons name="local-fire-department" size={20} color="orange" />
+            <MaterialIcons name="local-fire-department" size={20} color={palette.warning} />
             <Text style={[styles.statValue, { color: palette.text }]}>{streak}</Text>
           </View>
-          <Text style={[styles.statLabel, {color: palette.text}]}>Streak</Text>
+          <Text style={[styles.statLabel, { color: palette.mutedText }]}>Streak</Text>
         </View>
 
         {/* XP Bar */}
         <View style={styles.statItem}>
           <View style={styles.iconValueRow}>
-            <Ionicons name="star" size={20} color="gold" />
-            <View style={styles.xpBarContainer}>
-              <View style={[styles.xpBarFill, { width: `${progress}%` }]} />
-              <Text style={styles.barText}>{xp ?? 0}/{maxExp}</Text>
+            <Ionicons name="star" size={20} color={palette.warning} />
+            <View style={[styles.xpBarContainer, { backgroundColor: palette.icon }]}>
+              <View style={[styles.xpBarFill, { width: `${progress}%`, backgroundColor: palette.primary }]} />
+              <Text style={[styles.barText,]}>{xp}/{maxExp}</Text>
             </View>
           </View>
-          <Text style={[styles.statLabel, {color: palette.text}]}>XP</Text>
+          <Text style={[styles.statLabel, { color: palette.mutedText}]}>XP</Text>
         </View>
 
         {/* Stamina */}
         <View style={styles.statItem}>
           <View style={styles.iconValueRow}>
-            <MaterialCommunityIcons name="lightning-bolt-circle" size={20} color="#7ee926ff" />
-            <View style={styles.staminaBarContainer}>
-              <View style={[styles.staminaBarFill, { width: `${staminaWidth}%` }]} />
-              <Text style={styles.barText}>{currentStamina}/{maxStamina}</Text>
+            <MaterialCommunityIcons name="lightning-bolt-circle" size={20} color={palette.primary} />
+            <View style={[styles.staminaBarContainer, { backgroundColor: palette.icon }]}>
+              <View style={[styles.staminaBarFill, { width: `${staminaWidth}%`, backgroundColor: palette.primary }]} />
+              <Text style={[styles.barText,]}>{currentStamina}/{maxStamina}</Text>
             </View>
           </View>
-          <Text style={[styles.statLabel, {color: palette.text}]}>Stamina</Text>
+          <Text style={[styles.statLabel, { color: palette.mutedText }]}>Stamina</Text>
         </View>
       </View>
     </View>
@@ -59,20 +61,23 @@ export default function HeaderBar() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: 60,
-    paddingBottom: 10,
-    paddingHorizontal: 16,
+    paddingBottom: 12,
+    paddingHorizontal: 12,
   },
   statsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
   },
   statItem: {
     alignItems: 'center',
+    flex: 1,
   },
   iconValueRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   statValue: {
     marginLeft: 6,
@@ -86,7 +91,6 @@ const styles = StyleSheet.create({
   staminaBarContainer: {
     width: 60,
     height: 12,
-    backgroundColor: '#ada6a6ff',
     borderRadius: 6,
     marginLeft: 6,
     overflow: 'hidden',
@@ -94,7 +98,6 @@ const styles = StyleSheet.create({
   },
   staminaBarFill: {
     height: '100%',
-    backgroundColor: '#7ee926ff',
     position: 'absolute',
     left: 0,
     top: 0,
@@ -102,7 +105,6 @@ const styles = StyleSheet.create({
   xpBarContainer: {
     width: 80,
     height: 12,
-    backgroundColor: '#ada6a6ff',
     borderRadius: 6,
     marginLeft: 6,
     overflow: 'hidden',
@@ -110,16 +112,15 @@ const styles = StyleSheet.create({
   },
   xpBarFill: {
     height: '100%',
-    backgroundColor: 'gold',
     position: 'absolute',
     left: 0,
     top: 0,
   },
   barText: {
-    color: '#000000ff',
     fontSize: 10,
     fontWeight: '700',
     textAlign: 'center',
     zIndex: 1,
+    color: '#050505ff'
   },
   });

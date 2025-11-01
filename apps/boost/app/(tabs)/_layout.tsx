@@ -90,6 +90,7 @@ export default function TabLayout() {
           style={[
             styles.questButton,
             { backgroundColor: palette.primary },
+            { shadowColor: palette.primary, shadowOpacity: 0.35, shadowOffset: { width: 0, height: 12 }, shadowRadius: 16 },
             isSelected && styles.questButtonActive,
           ]}
         >
@@ -106,7 +107,7 @@ export default function TabLayout() {
               isSelected && styles.questLabelActive,
             ]}
           >
-            Go!
+            Go
           </Text>
         </View>
       </Pressable>

@@ -321,7 +321,7 @@ const handleCompleteExercise = async () => {
           >
             <MaterialIcons name="check-circle" size={24} color="#000" />
             <Text style={styles.completeButtonText}>
-              {completing ? 'Saving...' : 'Complete Exercise'}
+              {completing ? 'Saving...' : 'Finish Workout'}
             </Text>
           </Pressable>
 

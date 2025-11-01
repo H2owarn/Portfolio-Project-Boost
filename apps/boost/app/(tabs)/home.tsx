@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator, Alert } from "react-native";
 import * as Progress from "react-native-progress";
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { Colors, Radii, Shadow } from "@/constants/theme";
@@ -10,6 +11,9 @@ import { checkAndAwardBadges } from "@/utils/awardBadges";
 import { getBadgeImage } from "@/utils/getbadgeimage";
 import { LineChart, BarChart, Grid, XAxis, YAxis } from "react-native-svg-charts";
 import * as shape from "d3-shape";
+import Avatar from "@/components/ui/avatar";
+import EmptyState from "@/components/ui/empty-state";
+import Skeleton from "@/components/ui/skeleton";
 
 
 type Profile = {
@@ -32,10 +36,13 @@ type UserQuestRow = {
     id: number;
     name: string;
     description?: string | null;
+    exercise_ids?: number[];
   } | null;
+  completed_exercises: number;
+  total_exercises: number;
 };
 
-const FALLBACK_FRIEND_AVATAR = "https://via.placeholder.com/60";
+// Avatar fallback is handled by <Avatar/> component
 
 
 export default function HomeScreen() {
@@ -47,6 +54,7 @@ export default function HomeScreen() {
   const [badges, setBadges] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [rank, setRank] = useState<string>("IRON");
+  const [questRowWidth, setQuestRowWidth] = useState(0);
 
   useEffect(() => {
   preloadSounds();
@@ -151,14 +159,49 @@ export default function HomeScreen() {
     levelInfo && profile
       ? (currentExp - minExp) / ((maxExp ?? currentExp) - minExp)
       : 0;
+  const clampedProgress = Math.min(1, Math.max(0, progress));
 
 
 
   if (loading) {
     return (
-     <View style={styles.loadingContainer}>
-                 <ActivityIndicator size="large" color={palette.primary} />
-               </View>
+      <ScrollView
+        style={{ backgroundColor: palette.background }}
+        contentContainerStyle={styles.container}
+      >
+        {/* Header skeleton */}
+        <View style={[styles.header, { backgroundColor: palette.surface }]}>
+          <Skeleton style={{ width: 80, height: 80 }} borderRadius={40} />
+          <View style={styles.headerCopy}>
+            <Skeleton style={{ height: 18, width: '50%' }} borderRadius={6} />
+            <Skeleton style={{ height: 14, width: '30%' }} borderRadius={6} />
+            <Skeleton style={{ height: 12, width: '100%', marginTop: 8 }} borderRadius={6} />
+            <Skeleton style={{ height: 12, width: 100, marginTop: 8 }} borderRadius={6} />
+          </View>
+        </View>
+
+        {/* Quest Board skeleton */}
+        <View style={[styles.questSection, { backgroundColor: palette.surface }]}>
+          <View style={styles.sectionHeader}>
+            <Skeleton style={{ height: 20, width: 120 }} borderRadius={6} />
+            <Skeleton style={{ height: 16, width: 60 }} borderRadius={6} />
+          </View>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.questList}>
+            {[0, 1, 2].map((i) => (
+              <View key={i} style={[styles.questCard, { backgroundColor: palette.surfaceElevated }]}>
+                <View style={styles.questCardContent}>
+                  <View style={styles.questCardTop}>
+                    <Skeleton style={{ width: 60, height: 60 }} borderRadius={Radii.md} />
+                    <Skeleton style={{ height: 14, width: 80 }} borderRadius={6} />
+                  </View>
+                  <Skeleton style={{ height: 12, width: '100%' }} borderRadius={6} />
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      </ScrollView>
     );
   }
 
@@ -169,23 +212,25 @@ export default function HomeScreen() {
     >
       {/* Header / Profile */}
       <View style={[styles.header, { backgroundColor: palette.surface }]}>
-        <Image source={{ uri: FALLBACK_FRIEND_AVATAR }} style={styles.avatar} />
+        <Avatar name={profile?.name ?? undefined} level={profile?.level} size={64} />
         <View style={styles.headerCopy}>
           <Text style={[styles.userName, { color: palette.text }]}>{profile?.name ?? "—"}</Text>
           <Text style={[styles.userLevel, { color: palette.mutedText }]}>
             Rank: {rank} · Level {profile?.level ?? 1}
           </Text>
 
-          <Progress.Bar
-            progress={progress}
-            width={220}
-            height={12}
-            color={palette.primary}
-            unfilledColor={palette.primary + "20"}
-            borderWidth={1}
-            borderColor={palette.borderColor}
-            style={styles.progressBar}
-          />
+          <View style={[styles.progressBarWrapper, { borderColor: palette.borderColorAlt, backgroundColor: palette.background, width: '100%' }]}>
+            <View
+              style={[
+                styles.progressBarFill,
+                {
+                  width: `${clampedProgress * 100}%`,
+                  backgroundColor: palette.primary,
+                  borderRadius: 6,
+                },
+              ]}
+            />
+          </View>
 
           <Text style={[styles.xpText, { color: palette.mutedText }]}>
             {currentExp}/{maxExp ?? "∞"} XP
@@ -193,72 +238,74 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Quest Board */}
-        <View style={[styles.questSection, { backgroundColor: palette.surface }]}>
-          <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: palette.text }]}>Quest Board</Text>
+        {/* Active Quests with Progress */}
+        {quests.length > 0 ? (
+          <View
+            style={styles.questList}
+            onLayout={(e) => setQuestRowWidth(e.nativeEvent.layout.width)}
+          >
+            {quests.slice(0, 3).map((q, idx, arr) => {
+              const cardsCount = arr.length || 1;
+              const gap = 10; // must match styles.questList gap
+              const cardWidth = questRowWidth > 0 ? (questRowWidth - gap * (cardsCount - 1)) / cardsCount : undefined;
+              const progress = q.total_exercises > 0 
+                ? q.completed_exercises / q.total_exercises 
+                : 0;
+              const hasProgress = q.completed_exercises > 0;
 
-            <Pressable
-              onPress={() => {
-                playPreloaded("click");
-                router.push("/(tabs)/quest");
-              }}
-              android_ripple={{ color: palette.primary + "20" }}
-            >
-              <Text style={[styles.seeAll, { color: palette.primary }]}>See All</Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.questGrid}>
-            {(() => {
-              // sort by in-progress first
-              const inProgress = quests.filter(q => q.status === "in_progress");
-              const active = quests.filter(q => q.status === "active");
-              const displayQuests = [...inProgress, ...active].slice(0, 3);
-
-              if (displayQuests.length === 0) {
-                return (
-                  <>
-                    <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
-                      <Text style={styles.questEmoji}>👑</Text>
-                    </View>
-                    <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
-                      <Text style={styles.questEmoji}>🦴</Text>
-                    </View>
-                    <View style={[styles.hexagon, { backgroundColor: palette.primary + "15" }]}>
-                      <Text style={styles.questEmoji}>💎</Text>
-                    </View>
-                  </>
-                );
-              }
-
-              return displayQuests.map((q) => (
+              return (
                 <Pressable
                   key={q.quest_id}
-                  style={[
-                    styles.hexagon,
-                    {
-                      backgroundColor:
-                        q.status === "in_progress"
-                          ? palette.primary + "30"
-                          : palette.primary + "15",
-                    },
-                  ]}
-                  onPress={async () => {
-                    try {
-                      await playPreloaded("click");
-                    } catch {
-                      await playSound(require("@/assets/sound/tap.wav"));
-                    }
-                    router.push(`/screens/QuestScreen?id=${q.quest_id}`);
-                  }}
+                  style={[styles.questCard, { backgroundColor: palette.surfaceElevated ?? palette.surface, width: cardWidth }]}
+                  onPress={() => router.push(`/screens/QuestScreen?id=${q.quest?.id}`)}
+                  android_ripple={{ color: palette.primary + "20" }}
                 >
-                  <Text style={styles.questEmoji}>{q.quest?.name?.slice(0, 2) ?? "🌟"}</Text>
-                </Pressable>
-              ));
-            })()}
-          </View>
+                  <View style={styles.questCardContent}>
+                    <View style={styles.questCardTop}>
+                      <Text style={[styles.questCardEmoji, { backgroundColor: palette.primary + "15" }]}>
+                        {q.quest?.name?.slice(0, 2) ?? "�"}
+                      </Text>
+                      <Text style={[styles.questCardName, { color: palette.text }]} numberOfLines={2}>
+                        {q.quest?.name ?? "Quest"}
+                      </Text>
+                    </View>
 
+                    {hasProgress ? (
+                      <View style={styles.questProgressContainer}>
+                        <View style={[styles.progressBarWrapper, { borderColor: palette.borderColorAlt, backgroundColor: palette.background }]}>
+                          <View 
+                            style={[
+                              styles.progressBarFill, 
+                              { 
+                                width: `${progress * 100}%`,
+                                backgroundColor: palette.primary 
+                              }
+                            ]} 
+                          />
+                        </View>
+                        <Text style={[styles.progressBarText, { color: palette.mutedText, textAlign: 'center' }]}>
+                          {q.completed_exercises}/{q.total_exercises}
+                        </Text>
+                      </View>
+                    ) : (
+                      <View style={[styles.goButton, { backgroundColor: palette.primary }]}>
+                        <Text style={[styles.goButtonText, { color: palette.secondary }]}>GO</Text>
+                      </View>
+                    )}
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : (
+          <EmptyState
+            icon="auto-awesome"
+            title="No active quests"
+            message="Browse quests and start your next challenge."
+            actionLabel="Browse All Quests"
+            onActionPress={() => router.push("/(tabs)/quest")}
+          />
+        )}
 
         <Pressable
           style={[styles.quickStartBtn, { backgroundColor: palette.primary }]}
@@ -307,12 +354,10 @@ export default function HomeScreen() {
             router.push(`/screens/QuestScreen?id=${randomQuest.quest_id}`);
           }}
         >
-          <Text style={[styles.quickStartText, { color: palette.secondary }]}>
-            Quick Start
-          </Text>
+          <Text style={[styles.quickStartText, { color: palette.secondary }]}>Browse All Quests</Text>
         </Pressable>
 
-      </View>
+
 
       {/* Charts section */}
       <View style={[styles.section, { backgroundColor: palette.surface }]}>
@@ -346,7 +391,7 @@ export default function HomeScreen() {
         <View style={styles.badgeGrid}>
           {badges.length > 0 ? (
 
-            badges.slice(0, 3).map((b) => (
+            badges.slice(0, 5).map((b) => (
               <View
                 key={b.badge_id}
                 style={[styles.badgeCard, { backgroundColor: palette.surfaceElevated ?? palette.surface }]}
@@ -480,7 +525,7 @@ function ChartsSection({ palette }: { palette: any }) {
             No volume data yet
           </Text>
         ) : (
-          <View style={{ height: 220, flexDirection: "row" }}>
+          <View style={{ height: 190, flexDirection: "row" }}>
             <YAxis
               data={volumeData.map((v) => v.volume)}
               contentInset={{ top: 20, bottom: 20 }}
@@ -521,41 +566,36 @@ function ChartsSection({ palette }: { palette: any }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 16,
-    gap: 16,
+    padding: 12,
+    gap: 12,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 20,
+    padding: 12,
     borderRadius: Radii.lg,
     ...Shadow.card,
   },
   headerCopy: {
     flex: 1,
     marginLeft: 12,
-    gap: 6,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#000",
+    gap: 4,
   },
   progressBar: { marginTop: 6 },
-  userName: { fontSize: 20, fontWeight: "bold" },
-  userLevel: { fontSize: 14, fontWeight: "600" },
-  xpText: { fontSize: 12 },
+  userName: { fontSize: 18, fontWeight: "bold" },
+  userLevel: { fontSize: 12, fontWeight: "600" },
+  xpText: { fontSize: 11 },
+
   questSection: {
     borderRadius: Radii.lg,
-    padding: 20,
-    gap: 18,
+    padding: 12,
+    gap: 10,
     ...Shadow.card,
   },
   section: {
     borderRadius: Radii.lg,
-    padding: 20,
-    gap: 14,
+    padding: 12,
+    gap: 10,
     ...Shadow.card,
   },
   sectionHeader: {
@@ -563,8 +603,111 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  sectionTitle: { fontSize: 18, fontWeight: "700" },
-  seeAll: { fontSize: 14, fontWeight: "600" },
+  sectionTitle: { fontSize: 16, fontWeight: "700" },
+  seeAll: { fontSize: 12, fontWeight: "600" },
+
+  questList: {
+    flexDirection: "row",
+    gap: 10,
+    paddingRight: 0,
+    justifyContent: "center",
+    flexGrow: 1,
+  },
+  questCard: {
+    borderRadius: Radii.md,
+    padding: 12,
+    gap: 10,
+    ...Shadow.card,
+  },
+  questCardContent: {
+    flex: 1,
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+  },
+  questCardTop: {
+    alignItems: "center",
+    gap: 8,
+    width: "100%",
+  },
+  questCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  questCardLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    gap: 12,
+  },
+  questCardEmoji: {
+    width: 44,
+    height: 44,
+    borderRadius: Radii.md,
+    textAlign: "center",
+    lineHeight: 44,
+    fontSize: 22,
+  },
+  questCardInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  questCardName: {
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  questCardDesc: {
+    fontSize: 13,
+    textAlign: "center",
+  },
+  goButton: {
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: Radii.sm,
+    width: "100%",
+    alignItems: "center",
+  },
+  goButtonText: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
+  questProgressContainer: {
+    gap: 6,
+    width: "100%",
+  },
+  progressBarWrapper: {
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    overflow: "hidden",
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  progressBarFill: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    borderRadius: 6,
+  },
+  progressBarText: {
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 6,
+  },
+  noQuestsContainer: {
+    padding: 24,
+    alignItems: "center",
+  },
+  noQuestsText: {
+    fontSize: 14,
+    textAlign: "center",
+  },
+
   questGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -579,7 +722,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   questEmoji: { fontSize: 28 },
-  quickStartBtn: { borderRadius: Radii.md, paddingVertical: 14, alignItems: "center" },
+
+  quickStartBtn: { borderRadius: Radii.md, paddingVertical: 10, alignItems: "center" },
   quickStartText: { fontWeight: "700", letterSpacing: 0.4 },
   badgeGrid: {
     flexDirection: "row",
@@ -591,10 +735,9 @@ const styles = StyleSheet.create({
   badgeCard: {
     alignItems: "center",
     width: 80,
-    gap: 6,
     borderRadius: Radii.md,
-    padding: 8,
-    ...Shadow.card,
+    padding: 10,
+    gap: 10,
   },
   badgeImage: {
     width: 60,
@@ -606,9 +749,20 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "center",
   },
+
+  recommendContainer: {
+    gap: 10,
+    marginTop: 8,
+  },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    gap: 4
+  },
+  recommendName: {
+    fontSize: 14,
+    fontWeight: "600"
+  },
+  recommendLevel: {
+    fontSize: 12
   },
 });
