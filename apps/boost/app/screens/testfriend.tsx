@@ -115,7 +115,7 @@ export default function FriendTestScreen() {
             onPress={() => router.back()}
             activeOpacity={0.7}
           >
-            <MaterialIcons name="arrow-back" size={24} color={palette.text} />
+            <MaterialIcons name="arrow-back" size={24} color={palette.primary} />
             <Text style={[styles.backText, { color: palette.text }]}>Back</Text>
           </TouchableOpacity>
         </View>
