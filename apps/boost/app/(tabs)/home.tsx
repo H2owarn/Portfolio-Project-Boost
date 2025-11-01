@@ -103,7 +103,8 @@ export default function HomeScreen() {
         status,
         quests ( id, name, description )
       `)
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .eq("status", "active");
 
 
       const normalizedQuests = (questsData ?? []).map((q: any) => ({
@@ -119,7 +120,8 @@ export default function HomeScreen() {
           badge_id,
           badges ( name, description, asset_key )
         `)
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .order("badge_id", { ascending: true });
 
       if (badgesErr) console.error("Badge fetch error:", badgesErr);
 
@@ -301,9 +303,42 @@ export default function HomeScreen() {
           <EmptyState
             icon="auto-awesome"
             title="No active quests"
-            message="Browse quests and start your next challenge."
-            actionLabel="Browse All Quests"
-            onActionPress={() => router.push("/(tabs)/quest")}
+            message="Start a random quest or browse all available quests."
+            actionLabel="Quest Quick Start"
+            onActionPress={async () => {
+              try {
+                await playPreloaded("click");
+              } catch {
+                await playSound(require("@/assets/sound/tap.wav"));
+              }
+
+              // 1. Get the logged-in user
+              const { data: { user } } = await supabase.auth.getUser();
+              if (!user) {
+                Alert.alert("Login required", "Please sign in to start a quest.");
+                return;
+              }
+
+              // 2. Fetch all available quests
+              const { data: allQuests, error } = await supabase
+                .from("quests")
+                .select("id, name, description");
+
+              if (error || !allQuests?.length) {
+                Alert.alert(
+                  "No quests available",
+                  "There are no quests available right now."
+                );
+                return;
+              }
+
+              // 3. Pick a random quest
+              const randomQuest =
+                allQuests[Math.floor(Math.random() * allQuests.length)];
+
+              //4. Navigate to that quest detail page
+              router.push(`/screens/QuestScreen?id=${randomQuest.id}`);
+            }}
           />
         )}
 
@@ -316,42 +351,7 @@ export default function HomeScreen() {
             } catch {
               await playSound(require("@/assets/sound/tap.wav"));
             }
-
-            // 1. Get the logged-in user
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-              Alert.alert("Login required", "Please sign in to start a quest.");
-              return;
-            }
-
-            // 2. Fetch user's active quests
-            const { data: activeQuests, error } = await supabase
-              .from("user_quests")
-              .select(`
-                quest_id,
-                quests (
-                  id,
-                  name,
-                  description
-                )
-              `)
-              .eq("user_id", user.id)
-              .eq("status", "active");
-
-            if (error || !activeQuests?.length) {
-              Alert.alert(
-                "No active quests found",
-                "You don't have any assigned quests right now."
-              );
-              return;
-            }
-
-            // 3. Pick a random quest
-            const randomQuest =
-              activeQuests[Math.floor(Math.random() * activeQuests.length)];
-
-            //4. Navigate to that quest detail page
-            router.push(`/screens/QuestScreen?id=${randomQuest.quest_id}`);
+            router.push("/(tabs)/quest");
           }}
         >
           <Text style={[styles.quickStartText, { color: palette.secondary }]}>Browse All Quests</Text>
@@ -391,7 +391,7 @@ export default function HomeScreen() {
         <View style={styles.badgeGrid}>
           {badges.length > 0 ? (
 
-            badges.slice(0, 5).map((b) => (
+            badges.slice(0, 3).map((b) => (
               <View
                 key={b.badge_id}
                 style={[styles.badgeCard, { backgroundColor: palette.surfaceElevated ?? palette.surface }]}
@@ -734,7 +734,7 @@ const styles = StyleSheet.create({
   },
   badgeCard: {
     alignItems: "center",
-    width: 80,
+    width: 100,
     borderRadius: Radii.md,
     padding: 10,
     gap: 10,
