@@ -197,9 +197,15 @@ export default function ProfileScreen() {
       <View style={[styles.section, { backgroundColor: palette.surface }]}>
         <Text style={[styles.sectionTitle, { color: palette.text }]}>Overview</Text>
         <View style={styles.statsGrid}>
-          <StatCard icon="local-fire-department" value={streak} label="Streak" />
-          <StatCard icon="star" value={xp} label="Total XP" />
-          <StatCard icon="shield" value={rank} label="League" />
+          <View style={styles.statCardContainer}>
+            <StatCard icon="local-fire-department" value={streak} label="Streak" />
+          </View>
+          <View style={styles.statCardContainer}>
+            <StatCard icon="star" value={xp} label="Total XP" />
+          </View>
+          <View style={styles.statCardContainer}>
+            <StatCard icon="shield" value={rank} label="League" />
+          </View>
           <TouchableOpacity
             onPress={async () => {
               try {
@@ -209,7 +215,7 @@ export default function ProfileScreen() {
               }
               router.push('/screens/badges' as any);
             }}
-            style={{ width: '48%' }}
+            style={styles.statCardContainer}
           >
             <StatCard icon="workspace-premium" value={badgeCount} label="Badges" />
           </TouchableOpacity>
@@ -248,13 +254,13 @@ function StatCard({
 }) {
   const palette = Colors[useColorScheme() ?? "dark"];
   return (
-    <View style={styles.statCardContainer}>
+    <>
       <View style={[styles.statCard, { backgroundColor: palette.surfaceElevated }]}>
         <MaterialIcons name={icon as any} size={24} color={palette.primary} />
         <Text style={[styles.statValue, { color: palette.text }]}>{value}</Text>
       </View>
       <Text style={[styles.statLabel, { color: palette.text }]}>{label}</Text>
-    </View>
+    </>
   );
 }
 
