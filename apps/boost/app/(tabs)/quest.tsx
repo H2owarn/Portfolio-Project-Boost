@@ -4,8 +4,6 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  ActivityIndicator,
-  FlatList,
   ScrollView,
 } from "react-native";
 import { supabase } from "@/lib/supabase";
@@ -171,9 +169,7 @@ export default function QuestScreen() {
   }, [profile]);
 
   if (loading) {
-    return <View style={styles.loadingContainer}>
-                     <ActivityIndicator size="large" color={palette.primary} />
-                   </View>
+    return <Text style={{ color: palette.text }}>Loading quests…</Text>;
   }
 
   const userLevel = profile?.level ?? 1;
@@ -182,14 +178,7 @@ export default function QuestScreen() {
   const mainQuests = quests.filter((q) => q.quest_type?.toLowerCase() === "main");
   const sideQuests = quests.filter((q) => q.quest_type?.toLowerCase() === "side");
 
-
-  const canStartQuest = (quest: any) =>
-    userStamina >= (quest.stamina_cost ?? 0) &&
-    userLevel >= (quest.min_level ?? 0) &&
-    (quest.max_level == null || userLevel <= quest.max_level);
-
   const QuestCard = ({ quest }: { quest: any }) => {
-    const canStart = canStartQuest(quest);
     const isLocked = userLevel < (quest.min_level ?? 0);
     const exerciseNames: string[] = Array.isArray(quest.exercises)
       ? quest.exercises
@@ -203,8 +192,8 @@ export default function QuestScreen() {
           </Text>
           <Text style={[styles.questName, { color: palette.text }]}>{quest.name}</Text>
           {isLocked && (
-            <View style={styles.lockedTag}>
-              <Text style={styles.lockedText}>Locked</Text>
+            <View style={[styles.lockedTag, { backgroundColor: palette.errorTransparent }]}>
+              <Text style={[styles.lockedText, { color: palette.error }]}>Locked</Text>
             </View>
           )}
         </View>
@@ -214,10 +203,10 @@ export default function QuestScreen() {
         )}
 
         <View style={styles.questSpecs}>
-          <View style={[styles.tagsRow, { backgroundColor: palette.primary + "90" }]}>
-            <MaterialIcons name="diamond" size={12} color={palette.text} />
-            <Text style={[styles.specText, { color: palette.text }]}>
-            {quest.xp_reward ?? 0} XP
+          <View style={[styles.tagsRow, { backgroundColor: palette.primary + "20" }]}>
+            <MaterialIcons name="diamond" size={12} color={palette.primary} />
+            <Text style={[styles.specText, { color: palette.primary }]}>
+              {quest.xp_reward ?? 0} XP
             </Text>
           </View>
         </View>
@@ -227,7 +216,14 @@ export default function QuestScreen() {
           <View style={styles.questSpecs}>
             {exerciseNames.length > 0 ? (
               exerciseNames.map((ex, i) => (
-                <Text key={`${quest.id}-ex-${i}`} style={[styles.exercise, { color: palette.text }, { backgroundColor: palette.primary + "90" }]}>
+                <Text
+                  key={`${quest.id}-ex-${i}`}
+                  style={[
+                    styles.exercise,
+                    { color: palette.primary },
+                    { backgroundColor: palette.primary + "20" },
+                  ]}
+                >
                   {ex}
                 </Text>
               ))
@@ -244,7 +240,8 @@ export default function QuestScreen() {
           <Pressable
             style={[
               styles.startButton,
-              , { backgroundColor: palette.primary + "90" }]}
+              { backgroundColor: palette.primary }
+            ]}
             android_ripple={{ color: palette.secondary + "20" }}
             onPress={() => {
               playPreloaded("click");
@@ -257,7 +254,7 @@ export default function QuestScreen() {
                 : console.log("Quest Locked or Not Enough Stamina");
                 }}
           >
-            <Text style={[styles.startButtonText, { color: palette.text }]}>
+            <Text style={[styles.startButtonText, { color: palette.secondary }]}>
               {isLocked
                 ? `Level ${quest.min_level ?? 0} Required`
                 : userStamina < quest.stamina_cost
@@ -271,45 +268,75 @@ export default function QuestScreen() {
   };
 
   return (
-    <ScrollView contentInset={{ top: 45 }} style={[styles.container, {backgroundColor: palette.background}]}>
-      <View style={styles.header}>
+    <ScrollView 
+      style={{ backgroundColor: palette.background }}
+      contentContainerStyle={styles.container}
+    >
+      <View style={[styles.header, { backgroundColor: palette.surface }]}>
         <Text style={[styles.headerTitle,{ color: palette.text }]}>
           Choose Your Quest
         </Text>
       </View>
 
-      <Text style={[styles.sectionTitle, {color: palette.text}]}>
-        ⚔️
-        Main Quests</Text>
-      {mainQuests.map((quest) => (
-        <QuestCard key={quest.id} quest={quest} />
-      ))}
+      <View style={[styles.section, { backgroundColor: palette.surface }]}>
+        <Text style={[styles.sectionTitle, {color: palette.text}]}>
+          ⚔️ Main Quests
+        </Text>
+        {mainQuests.map((quest, index) => (
+          <React.Fragment key={quest.id}>
+            <QuestCard quest={quest} />
+            {index < mainQuests.length - 1 && (
+              <View style={[styles.questDivider, { backgroundColor: palette.borderColorAlt }]} />
+            )}
+          </React.Fragment>
+        ))}
+      </View>
 
-      <Text style={styles.sectionTitle}>⭐ Side Quests</Text>
-      {sideQuests.map((quest) => (
-        <QuestCard key={quest.id} quest={quest} />
-      ))}
+      <View style={[styles.section, { backgroundColor: palette.surface }]}>
+        <Text style={[styles.sectionTitle, { color: palette.text }]}>⭐ Side Quests</Text>
+        {sideQuests.map((quest, index) => (
+          <React.Fragment key={quest.id}>
+            <QuestCard quest={quest} />
+            {index < sideQuests.length - 1 && (
+              <View style={[styles.questDivider, { backgroundColor: palette.borderColorAlt }]} />
+            )}
+          </React.Fragment>
+        ))}
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 10
-},
+    flexGrow: 1,
+    padding: 12,
+    gap: 12,
+  },
   header: {
     alignItems: "center",
-    marginBottom: Spacing.md,
-    gap: Spacing.xs,
+    padding: 12,
+    borderRadius: Radii.lg,
+    ...Shadow.card,
   },
-  headerTitle: Font.title,
-
+  headerTitle: {
+    ...Font.title,
+  },
+  section: {
+    borderRadius: Radii.lg,
+    padding: 16,
+    gap: 16,
+    ...Shadow.card,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#fff",
-    marginVertical: 10,
+    marginBottom: 4,
+  },
+  questDivider: {
+    height: 1,
+    borderRadius: 1,
+    marginVertical: 4,
   },
   card: { backgroundColor: "#fff", borderRadius: 12, padding: 16, marginBottom: 12 },
   cardHeader: {
@@ -324,12 +351,11 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   lockedTag: {
-    backgroundColor: "#f8d7da",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
   },
-  lockedText: { color: "#721c24", fontSize: 12, fontWeight: "600" },
+  lockedText: { fontSize: 12, fontWeight: "600" },
   description: { fontSize: 14, marginBottom: 8 },
   tagsRow: {
     flexDirection: "row",
@@ -395,7 +421,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     gap: Spacing.xs,
-    marginBottom: Spacing.sm,
   },
   specText: {
     fontSize: 12,

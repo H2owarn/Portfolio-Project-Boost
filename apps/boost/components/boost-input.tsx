@@ -28,7 +28,7 @@ export const BoostInput = forwardRef<TextInput, BoostInputProps>(
 		return (
 			<View style={[styles.wrapper, containerStyle]}>
 				{label ? <Text style={styles.label}>{label}</Text> : null}
-				<View style={[styles.inputRow, inputRowStyle]}>
+				<View style={[styles.inputRow, focused && styles.inputRowFocused, inputRowStyle]}>
 					{leadingIcon ? <MaterialIcons name={leadingIcon.name} size={20} color={palette.mutedText} /> : null}
 					<TextInput
 						ref={ref}
@@ -68,6 +68,10 @@ const createStyles = (palette: (typeof Colors)['light']) =>
 			paddingHorizontal: Spacing.md,
 			height: 52,
 			gap: Spacing.sm
+		},
+		inputRowFocused: {
+			borderColor: palette.primary,
+			backgroundColor: `${palette.primary}20`
 		},
 		input: {
 			flex: 1,

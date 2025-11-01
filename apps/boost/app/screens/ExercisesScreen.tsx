@@ -175,8 +175,8 @@ export default function ExercisesScreen() {
     >
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
-          <View style={[styles.exerciseIcon, { backgroundColor: palette.primary + '20' }]}>
-            <MaterialIcons name="fitness-center" size={24} color={palette.primary} />
+          <View style={[styles.exerciseIcon, { backgroundColor: palette.primary + '15' }]}>
+            <MaterialIcons name="fitness-center" size={20} color={palette.primary} />
           </View>
           <View style={styles.exerciseInfo}>
             <Text style={[styles.exerciseName, { color: palette.text }]}>{item.name}</Text>
@@ -188,25 +188,25 @@ export default function ExercisesScreen() {
 
         <View style={styles.exerciseSpecs}>
           {item.xp_reward && (
-            <View style={[styles.specBadge, { backgroundColor: palette.primary + '10' }]}>
-              <MaterialIcons name="diamond" size={12} color={palette.primary} />
+            <View style={[styles.specBadge, { backgroundColor: palette.primary + '15' }]}>
+              <MaterialIcons name="star" size={14} color={palette.primary} />
               <Text style={[styles.specText, { color: palette.primary }]}>{item.xp_reward} XP</Text>
             </View>
           )}
           {item.level && (
-            <View style={[styles.specBadge, { backgroundColor: palette.primary + '10' }]}>
-              <MaterialIcons name="signal-cellular-alt" size={12} color={palette.primary} />
+            <View style={[styles.specBadge, { backgroundColor: palette.primary + '15' }]}>
+              <MaterialIcons name="signal-cellular-alt" size={14} color={palette.primary} />
               <Text style={[styles.specText, { color: palette.primary }]}>{item.level}</Text>
             </View>
           )}
           {item.category && (
-            <View style={[styles.specBadge, { backgroundColor: palette.primary + '10' }]}>
-              <MaterialIcons name="category" size={12} color={palette.primary} />
+            <View style={[styles.specBadge, { backgroundColor: palette.primary + '15' }]}>
+              <MaterialIcons name="category" size={14} color={palette.primary} />
               <Text style={[styles.specText, { color: palette.primary }]}>{item.category}</Text>
             </View>
           )}
-          {item.secondary_muscles && item.secondary_muscles.map((muscle, index) => (
-            <View key={index} style={[styles.specBadge, { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.borderColorAlt }]}>
+          {item.secondary_muscles && item.secondary_muscles.slice(0, 2).map((muscle, index) => (
+            <View key={index} style={[styles.specBadge, { backgroundColor: palette.surface, borderWidth: 1, borderColor: palette.borderColor }]}>
               <Text style={[styles.specText, { color: palette.mutedText }]}>{muscle}</Text>
             </View>
           ))}
@@ -271,6 +271,7 @@ export default function ExercisesScreen() {
           } catch {
             await playSound(require('@/assets/sound/tap.wav'));
           }
+          router.push('/screens/share');
         return;
   },},]
     );
@@ -314,22 +315,40 @@ export default function ExercisesScreen() {
         ) : (
           <>
             {/* Search Bar */}
-            <View style={{ paddingHorizontal: Spacing.lg, marginBottom: Spacing.md }}>
-              <TextInput
-                style={{
-                  backgroundColor: palette.surface,
-                  color: palette.text,
-                  borderRadius: Radii.md,
-                  paddingHorizontal: 16,
-                  paddingVertical: 20,
-                  borderWidth: 1,
-                  borderColor: palette.borderColor,
-                }}
-                placeholder="Search exercises..."
-                placeholderTextColor={palette.mutedText}
-                value={searchText}
-                onChangeText={setSearchText}
-              />
+            <View style={styles.headerContainer}>
+              <View style={styles.searchRow}>
+                <Pressable 
+                  style={styles.backButton}
+                  onPress={() => router.back()}
+                  android_ripple={{ color: palette.primary + '20', borderless: true, radius: 20 }}
+                >
+                  <MaterialIcons name="arrow-back" size={24} color={palette.text} />
+                </Pressable>
+                <View style={styles.searchInputContainer}>
+                  <MaterialIcons name="search" size={20} color={palette.mutedText} style={styles.searchIcon} />
+                  <TextInput
+                    style={[styles.searchInput, {
+                      backgroundColor: palette.surface,
+                      color: palette.text,
+                      borderColor: palette.borderColor,
+                      paddingRight: searchText.trim() !== '' ? 44 : 16,
+                    }]}
+                    placeholder="Search exercises..."
+                    placeholderTextColor={palette.mutedText}
+                    value={searchText}
+                    onChangeText={setSearchText}
+                  />
+                  {searchText.trim() !== '' && (
+                    <Pressable 
+                      style={styles.clearButton}
+                      onPress={() => setSearchText('')}
+                      android_ripple={{ color: palette.primary + '20', borderless: true, radius: 16 }}
+                    >
+                      <MaterialIcons name="close" size={20} color={palette.mutedText} />
+                    </Pressable>
+                  )}
+                </View>
+              </View>
             </View>
 
             {/* Filters Section */}
@@ -337,7 +356,7 @@ export default function ExercisesScreen() {
               <View style={styles.filtersSection}>
                 {availableLevels.length > 0 && (
                   <View style={styles.filterGroup}>
-                    <Text style={[styles.filterLabel, { color: palette.mutedText }]}>Level</Text>
+                    <Text style={[styles.filterLabel, { color: palette.mutedText }]}>LEVEL</Text>
                     <ScrollView
                       horizontal
                       showsHorizontalScrollIndicator={false}
@@ -358,7 +377,7 @@ export default function ExercisesScreen() {
 
                 {availableCategories.length > 0 && (
                   <View style={styles.filterGroup}>
-                    <Text style={[styles.filterLabel, { color: palette.mutedText }]}>Category</Text>
+                    <Text style={[styles.filterLabel, { color: palette.mutedText }]}>CATEGORY</Text>
                     <ScrollView
                       horizontal
                       showsHorizontalScrollIndicator={false}
@@ -383,7 +402,7 @@ export default function ExercisesScreen() {
               data={filteredExercises}
               renderItem={renderExerciseCard}
               keyExtractor={(item) => item.id.toString()}
-              contentContainerStyle={{ ...styles.list, paddingBottom: 120 }} // extra space for floating button
+              contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
             />
 
@@ -410,7 +429,6 @@ export default function ExercisesScreen() {
               }}
               onPress={async () => {
                 await handleFinishWorkout();
-                router.push('/screens/share');
               }}
             >
               <MaterialIcons name="check-circle" size={24} color="#000" />
@@ -429,18 +447,69 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  headerContainer: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
+  },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  backButton: {
+    width: 40,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: Radii.md,
+  },
+  searchInputContainer: {
+    flex: 1,
+    position: 'relative',
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 14,
+    top: 14,
+    zIndex: 1,
+  },
+  searchInput: {
+    borderRadius: Radii.lg,
+    paddingLeft: 44,
+    paddingRight: 16,
+    paddingVertical: 14,
+    fontSize: 15,
+    borderWidth: 1,
+  },
+  clearButton: {
+    position: 'absolute',
+    right: 8,
+    top: 8,
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+    zIndex: 1,
+  },
   list: {
     gap: Spacing.md,
     paddingHorizontal: Spacing.lg,
+  },
+  listContent: {
+    gap: 12,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: 100,
   },
   exerciseCard: {
     padding: 16,
     borderRadius: Radii.lg,
     elevation: 4,
     shadowColor: '#0f172a',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   cardContent: {
     gap: 12,
@@ -453,7 +522,7 @@ const styles = StyleSheet.create({
   exerciseIcon: {
     width: 40,
     height: 40,
-    borderRadius: Radii.sm,
+    borderRadius: Radii.md,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -462,58 +531,83 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   exerciseName: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '600',
+    letterSpacing: 0.2,
   },
   exerciseDescription: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 18,
+    opacity: 0.7,
   },
   exerciseSpecs: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+    marginTop: 4,
   },
   specBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: Radii.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: Radii.md,
     gap: 4,
   },
   specText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   filtersSection: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xs,
     paddingBottom: Spacing.md,
     gap: Spacing.md,
   },
   filterGroup: {
-    gap: Spacing.xs,
+    gap: Spacing.sm,
   },
   filterLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+    opacity: 0.6,
   },
   filterChips: {
-    gap: Spacing.xs,
+    gap: Spacing.sm,
     paddingVertical: Spacing.xs,
   },
   filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
     borderRadius: Radii.pill,
   },
   filterChipText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     textTransform: 'capitalize',
+  },
+  finishButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: 16,
+    right: 16,
+    zIndex: 20,
+    borderRadius: Radii.pill,
+    paddingVertical: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  finishButtonText: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#000',
+    letterSpacing: 0.3,
   },
   loadingContainer: {
     flex: 1,
@@ -525,9 +619,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 16,
+    paddingHorizontal: Spacing.lg,
   },
   errorText: {
     fontSize: 16,
     fontWeight: '500',
+    textAlign: 'center',
   },
 });
