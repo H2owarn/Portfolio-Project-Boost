@@ -19,7 +19,7 @@ export default function ProfileScreen() {
   const [level, setLevel] = useState(profile?.level ?? 1);
   const [rank, setRank] = useState(profile?.rank_divisions?.name ?? "?");
   const [streak, setStreak] = useState(profile?.streak ?? 0);
-  const { requests, fetchPendingRequests } = useRelationships();
+  const { friends, rivals, requests, fetchRelationships, fetchPendingRequests } = useRelationships();
 
   // ✅ Handle joined date
   const joined = useMemo(() => {
@@ -119,10 +119,11 @@ export default function ProfileScreen() {
     };
   }, [profile?.id]);
 
-  // ✅ Fetch friend requests
+  // ✅ Fetch friend requests and relationships
   useEffect(() => {
+    fetchRelationships();
     fetchPendingRequests();
-  }, [fetchPendingRequests]);
+  }, [fetchRelationships, fetchPendingRequests]);
 
   // ✅ Auth check
   if (!authChecked) return <Text>Loading...</Text>;
@@ -230,12 +231,45 @@ export default function ProfileScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.friendsRow}
         >
-          {["Kaj Kennedy", "WaWa", "Jin Lieu"].map((name) => (
-            <View key={name} style={styles.friendCard}>
-              <Avatar name={name} size={56} />
-              <Text style={[styles.friendName, { color: palette.text }]}>{name}</Text>
-            </View>
-          ))}
+          {friends.length === 0 ? (
+            <Text style={[styles.emptyText, { color: palette.mutedText }]}>
+              No friends yet. Add some friends!
+            </Text>
+          ) : (
+            friends.map((friend) => (
+              <View key={friend.id} style={styles.friendCard}>
+                <Avatar name={friend.name ?? undefined} size={56} />
+                <Text style={[styles.friendName, { color: palette.text }]}>
+                  {friend.name ?? "Unknown"}
+                </Text>
+              </View>
+            ))
+          )}
+        </ScrollView>
+      </View>
+
+      {/* ⚔️ Rivals Section */}
+      <View style={[styles.section, { backgroundColor: palette.surface }]}>
+        <Text style={[styles.sectionTitle, { color: palette.text }]}>Rivals</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.friendsRow}
+        >
+          {rivals.length === 0 ? (
+            <Text style={[styles.emptyText, { color: palette.mutedText }]}>
+              No rivals yet. Challenge someone!
+            </Text>
+          ) : (
+            rivals.map((rival) => (
+              <View key={rival.id} style={styles.friendCard}>
+                <Avatar name={rival.name ?? undefined} size={56} />
+                <Text style={[styles.friendName, { color: palette.text }]}>
+                  {rival.name ?? "Unknown"}
+                </Text>
+              </View>
+            ))
+          )}
         </ScrollView>
       </View>
     </ScrollView>
@@ -322,6 +356,7 @@ const styles = StyleSheet.create({
   friendsRow: { paddingVertical: 2, gap: 10 },
   friendCard: { alignItems: "center", gap: 6 },
   friendName: { fontSize: 12, fontWeight: "600" },
+  emptyText: { fontSize: 13, textAlign: "center", paddingVertical: 10 },
   badge: {
     position: "absolute",
     top: -6,

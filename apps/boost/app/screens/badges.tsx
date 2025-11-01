@@ -138,7 +138,7 @@ export default function BadgesScreen() {
           onPress={handleBack}
           activeOpacity={0.7}
         >
-          <Ionicons name="arrow-back" size={28} color={palette.primary} />
+          <Ionicons name="arrow-back" size={24} color={palette.primary} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: palette.text }]}>Your Badges</Text>
         <View style={styles.backButton} />
@@ -355,9 +355,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    letterSpacing: 0.5,
+    fontSize: 20,
+    fontWeight: "600",
+    letterSpacing: 0.3,
   },
   statsCard: {
     flexDirection: "row",
