@@ -240,22 +240,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-        {/* Active Quests section */}
-        <View style={[styles.section, { backgroundColor: palette.surface }]}>
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: palette.text }]}>Your Badges</Text>
-          <Pressable
-            onPress={ () => {
-              playPreloaded("click");
-              router.push("/(tabs)/quest");
-            }}
-            android_ripple={{ color: palette.primary + "20" }}
-          >
-            <Text style={[styles.seeAll, { color: palette.primary }]}>See All</Text>
-          </Pressable>
-        </View>
-
-
+        {/* Active Quests with Progress */}
         {quests.length > 0 ? (
           <View
             style={styles.questList}
@@ -265,8 +250,8 @@ export default function HomeScreen() {
               const cardsCount = arr.length || 1;
               const gap = 10; // must match styles.questList gap
               const cardWidth = questRowWidth > 0 ? (questRowWidth - gap * (cardsCount - 1)) / cardsCount : undefined;
-              const progress = q.total_exercises > 0
-                ? q.completed_exercises / q.total_exercises
+              const progress = q.total_exercises > 0 
+                ? q.completed_exercises / q.total_exercises 
                 : 0;
               const hasProgress = q.completed_exercises > 0;
 
@@ -290,14 +275,14 @@ export default function HomeScreen() {
                     {hasProgress ? (
                       <View style={styles.questProgressContainer}>
                         <View style={[styles.progressBarWrapper, { borderColor: palette.borderColorAlt, backgroundColor: palette.background }]}>
-                          <View
+                          <View 
                             style={[
-                              styles.progressBarFill,
-                              {
+                              styles.progressBarFill, 
+                              { 
                                 width: `${progress * 100}%`,
-                                backgroundColor: palette.primary
+                                backgroundColor: palette.primary 
                               }
-                            ]}
+                            ]} 
                           />
                         </View>
                         <Text style={[styles.progressBarText, { color: palette.mutedText, textAlign: 'center' }]}>
@@ -357,7 +342,6 @@ export default function HomeScreen() {
           />
         )}
 
-
         <Pressable
           style={[styles.quickStartBtn, { backgroundColor: palette.primary }]}
           android_ripple={{ color: palette.secondary + "20" }}
@@ -370,12 +354,8 @@ export default function HomeScreen() {
             router.push("/(tabs)/quest");
           }}
         >
-          <Text style={[styles.quickStartText, { color: palette.secondary }]}>Quick Start!!</Text>
+          <Text style={[styles.quickStartText, { color: palette.secondary }]}>Browse All Quests</Text>
         </Pressable>
-
-
-      </View>
-
 
 
 
