@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { playPreloaded, playSound } from "@/utils/sound";
 import { useAuth } from "@/hooks/use-auth";
 import { useRelationships } from "@/contexts/FriendContext";
-import Avatar from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 
 export default function ProfileScreen() {
   const { authedProfile: profile, authChecked } = useAuth();
@@ -19,7 +19,14 @@ export default function ProfileScreen() {
   const [level, setLevel] = useState(profile?.level ?? 1);
   const [rank, setRank] = useState(profile?.rank_divisions?.name ?? "?");
   const [streak, setStreak] = useState(profile?.streak ?? 0);
-  const { requests, fetchPendingRequests } = useRelationships();
+  const { friends, rivals, requests, fetchRelationships, fetchPendingRequests } = useRelationships();
+
+  // ✅ Handle joined date
+  const joined = useMemo(() => {
+    if (!profile?.created_at) return "";
+    const d = new Date(profile.created_at);
+    return d.toLocaleString(undefined, { month: "long", year: "numeric" });
+  }, [profile?.created_at]);
 
   // ✅ Fetch badge count
   useEffect(() => {
@@ -35,17 +42,6 @@ export default function ProfileScreen() {
     };
     fetchBadgeCount();
   }, [profile?.id]);
-
-  // ✅ Handle joined date
-  const joined = useMemo(() => {
-    if (!profile?.created_at) return "";
-    const d = new Date(profile.created_at);
-    return d.toLocaleString(undefined, { month: "long", year: "numeric" });
-  }, [profile?.created_at]);
-
-  // ✅ Auth check
-  if (!authChecked) return <Text>Loading...</Text>;
-  if (!profile) return <Redirect href="/onboarding/login" />;
 
   // ✅ Fetch and subscribe to profile realtime changes
   useEffect(() => {
@@ -123,10 +119,15 @@ export default function ProfileScreen() {
     };
   }, [profile?.id]);
 
-  // ✅ Fetch friend requests
+  // ✅ Fetch friend requests and relationships
   useEffect(() => {
+    fetchRelationships();
     fetchPendingRequests();
   }, []);
+
+  // ✅ Auth check
+  if (!authChecked) return <Text>Loading...</Text>;
+  if (!profile) return <Redirect href="/onboarding/login" />;
 
   const hasRequests = requests && requests.length > 0;
 
@@ -138,7 +139,7 @@ export default function ProfileScreen() {
       {/* 🧍 Profile Header */}
       <View style={[styles.profileCard, { backgroundColor: palette.surface }]}>
         <View style={styles.profileSection}>
-          <Avatar name={profile.name} level={profile.level} size={80} />
+          <Avatar name={profile.name} level={level} size={80} />
           <Text style={[styles.username, { color: palette.text }]}>{profile.name}</Text>
           <Text style={[styles.joinedText, { color: palette.mutedText }]}>
             Joined {joined}
@@ -197,10 +198,28 @@ export default function ProfileScreen() {
       <View style={[styles.section, { backgroundColor: palette.surface }]}>
         <Text style={[styles.sectionTitle, { color: palette.text }]}>Overview</Text>
         <View style={styles.statsGrid}>
-          <StatCard icon="local-fire-department" value={streak} label="Streak" />
-          <StatCard icon="star" value={xp} label="Total XP" />
-          <StatCard icon="shield" value={rank} label="League" />
-          <StatCard icon="workspace-premium" value={badgeCount} label="Badges" />
+          <View style={styles.statCardContainer}>
+            <StatCard icon="local-fire-department" value={streak} label="Streak" />
+          </View>
+          <View style={styles.statCardContainer}>
+            <StatCard icon="star" value={xp} label="Total XP" />
+          </View>
+          <View style={styles.statCardContainer}>
+            <StatCard icon="shield" value={rank} label="League" />
+          </View>
+          <TouchableOpacity
+            onPress={async () => {
+              try {
+                await playPreloaded('click');
+              } catch {
+                await playSound(require('@/assets/sound/tap.wav'));
+              }
+              router.push('/screens/badges' as any);
+            }}
+            style={styles.statCardContainer}
+          >
+            <StatCard icon="workspace-premium" value={badgeCount} label="Badges" />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -212,12 +231,45 @@ export default function ProfileScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.friendsRow}
         >
-          {["Kaj Kennedy", "WaWa", "Jin Lieu"].map((name) => (
-            <View key={name} style={styles.friendCard}>
-              <Avatar name={name} size={56} />
-              <Text style={[styles.friendName, { color: palette.text }]}>{name}</Text>
-            </View>
-          ))}
+          {friends.length === 0 ? (
+            <Text style={[styles.emptyText, { color: palette.mutedText }]}>
+              No friends yet. Add some friends!
+            </Text>
+          ) : (
+            friends.map((friend) => (
+              <View key={friend.id} style={styles.friendCard}>
+                <Avatar name={friend.name ?? undefined} size={56} />
+                <Text style={[styles.friendName, { color: palette.text }]}>
+                  {friend.name ?? "Unknown"}
+                </Text>
+              </View>
+            ))
+          )}
+        </ScrollView>
+      </View>
+
+      {/* ⚔️ Rivals Section */}
+      <View style={[styles.section, { backgroundColor: palette.surface }]}>
+        <Text style={[styles.sectionTitle, { color: palette.text }]}>Rivals</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.friendsRow}
+        >
+          {rivals.length === 0 ? (
+            <Text style={[styles.emptyText, { color: palette.mutedText }]}>
+              No rivals yet. Challenge someone!
+            </Text>
+          ) : (
+            rivals.map((rival) => (
+              <View key={rival.id} style={styles.friendCard}>
+                <Avatar name={rival.name ?? undefined} size={56} />
+                <Text style={[styles.friendName, { color: palette.text }]}>
+                  {rival.name ?? "Unknown"}
+                </Text>
+              </View>
+            ))
+          )}
         </ScrollView>
       </View>
     </ScrollView>
@@ -236,13 +288,13 @@ function StatCard({
 }) {
   const palette = Colors[useColorScheme() ?? "dark"];
   return (
-    <View style={styles.statCardContainer}>
+    <>
       <View style={[styles.statCard, { backgroundColor: palette.surfaceElevated }]}>
         <MaterialIcons name={icon as any} size={24} color={palette.primary} />
         <Text style={[styles.statValue, { color: palette.text }]}>{value}</Text>
       </View>
       <Text style={[styles.statLabel, { color: palette.text }]}>{label}</Text>
-    </View>
+    </>
   );
 }
 
@@ -304,6 +356,7 @@ const styles = StyleSheet.create({
   friendsRow: { paddingVertical: 2, gap: 10 },
   friendCard: { alignItems: "center", gap: 6 },
   friendName: { fontSize: 12, fontWeight: "600" },
+  emptyText: { fontSize: 13, textAlign: "center", paddingVertical: 10 },
   badge: {
     position: "absolute",
     top: -6,

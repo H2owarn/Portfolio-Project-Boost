@@ -322,7 +322,7 @@ export default function ExercisesScreen() {
                   onPress={() => router.back()}
                   android_ripple={{ color: palette.primary + '20', borderless: true, radius: 20 }}
                 >
-                  <MaterialIcons name="arrow-back" size={24} color={palette.text} />
+                  <MaterialIcons name="arrow-back" size={24} color={palette.primary} />
                 </Pressable>
                 <View style={styles.searchInputContainer}>
                   <MaterialIcons name="search" size={20} color={palette.mutedText} style={styles.searchIcon} />
