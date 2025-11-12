@@ -1,4 +1,4 @@
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams, router, Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { supabase } from "@/lib/supabase";
@@ -92,10 +92,9 @@ export default function QuestDetailScreen() {
     );
   }
 
-  const totalXP = exercises.reduce((sum, e) => sum + (e.xp_reward || 0), 0);
-  const totalStamina = exercises.reduce((sum, e) => sum + (e.stamina_cost || 0), 0);
-
   return (
+    <>
+    <Stack.Screen options={{ title: 'Quest Details', headerBackTitle: 'Back'}} />
     <View style={[styles.container, { backgroundColor: palette.background }]}>
       {/* Header Card */}
       <View style={[styles.header, { backgroundColor: palette.surface }]}>
@@ -105,11 +104,7 @@ export default function QuestDetailScreen() {
         <View style={styles.stats}>
           <View style={[styles.statBadge, { backgroundColor: palette.primary + "20" }]}>
             <MaterialIcons name="star" size={18} color={palette.primary} />
-            <Text style={[styles.statText, { color: palette.primary }]}>{totalXP} XP</Text>
-          </View>
-          <View style={[styles.statBadge, { backgroundColor: palette.primary + "20" }]}>
-            <MaterialIcons name="flash-on" size={18} color={palette.primary} />
-            <Text style={[styles.statText, { color: palette.primary }]}>{totalStamina} Stamina</Text>
+            <Text style={[styles.statText, { color: palette.primary }]}>{quest?.xp_reward} XP</Text>
           </View>
         </View>
       </View>
@@ -183,6 +178,7 @@ export default function QuestDetailScreen() {
         )}
       />
     </View>
+    </>
   );
 }
 

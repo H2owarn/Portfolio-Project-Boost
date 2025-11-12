@@ -161,7 +161,7 @@ export default function QuestExerciseScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: data.name }} />
+      <Stack.Screen options={{ title: data.name, headerBackTitle: 'Back' }} />
       <ScrollView style={[styles.container, { backgroundColor: palette.background }]}>
         {/* Quest Info */}
         <View style={styles.questHeader}>
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   questHeader: {
-    padding: Spacing.lg,
+    padding: 10,
     alignItems: "center",
     borderBottomWidth: 1,
     borderColor: "#444",
