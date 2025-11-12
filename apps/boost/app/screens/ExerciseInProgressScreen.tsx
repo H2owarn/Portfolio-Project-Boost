@@ -89,21 +89,6 @@ const handleCompleteExercise = async () => {
       return;
     }
 
-    const staminaCost = exercise.stamina_cost ?? 0;
-
-    if (stamina < staminaCost) {
-      try {
-        await playPreloaded('over');
-      } catch {
-        await playSound(require('@/assets/sound/over.wav'));
-      }
-      alert('❌ Not enough stamina to complete this exercise!');
-      return;
-    }
-
-    // Deduct stamina via context (this updates DB & UI)
-    await spendStamina(staminaCost);
-
     // ✅ Try inserting completed exercise
     const { data: insertData, error: insertErr } = await supabase
       .from('completed_exercises')

@@ -1,7 +1,7 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { Redirect, useRouter } from "expo-router";
-import React, { useMemo, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Redirect, useRouter, } from "expo-router";
+import React, { useMemo, useState, useRef } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Share, } from "react-native";
 import { Colors, Radii, Shadow } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { supabase } from "@/lib/supabase";
@@ -9,123 +9,116 @@ import { playPreloaded, playSound } from "@/utils/sound";
 import { useAuth } from "@/hooks/use-auth";
 import { useRelationships } from "@/contexts/FriendContext";
 import { Avatar } from "@/components/ui/avatar";
+import { useFocusEffect, } from "@react-navigation/native";
+import  ViewShot from "react-native-view-shot";
+import * as sharing from "expo-sharing"
 
 export default function ProfileScreen() {
   const { authedProfile: profile, authChecked } = useAuth();
   const palette = Colors[useColorScheme() ?? "dark"];
   const router = useRouter();
-  const [badgeCount, setBadgeCount] = useState(0);
-  const [xp, setXp] = useState(profile?.exp ?? 0);
-  const [level, setLevel] = useState(profile?.level ?? 1);
-  const [rank, setRank] = useState(profile?.rank_divisions?.name ?? "?");
-  const [streak, setStreak] = useState(profile?.streak ?? 0);
-  const { friends, rivals, requests, fetchRelationships, fetchPendingRequests } = useRelationships();
+  const viewShotRef = useRef(null);
 
-  // ✅ Handle joined date
+  const [badgeCount, setBadgeCount] = useState(0);
+  const [xp, setXp] = useState(0);
+  const [level, setLevel] = useState(1);
+  const [rank, setRank] = useState(profile?.rank_divisions?.name ?? "?");
+  const [streak, setStreak] = useState(0);
+
+  const { friends, rivals, requests, fetchRelationships, fetchPendingRequests } =
+    useRelationships();
+
+
   const joined = useMemo(() => {
     if (!profile?.created_at) return "";
     const d = new Date(profile.created_at);
     return d.toLocaleString(undefined, { month: "long", year: "numeric" });
   }, [profile?.created_at]);
 
-  // ✅ Fetch badge count
-  useEffect(() => {
-    if (!profile?.id) return;
-    const fetchBadgeCount = async () => {
-      const { count, error } = await supabase
-        .from("user_badges")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", profile.id);
-
-      if (!error) setBadgeCount(count ?? 0);
-      else console.error("Badge count error:", error);
-    };
-    fetchBadgeCount();
-  }, [profile?.id]);
-
-  // ✅ Fetch and subscribe to profile realtime changes
-  useEffect(() => {
-    if (!profile?.id) return;
-
-    let isMounted = true;
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-
-    const fetchProfile = async () => {
+  const handleShare = async () => {
       try {
+
+        const uri = await viewShotRef.current.capture();
+
+        console.log("Screenshot saved:", uri);
+
+        await sharing.shareAsync(uri, {
+          mimeType: "image/png",
+          dialogTitle: "Share your Boost stats!",
+        });
+      } catch (err) {
+        console.error("Share failed:", err);
+      }
+    };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!profile?.id) return;
+
+      const load = async () => {
+        const { count } = await supabase
+          .from("user_badges")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", profile.id);
+
+        setBadgeCount(count ?? 0);
+      };
+
+      load();
+    }, [profile?.id])
+  );
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!profile?.id) return;
+
+      let isMounted = true;
+
+      const fetchProfile = async () => {
         const { data, error } = await supabase
           .from("profiles")
           .select("exp, level, streak, rank_division_id")
           .eq("id", profile.id)
           .single();
 
-        if (!isMounted || error || !data) return;
+        if (error || !data || !isMounted) return;
 
         setXp(data.exp ?? 0);
         setLevel(data.level ?? 1);
         setStreak(data.streak ?? 0);
 
+
         if (data.rank_division_id) {
-          const { data: rankData } = await supabase
+          const { data: rankRow } = await supabase
             .from("rank_divisions")
             .select("name")
             .eq("id", data.rank_division_id)
             .single();
-          if (isMounted) setRank(rankData?.name ?? "?");
+
+          if (isMounted) setRank(rankRow?.name ?? "?");
+        } else {
+          setRank("?");
         }
-      } catch (err) {
-        console.error("Profile fetch failed:", err);
-      }
-    };
+      };
 
-    fetchProfile();
+      fetchProfile();
 
-    channel = supabase
-      .channel(`profiles_realtime_${profile.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "profiles",
-          filter: `id=eq.${profile.id}`,
-        },
-        async (payload) => {
-          const newData = payload.new;
-          if (!newData || !isMounted) return;
+      return () => {
+        isMounted = false;
+      };
+    }, [profile?.id])
+  );
 
-          setXp(newData.exp ?? 0);
-          setLevel(newData.level ?? 1);
-          setStreak(newData.streak ?? 0);
 
-          if (newData.rank_division_id) {
-            try {
-              const { data: rankData } = await supabase
-                .from("rank_divisions")
-                .select("name")
-                .eq("id", newData.rank_division_id)
-                .single();
-              if (isMounted) setRank(rankData?.name ?? "?");
-            } catch (err) {
-              console.warn("Failed to refresh rank name:", err);
-            }
-          }
-        }
-      )
-      .subscribe();
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchRelationships();
+      fetchPendingRequests();
+    }, [])
+  );
 
-    return () => {
-      isMounted = false;
-      if (channel) supabase.removeChannel(channel);
-    };
-  }, [profile?.id]);
 
-  // ✅ Fetch friend requests and relationships
-  useEffect(() => {
-    fetchRelationships();
-    fetchPendingRequests();
-  }, []);
-
-  // ✅ Auth check
   if (!authChecked) return <Text>Loading...</Text>;
   if (!profile) return <Redirect href="/onboarding/login" />;
 
@@ -136,7 +129,8 @@ export default function ProfileScreen() {
       style={{ backgroundColor: palette.background }}
       contentContainerStyle={styles.container}
     >
-      {/* 🧍 Profile Header */}
+      {/* Profile Header */}
+      <ViewShot style={styles.shotGroup} ref={viewShotRef} options={{ format: "png", quality: 0.9 }}>
       <View style={[styles.profileCard, { backgroundColor: palette.surface }]}>
         <View style={styles.profileSection}>
           <Avatar name={profile.name} level={level} size={80} />
@@ -148,7 +142,6 @@ export default function ProfileScreen() {
 
           {/* Buttons Row */}
           <View style={styles.buttonRow}>
-            {/* Add Friends Button */}
             <View style={{ position: "relative" }}>
               <TouchableOpacity
                 style={[styles.addButton, { backgroundColor: palette.secondary }]}
@@ -179,14 +172,7 @@ export default function ProfileScreen() {
             {/* Share Button */}
             <TouchableOpacity
               style={[styles.shareButton, { backgroundColor: palette.surfaceElevated }]}
-              onPress={async () => {
-                try {
-                  await playPreloaded("click");
-                } catch {
-                  await playSound(require("@/assets/sound/tap.wav"));
-                }
-                router.push("/screens/streaktest");
-              }}
+              onPress={handleShare}
             >
               <Ionicons name="share-outline" size={18} color={palette.text} />
             </TouchableOpacity>
@@ -194,9 +180,10 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* 🧩 Overview */}
+      {/*  Overview */}
       <View style={[styles.section, { backgroundColor: palette.surface }]}>
         <Text style={[styles.sectionTitle, { color: palette.text }]}>Overview</Text>
+
         <View style={styles.statsGrid}>
           <View style={styles.statCardContainer}>
             <StatCard icon="local-fire-department" value={streak} label="Streak" />
@@ -210,11 +197,11 @@ export default function ProfileScreen() {
           <TouchableOpacity
             onPress={async () => {
               try {
-                await playPreloaded('click');
+                await playPreloaded("click");
               } catch {
-                await playSound(require('@/assets/sound/tap.wav'));
+                await playSound(require("@/assets/sound/tap.wav"));
               }
-              router.push('/screens/badges' as any);
+              router.push("/screens/badges" as any);
             }}
             style={styles.statCardContainer}
           >
@@ -222,8 +209,9 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      </ViewShot>
 
-      {/* 👥 Friends Section */}
+      {/*  Friends */}
       <View style={[styles.section, { backgroundColor: palette.surface }]}>
         <Text style={[styles.sectionTitle, { color: palette.text }]}>Friends</Text>
         <ScrollView
@@ -248,7 +236,7 @@ export default function ProfileScreen() {
         </ScrollView>
       </View>
 
-      {/* ⚔️ Rivals Section */}
+      {/*  Rivals */}
       <View style={[styles.section, { backgroundColor: palette.surface }]}>
         <Text style={[styles.sectionTitle, { color: palette.text }]}>Rivals</Text>
         <ScrollView
@@ -276,7 +264,7 @@ export default function ProfileScreen() {
   );
 }
 
-// ✅ Stat Card Component
+//  Stat Card Component
 function StatCard({
   icon,
   value,
@@ -340,7 +328,7 @@ const styles = StyleSheet.create({
     gap: 10,
     width: "100%",
   },
-  statCardContainer: { width: "48%", alignItems: "center", gap: 4 },
+  statCardContainer: { width: "48%", alignItems: "center", gap: 4},
   statCard: {
     borderRadius: Radii.md,
     padding: 10,
@@ -369,4 +357,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   badgeText: { color: "white", fontSize: 10, fontWeight: "700" },
+  shotGroup: {
+    width: "100%",
+    gap: 10,
+    marginBottom: 1,
+  },
 });

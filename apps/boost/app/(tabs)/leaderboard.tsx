@@ -12,7 +12,7 @@ import { supabase } from "@/lib/supabase";
 import { Colors, Shadow } from "@/constants/theme";
 import Skeleton from "@/components/ui/skeleton";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import Avatar from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 
 const { width } = Dimensions.get("window");
 
@@ -358,7 +358,7 @@ export default function LeaderboardPage() {
       >
         <View style={[styles.card, { backgroundColor: palette.surface }]}>
           <Text style={[styles.header, { color: palette.text }]}>
-            Rival Standings
+            Weekly Standings
           </Text>
 
           {sorted.map((r) => {
@@ -564,9 +564,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   podiumName: {
-    fontWeight: "600",
+    fontWeight: "700",
     textAlign: "center",
-    fontSize: 13,
+    fontSize: 16,
     maxWidth: "100%",
     paddingHorizontal: 4,
   },
@@ -591,8 +591,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listName: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: 20,
+    fontWeight: "800",
+    
   },
   listScore: {
     fontSize: 12,
@@ -638,13 +639,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   vsScore: {
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: "500",
     marginTop: 2,
   },
   vsStatus: {
-    fontWeight: "bold",
-    fontSize: 13,
+    fontWeight: "900",
+    fontSize: 15,
     textAlign: "center",
     width: "40%",
   },

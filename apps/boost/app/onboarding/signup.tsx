@@ -1,8 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { Link, router } from 'expo-router';
+import { Link, router, Stack } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-
 import { BoostButton } from '@/components/boost-button';
 import { BoostInput } from '@/components/boost-input';
 import { Screen } from '@/components/layout/screen';
@@ -56,7 +55,7 @@ export default function SignUpScreen() {
 			}
 
 
-			router.replace('/(tabs)/home');
+			router.replace('/onboarding/login');
 		} catch (error: any) {
 			console.error('Signup failed:', error);
 			setErrors({
@@ -70,6 +69,8 @@ export default function SignUpScreen() {
 
 
 	return (
+		<>
+		<Stack.Screen options={{ headerShown: false }} />
 		<Screen scrollable contentStyle={styles.container} style={{ backgroundColor: palette.surface }}>
 			<View style={styles.content}>
 				<View style={styles.header}>
@@ -173,6 +174,7 @@ export default function SignUpScreen() {
 				</Text>
 			</View>
 		</Screen>
+		</>
 	);
 }
 

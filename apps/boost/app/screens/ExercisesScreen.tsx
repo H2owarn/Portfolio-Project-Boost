@@ -1,6 +1,6 @@
 // app/exercises/ExercisesScreen.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, ScrollView, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, ScrollView, TextInput, Alert, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
@@ -254,7 +254,7 @@ export default function ExercisesScreen() {
 
     //  Add XP in one go
     await addXp(totalXp);
-
+    
     // play success sound
     try {
       await playPreloaded("complete");
@@ -290,9 +290,6 @@ export default function ExercisesScreen() {
     console.error("Error finishing workout:", err);
     Alert.alert("❌ Error", "Could not finish workout.");
   }
-
-
-
 
 };
 
@@ -407,7 +404,7 @@ export default function ExercisesScreen() {
             />
 
             {/* Floating Finish Workout Button */}
-            <Pressable
+            <TouchableOpacity
               style={{
                 position: 'absolute',
                 bottom: 16,
@@ -435,7 +432,7 @@ export default function ExercisesScreen() {
               <Text style={{ fontSize: 16, fontWeight: '700', color: '#000' }}>
                 Finish Workout
               </Text>
-            </Pressable>
+            </TouchableOpacity>
           </>
         )}
       </Screen>

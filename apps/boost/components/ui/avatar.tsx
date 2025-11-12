@@ -35,8 +35,8 @@ export function Avatar({ uri, name, seed, size = 64, level, ring = true, style }
   const ringColor = useMemo(() => {
     if (!ring) return 'transparent';
     if (typeof level !== 'number') return palette.borderColor;
-    if (level >= 10) return palette.warning; // milestone
-    if (level >= 5) return palette.primary;
+    if (level >= 35) return palette.warning; // milestone
+    if (level >= 10) return palette.primary;
     return palette.borderColor;
   }, [ring, level, palette]);
 
@@ -59,8 +59,8 @@ export function Avatar({ uri, name, seed, size = 64, level, ring = true, style }
           onError={() => setImgError(true)}
         />
       ) : initials ? (
-        <View style={[dimension, styles.fallback, { backgroundColor: `${palette.primary}20` }]}> 
-          <Text style={[styles.initials, { color: palette.secondary, fontSize: Math.round(size * 0.36) }]}>{initials}</Text>
+        <View style={[dimension, styles.fallback, { backgroundColor: `${palette.secondary}20` }]}> 
+          <Text style={[styles.initials, { color: palette.text, fontSize: Math.round(size * 0.36) }]}>{initials}</Text>
         </View>
       ) : (
         <View style={[dimension, styles.fallback, { backgroundColor: `${palette.primary}20` }]}> 

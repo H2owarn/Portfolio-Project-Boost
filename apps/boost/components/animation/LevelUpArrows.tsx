@@ -3,7 +3,7 @@ import { Animated, View, Easing, StyleSheet } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
 export const LevelUpArrows = ({ palette }: { palette: any }) => {
-  const arrows = Array.from({ length: 20 });
+  const arrows = Array.from({ length: 30 });
   const anims = useRef(arrows.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {

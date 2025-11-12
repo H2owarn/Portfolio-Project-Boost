@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  ScrollView,
-} from "react-native";
+import {View, Text, StyleSheet, Pressable, ScrollView, } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { Colors, Shadow, Radii, Spacing, Font} from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -13,6 +7,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { color } from "bun";
 import { playPreloaded, preloadSounds } from "@/utils/sound";
+import { useFocusEffect } from "@react-navigation/native";
+
 
 
 export default function QuestScreen() {
@@ -22,7 +18,8 @@ export default function QuestScreen() {
   const [profile, setProfile] = useState<any>(null);
 
   // Load profile
-  useEffect(() => {
+  useFocusEffect(
+    React.useCallback(() => {
     preloadSounds();
     const loadProfile = async () => {
       const { data: { user }, error: userErr } = await supabase.auth.getUser();
@@ -50,10 +47,12 @@ export default function QuestScreen() {
     };
 
     loadProfile();
-  }, []);
+  }, [])
+);
 
   // Load quests
-  useEffect(() => {
+  useFocusEffect(
+    React.useCallback(() => {
     if (!profile) return;
 
     const loadQuests = async () => {
@@ -166,7 +165,8 @@ export default function QuestScreen() {
     };
 
     loadQuests();
-  }, [profile]);
+  }, [profile])
+);
 
   if (loading) {
     return <Text style={{ color: palette.text }}>Loading quests…</Text>;
@@ -178,7 +178,7 @@ export default function QuestScreen() {
   const mainQuests = quests.filter((q) => q.quest_type?.toLowerCase() === "main");
   const sideQuests = quests.filter((q) => q.quest_type?.toLowerCase() === "side");
 
-  const QuestCard = ({ quest }: { quest: any }) => {
+  const QuestCard = React.memo(function QuestCard({ quest }: { quest: any }) {
     const isLocked = userLevel < (quest.min_level ?? 0);
     const exerciseNames: string[] = Array.isArray(quest.exercises)
       ? quest.exercises
@@ -203,9 +203,9 @@ export default function QuestScreen() {
         )}
 
         <View style={styles.questSpecs}>
-          <View style={[styles.tagsRow, { backgroundColor: palette.primary + "20" }]}>
-            <MaterialIcons name="diamond" size={12} color={palette.primary} />
-            <Text style={[styles.specText, { color: palette.primary }]}>
+          <View style={[styles.tagsRow, { backgroundColor: palette.primary + "99" }]}>
+            <MaterialIcons name="diamond" size={12} color={palette.text} />
+            <Text style={[styles.specText, { color: palette.text}]}>
               {quest.xp_reward ?? 0} XP
             </Text>
           </View>
@@ -220,8 +220,8 @@ export default function QuestScreen() {
                   key={`${quest.id}-ex-${i}`}
                   style={[
                     styles.exercise,
-                    { color: palette.primary },
-                    { backgroundColor: palette.primary + "20" },
+                    { color: palette.secondary },
+                    { backgroundColor: palette.primary},
                   ]}
                 >
                   {ex}
@@ -265,7 +265,7 @@ export default function QuestScreen() {
         </View>
       </View>
     );
-  };
+  });
 
   return (
     <ScrollView 
@@ -400,7 +400,8 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   stamina: {
-    fontSize: 13,
+    fontSize: 18,
+    fontWeight: 800,
     color: "#666"
   },
   startButton: {

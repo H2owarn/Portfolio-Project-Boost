@@ -11,7 +11,7 @@ import { checkAndAwardBadges } from "@/utils/awardBadges";
 import { getBadgeImage } from "@/utils/getbadgeimage";
 import { LineChart, BarChart, Grid, XAxis, YAxis } from "react-native-svg-charts";
 import * as shape from "d3-shape";
-import Avatar from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import EmptyState from "@/components/ui/empty-state";
 import Skeleton from "@/components/ui/skeleton";
 
@@ -356,21 +356,6 @@ export default function HomeScreen() {
             }}
           />
         )}
-
-        <Pressable
-          style={[styles.quickStartBtn, { backgroundColor: palette.primary }]}
-          android_ripple={{ color: palette.secondary + "20" }}
-          onPress={async () => {
-            try {
-              await playPreloaded("click");
-            } catch {
-              await playSound(require("@/assets/sound/tap.wav"));
-            }
-            router.push("/(tabs)/quest");
-          }}
-        >
-          <Text style={[styles.quickStartText, { color: palette.secondary }]}>Quick Start!!</Text>
-        </Pressable>
       </View>
 
 
@@ -541,7 +526,7 @@ function ChartsSection({ palette }: { palette: any }) {
             No volume data yet
           </Text>
         ) : (
-          <View style={{ height: 190, flexDirection: "row" }}>
+          <View style={{ height: 170, flexDirection: "row" }}>
             <YAxis
               data={volumeData.map((v) => v.volume)}
               contentInset={{ top: 20, bottom: 20 }}

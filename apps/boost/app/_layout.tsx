@@ -40,7 +40,6 @@ export default function RootLayout() {
                   <Stack.Screen name="onboarding/login" options={{ headerShown: false }} />
                   <Stack.Screen name="onboarding/index" options={{ headerShown: false }} />
                   <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                  <Stack.Screen name="(tabs)/home" options={{ headerShown: false }} />
                   <Stack.Screen 
                     name="screens/badges" 
                     options={{ 
@@ -49,7 +48,6 @@ export default function RootLayout() {
                       animation: 'slide_from_right'
                     }} 
                   />
-                  <Stack.Screen name="testxpscreen" options={{ headerShown: false }} />
                   <Stack.Screen name="index" options={{ headerShown: false }} />
                 </Stack>
               </ThemeProvider>

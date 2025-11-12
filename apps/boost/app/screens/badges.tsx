@@ -1,16 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-  Dimensions,
-  SafeAreaView,
-  StatusBar,
-} from "react-native";
+import {View, Text, StyleSheet, ScrollView, Image,TouchableOpacity, ActivityIndicator, Dimensions, StatusBar, SafeAreaView } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "@/lib/supabase";
@@ -395,7 +384,8 @@ const styles = StyleSheet.create({
   badgesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
+    gap: 10,
   },
   badgeCard: {
     width: (width - 60) / 3,
