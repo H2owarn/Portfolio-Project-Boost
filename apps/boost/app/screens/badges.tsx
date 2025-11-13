@@ -154,7 +154,7 @@ export default function BadgesScreen() {
         </View>
         <View style={[styles.divider, { backgroundColor: palette.borderColor }]} />
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: palette.secondary }]}>
+          <Text style={[styles.statValue, { color: palette.text }]}>
             {allBadges.length > 0 ? Math.round((earnedBadges.length / allBadges.length) * 100) : 0}%
           </Text>
           <Text style={[styles.statLabel, { color: palette.mutedText }]}>
