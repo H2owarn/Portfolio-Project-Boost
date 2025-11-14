@@ -1,10 +1,14 @@
 import { useLocalSearchParams, router, Stack } from "expo-router";
-import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator } from "react-native";
+import { useEffect, useState, useCallback } from "react";
+import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator, } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Colors, Radii, Shadow } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useFocusEffect } from "@react-navigation/native";
+import { useXp } from "@/contexts/Xpcontext";
+import { useStamina } from "@/contexts/Staminacontext";
+
 
 
 
@@ -17,56 +21,65 @@ export default function QuestDetailScreen() {
   const [completedExercises, setCompletedExercises] = useState<Record<string, boolean>>({});
   const completedCount = Object.values(completedExercises).filter(Boolean).length;
   const totalCount = exercises.length;
+  const { xp, addXp } = useXp();
+  const { stamina, spendStamina } = useStamina();
 
-  useEffect(() => {
+
+
+  
+  useFocusEffect(
+    useCallback(() => {
+    let isActive = true;
+
     const loadQuest = async () => {
       if (!id) return;
       setLoading(true);
 
-      // 1️⃣ Fetch quest details
-      const { data: questData, error: questErr } = await supabase
-        .from("quests")
-        .select("*")
-        .eq("id", id)
-        .single();
+      try {
+        const { data: questData, error: questErr } = await supabase
+          .from("quests")
+          .select("*")
+          .eq("id", id)
+          .single();
 
-      if (questErr) {
-        console.error("Quest fetch error:", questErr);
-        setLoading(false);
-        return;
-      }
+        if (questErr) throw questErr;
 
-      setQuest(questData);
+        if (!isActive) return;
+        setQuest(questData);
 
-      // 2️⃣ Fetch all exercises linked to that quest
-      if (questData.exercise_ids && questData.exercise_ids.length > 0) {
-        const { data: exerciseRows, error: exErr } = await supabase
-        .from("exercises")
-        .select(`
-            id,
-            name,
-            primary_muscles,
-            level,
-            category,
-            xp_reward,
-            stamina_cost,
-            images,
-            instructions
-        `)
-        .in("id", questData.exercise_ids);
+        if (questData.exercise_ids?.length > 0) {
+          const { data: exerciseRows, error: exErr } = await supabase
+            .from("exercises")
+            .select(`
+              id,
+              name,
+              primary_muscles,
+              level,
+              category,
+              xp_reward,
+              stamina_cost,
+              images,
+              instructions
+            `)
+            .in("id", questData.exercise_ids);
 
-        if (exErr) {
-          console.error("Exercise fetch error:", exErr);
-        } else {
-          setExercises(exerciseRows);
+          if (exErr) throw exErr;
+          if (isActive) setExercises(exerciseRows);
         }
+      } catch (err) {
+        console.error("Quest fetch error:", err);
+      } finally {
+        if (isActive) setLoading(false);
       }
-
-      setLoading(false);
     };
 
     loadQuest();
-  }, [id]);
+
+    return () => {
+      isActive = false;
+    };
+  }, [id])
+);
 
   const toggleComplete = (id: string) => {
   setCompletedExercises((prev) => ({
@@ -76,13 +89,6 @@ export default function QuestDetailScreen() {
 };
 
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={palette.primary} />
-      </View>
-    );
-  }
 
   if (!quest) {
     return (
@@ -93,8 +99,9 @@ export default function QuestDetailScreen() {
   }
 
   return (
-    <>
-    <Stack.Screen options={{ title: 'Quest Details', headerBackTitle: 'Back'}} />
+  <>
+    <Stack.Screen options={{ title: 'Quest Details', headerBackTitle: 'Back' }} />
+
     <View style={[styles.container, { backgroundColor: palette.background }]}>
       {/* Header Card */}
       <View style={[styles.header, { backgroundColor: palette.surface }]}>
@@ -115,14 +122,14 @@ export default function QuestDetailScreen() {
           {completedCount}/{totalCount} exercises completed
         </Text>
         <View style={styles.progressBarContainer}>
-          <View 
+          <View
             style={[
-              styles.progressBar, 
-              { 
+              styles.progressBar,
+              {
                 backgroundColor: palette.primary,
-                width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%`
-              }
-            ]} 
+                width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%`,
+              },
+            ]}
           />
         </View>
       </View>
@@ -141,7 +148,7 @@ export default function QuestDetailScreen() {
                 params: {
                   exercise: JSON.stringify(item),
                   quest_id: quest.id,
-               },
+                },
               })
             }
           >
@@ -161,7 +168,6 @@ export default function QuestDetailScreen() {
             {/* Right side: checkbox */}
             <View
               onStartShouldSetResponder={(e) => {
-                // 👇 Prevent checkbox press from triggering card navigation
                 e.stopPropagation();
                 return false;
               }}
@@ -177,10 +183,50 @@ export default function QuestDetailScreen() {
           </Pressable>
         )}
       />
+
+      {/* Complete Workout Button */}
+      <View style={{ marginTop: 20, alignItems: "center" }}>
+        <Pressable
+          style={[
+            styles.completeButton,
+            { backgroundColor: completedCount === totalCount ? palette.primary : "#555" },
+          ]}
+          onPress={async () => {
+            if (completedCount < totalCount) {
+              alert("You must complete all exercises before finishing the workout!");
+              return;
+            }
+
+            try {
+              const { data: { user } } = await supabase.auth.getUser();
+              if (!user) return alert("Please log in to save progress.");
+
+              await supabase
+                .from("user_quests")
+                .update({ status: "completed", completed_at: new Date().toISOString() })
+                .eq("user_id", user.id)
+                .eq("quest_id", quest.id);
+
+                addXp(quest.xp_reward);
+                await spendStamina(quest.stamina_cost);
+
+              alert(`Quest complete!\n+${quest.xp_reward} XP -${quest.stamina_cost} Stamina`);
+              router.back();
+            } catch (err) {
+              console.error(err);
+              alert("Error marking quest complete.");
+            }
+          }}
+        >
+          <MaterialIcons name="check-circle" size={24} color="#000" />
+          <Text style={styles.completeText}>Complete Workout</Text>
+        </Pressable>
+      </View>
     </View>
-    </>
-  );
+  </>
+);
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -285,4 +331,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     opacity: 0.7,
   },
+  completeButton: {
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  paddingVertical: 14,
+  paddingHorizontal: 24,
+  borderRadius: 12,
+  gap: 8,
+  marginBottom: 30,
+},
+completeText: {
+  fontSize: 18,
+  fontWeight: "700",
+  color: "#000",
+},
+
 });

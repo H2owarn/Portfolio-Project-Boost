@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {View, Text, StyleSheet, Pressable, ScrollView, } from "react-native";
+import {View, Text, StyleSheet, Pressable, ScrollView, Alert } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { Colors, Shadow, Radii, Spacing, Font} from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -173,7 +173,7 @@ export default function QuestScreen() {
   }
 
   const userLevel = profile?.level ?? 1;
-  const userStamina = 40;
+  const userStamina = profile?.stamina
 
   const mainQuests = quests.filter((q) => q.quest_type?.toLowerCase() === "main");
   const sideQuests = quests.filter((q) => q.quest_type?.toLowerCase() === "side");
@@ -238,26 +238,61 @@ export default function QuestScreen() {
             Stamina Cost: <MaterialIcons name="bolt" size={12} color={palette.primary} /> {quest.stamina_cost ?? 0}
           </Text>
           <Pressable
-            style={[
+            style={({ pressed }) => [
               styles.startButton,
-              { backgroundColor: palette.primary }
+              {
+                backgroundColor: isLocked
+                  ? palette.error + "60"
+                  : userStamina < (quest.stamina_cost ?? 0)
+                  ? palette.mutedText+ "40"
+                  : palette.primary,
+                opacity: pressed ? 0.8 : 1,
+              },
             ]}
             android_ripple={{ color: palette.secondary + "20" }}
             onPress={() => {
-              playPreloaded("click");
 
-              !isLocked && userStamina >= (quest.stamina_cost ?? 0)
-                ? router.push({
-                    pathname: '/screens/QuestScreen',
-                    params: { id: quest.id.toString() }, // 👈 pass quest ID
-                  })
-                : console.log("Quest Locked or Not Enough Stamina");
-                }}
+              if (isLocked) {
+                playPreloaded("error");
+                Alert.alert(
+                  "Quest Locked",
+                  `Reach level ${quest.min_level ?? 0} to unlock this quest.`
+                );
+                return;
+              }
+
+              if (userStamina < (quest.stamina_cost ?? 0)) {
+                playPreloaded("error");
+                Alert.alert(
+                  "Not Enough Stamina",
+                  `You need ${quest.stamina_cost ?? 0} stamina to start this quest.`
+                );
+                return;
+              }
+
+              playPreloaded("click");
+              router.push({
+                pathname: "/screens/QuestScreen",
+                params: { id: quest.id.toString() },
+              });
+            }}
           >
-            <Text style={[styles.startButtonText, { color: palette.secondary }]}>
+            <Text
+              style={[
+                styles.startButtonText,
+                {
+                  color:
+                    userStamina < (quest.stamina_cost ?? 0) || isLocked
+                      ? palette.mutedText
+                      : palette.secondary,
+                  textAlign: "center",
+                  fontWeight: "700",
+                },
+              ]}
+            >
               {isLocked
                 ? `Level ${quest.min_level ?? 0} Required`
-                : userStamina < quest.stamina_cost
+                : userStamina < (quest.stamina_cost ?? 0)
                 ? "Not Enough Stamina"
                 : "Start Quest"}
             </Text>

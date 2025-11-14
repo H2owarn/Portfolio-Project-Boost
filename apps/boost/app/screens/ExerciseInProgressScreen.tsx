@@ -104,12 +104,12 @@ const handleCompleteExercise = async () => {
       .select();
 
     if (insertErr) {
-      console.error("❌ Failed to insert completed_exercises:", JSON.stringify(insertErr, null, 2));
+      console.error(" Failed to insert completed_exercises:", JSON.stringify(insertErr, null, 2));
       Alert.alert("Insert error", JSON.stringify(insertErr, null, 2));
       return;
     }
 
-    console.log("✅ Insert success:", insertData);
+    console.log(" Insert success:", insertData);
 
     try {
       await playPreloaded('achieve');
@@ -117,7 +117,7 @@ const handleCompleteExercise = async () => {
       await playSound(require('@/assets/sound/achievement.wav'));
     }
 
-    alert(`✅ Exercise complete!\n\nEXP will be added after finishing your workout.`);
+    alert(` Exercise complete!\n\nEXP will be added after finishing your workout.`);
     router.back();
 
   } catch (err) {

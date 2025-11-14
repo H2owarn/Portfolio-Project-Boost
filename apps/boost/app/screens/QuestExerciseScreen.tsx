@@ -50,7 +50,6 @@ export default function QuestExerciseScreen() {
   const [sets, setSets] = useState("3");
   const [reps, setReps] = useState("10");
 
-  // ✅ Fetch quest info (non-blocking)
   useEffect(() => {
     const loadQuest = async () => {
       if (!quest_id) return;
@@ -66,14 +65,12 @@ export default function QuestExerciseScreen() {
     loadQuest();
   }, [quest_id]);
 
-  // ✅ Scroll handler for image carousel
   const handleScroll = (event: any) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / width);
     setCurrentImageIndex(index);
   };
 
-  // ✅ Handle quest exercise completion
   const handleCompleteQuestExercise = async () => {
     if (!data || !quest_id) return;
     setLoading(true);
@@ -85,7 +82,6 @@ export default function QuestExerciseScreen() {
         return;
       }
 
-      // 🟩 Mark this exercise as complete
       const { error: insertErr } = await supabase
         .from("completed_quest_exercises")
         .upsert({
@@ -102,7 +98,7 @@ export default function QuestExerciseScreen() {
         return;
       }
 
-      // ✅ Update user_quests status if active
+
       const { data: questRow } = await supabase
         .from("user_quests")
         .select("status")
@@ -113,21 +109,21 @@ export default function QuestExerciseScreen() {
       if (questRow?.status === "active") {
         await supabase
           .from("user_quests")
-          .update({ status: "in_progress" })
+          .update({ status: "complete" })
           .eq("user_id", user.id)
           .eq("quest_id", quest_id);
       }
 
-      // 🔊 Sound feedback
+
       try {
         await playPreloaded("achieve");
       } catch {
         await playSound(require("@/assets/sound/achievement.wav"));
       }
 
-      // ✅ Alert and navigate back
+
       Alert.alert(
-        "✅ Exercise Complete!",
+        "Exercise Complete!",
         `You finished ${data.name}! Progress saved toward your quest.`,
         [
           {
@@ -198,13 +194,6 @@ export default function QuestExerciseScreen() {
                     onLoad={() => setImageLoading((prev) => ({ ...prev, [index]: false }))}
                     onError={() => setImageLoading((prev) => ({ ...prev, [index]: false }))}
                   />
-                  {imageLoading[index] && (
-                    <ActivityIndicator
-                      size="large"
-                      color={palette.primary}
-                      style={styles.imageLoader}
-                    />
-                  )}
                 </View>
               )}
               horizontal
@@ -283,22 +272,6 @@ export default function QuestExerciseScreen() {
           </View>
         </View>
 
-        {/* Complete Button */}
-        <Pressable
-          style={[
-            styles.completeButton,
-            { backgroundColor: palette.primary },
-            loading && { opacity: 0.6 },
-          ]}
-          onPress={handleCompleteQuestExercise}
-          disabled={loading}
-        >
-          <MaterialIcons name="check-circle" size={24} color="#000" />
-          <Text style={styles.completeText}>
-            {loading ? "Saving..." : "Finish Workout"}
-          </Text>
-        </Pressable>
-
         {/* Instructions */}
         {data.instructions && data.instructions.length > 0 && (
           <View style={[styles.instructionsCard, { backgroundColor: palette.surface }]}>
@@ -359,7 +332,7 @@ const styles = StyleSheet.create({
   imageLoader: { position: "absolute" },
   noImageContainer: { justifyContent: "center", alignItems: "center", backgroundColor: "#000" },
   noImageText: { fontSize: 16, fontWeight: "500" },
-  inputCard: { padding: Spacing.sm, borderRadius: Radii.lg, gap: Spacing.sm },
+  inputCard: { padding: Spacing.sm, borderRadius: Radii.lg, gap: Spacing.sm, marginBottom: 10 },
   inputRow: { flexDirection: "row", gap: Spacing.md },
   inputGroup: { flex: 1, gap: Spacing.xs },
   inputLabel: { fontSize: 14, fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.5 },

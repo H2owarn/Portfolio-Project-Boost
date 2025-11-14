@@ -1,18 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Dimensions,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import {View, Text, StyleSheet, ScrollView, Dimensions ,TouchableOpacity, FlatList,} from "react-native";
 import { supabase } from "@/lib/supabase";
 import { Colors, Shadow } from "@/constants/theme";
 import Skeleton from "@/components/ui/skeleton";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Avatar } from "@/components/ui/avatar";
+import { useFocusEffect } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 
@@ -24,7 +17,8 @@ export default function LeaderboardPage() {
   const [activePage, setActivePage] = useState(0);
   const flatListRef = useRef<FlatList>(null);
 
-  useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
     const loadLeaderboard = async () => {
       const { data, error } = await supabase
         .from("profiles")
@@ -88,7 +82,7 @@ export default function LeaderboardPage() {
 
     loadLeaderboard();
     loadRivals();
-  }, []);
+  }, []));
 
   const handleTabPress = (index: number) => {
     setActivePage(index);
